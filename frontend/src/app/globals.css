@@ -1,28 +1,33 @@
+@layer reset;
+
 /* biome-ignore lint/suspicious/noUnknownAtRules: StyleX の CSS 注入ディレクティブ */
 @stylex;
 
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+@layer reset {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
 }
-
 :root {
   color-scheme: light dark;
 }
-
 body {
-  background-color: #fafafa;
-  color: #111827;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: system-ui, -apple-system, "Segoe UI", "Yu Gothic UI", "Hiragino Sans", sans-serif;
   line-height: 1.6;
 }
-
-@media (prefers-color-scheme: dark) {
-  body {
-    background-color: #0b0f17;
-    color: #f3f4f6;
+html {
+  scroll-behavior: smooth;
+}
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
   }
+}
+::selection {
+  background: Highlight;
+  color: HighlightText;
 }

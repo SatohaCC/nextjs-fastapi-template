@@ -7,14 +7,14 @@ export default defineConfig({
   retries: process.env.CI ? 1 : 0,
   reporter: "list",
   use: {
-    baseURL: "http://127.0.0.1:6006",
+    baseURL: "http://127.0.0.1:6007",
     trace: "on-first-retry",
     ...devices["Desktop Chrome"],
   },
   webServer: {
     command:
-      "pnpm -C ../backend exec python -B -m http.server 6006 --bind 127.0.0.1 --directory ../.cache/storybook-static",
-    url: "http://127.0.0.1:6006/index.json",
+      "pnpm -C ../backend exec python -B -m http.server 6007 --bind 127.0.0.1 --directory ../.cache/storybook-static",
+    url: "http://127.0.0.1:6007/index.json",
     reuseExistingServer: false,
     timeout: 30_000,
   },

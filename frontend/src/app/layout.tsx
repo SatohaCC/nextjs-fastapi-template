@@ -1,7 +1,9 @@
+import * as stylex from "@stylexjs/stylex";
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { QueryProvider } from "@/shared/lib/query/QueryProvider";
 import "./globals.css";
+import { layoutStyles } from "./layout.styles";
 
 export const metadata: Metadata = {
   title: "Realtime Voice",
@@ -11,7 +13,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
   return (
     <html lang="ja">
-      <body>
+      <body {...stylex.props(layoutStyles.body)}>
         <QueryProvider>{children}</QueryProvider>
       </body>
     </html>

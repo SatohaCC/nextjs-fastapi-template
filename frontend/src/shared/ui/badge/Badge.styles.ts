@@ -5,22 +5,17 @@ export const badgeStyles = stylex.create({
   base: {
     display: "inline-flex",
     alignItems: "center",
-    borderRadius: tokens.radiusControl,
-    paddingBlock: "0.125rem",
-    paddingInline: "0.625rem",
-    fontSize: "0.875rem",
+    gap: "0.375rem",
+    borderRadius: tokens.cornerSmall,
+    paddingBlock: "0.375rem",
+    paddingInline: "0.75rem",
+    fontSize: "0.75rem",
+    lineHeight: "1rem",
     fontWeight: 500,
+    overflowWrap: "anywhere",
+    maxWidth: "100%",
   },
-  neutral: {
-    backgroundColor: tokens.bg,
-    color: tokens.muted,
-  },
-  success: {
-    backgroundColor: tokens.okBg,
-    color: tokens.ok,
-  },
-  danger: {
-    backgroundColor: tokens.errBg,
-    color: tokens.err,
-  },
+  neutral: { backgroundColor: tokens.surfaceContainerHighest, color: tokens.onSurfaceVariant },
+  success: { backgroundColor: tokens.successContainer, color: tokens.onSuccessContainer },
+  danger: { backgroundColor: tokens.errorContainer, color: tokens.onErrorContainer },
 });

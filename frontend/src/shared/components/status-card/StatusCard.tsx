@@ -22,7 +22,13 @@ export function StatusCard({
 }: StatusCardProps) {
   return (
     <div {...stylex.props(statusCardStyles.root)}>
-      <div {...stylex.props(statusCardStyles.row)}>
+      <div
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+        aria-busy={isActionDisabled}
+        {...stylex.props(statusCardStyles.row)}
+      >
         <span {...stylex.props(statusCardStyles.label)}>{label}</span>
         <Badge tone={badgeTone}>{badgeText}</Badge>
       </div>

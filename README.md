@@ -74,7 +74,7 @@ E2E / Storybook のブラウザ検証前に、初回のみ Chromium をインス
 pnpm --filter frontend exec playwright install chromium
 ```
 
-Linux でシステム依存も導入する場合は `playwright install chromium --with-deps` を使います。E2E はポート 3000 / 8000、Storybook 検証は 6006 を使用します。E2E はローカルで起動済みのサーバーを再利用し、CI では新規起動します。Storybook 検証は常に専用サーバーを起動するため、6006 を空けてください。
+Linux でシステム依存も導入する場合は `playwright install chromium --with-deps` を使います。E2E はポート 3000 / 8000、Storybook 検証は 6007 を使用します。E2E はローカルで起動済みのサーバーを再利用し、CI では新規起動します。Storybook 検証は常に専用サーバーを起動するため、6007 を空けてください。開発用Storybookの6006とは別ポートです。
 
 ## Vercel
 

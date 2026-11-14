@@ -26,3 +26,20 @@ test("すべてのストーリーを描画でき、StyleXのスタイルが適�
   await page.goto("/iframe.html?id=shared-ui-badge--success&viewMode=story");
   await expect(page.locator("#storybook-root span")).toHaveCSS("display", "inline-flex");
 });
+
+test("ボタン比較に全バリアント・サイズ・無効状態があり、キーボードフォーカスを表示する", async ({
+  page,
+}) => {
+  await page.goto("/iframe.html?id=shared-ui-button--variants&viewMode=story");
+  const table = page.getByRole("table", { name: "ボタンのバリアントと状態の比較" });
+  await expect(table).toBeVisible();
+  for (const name of ["Elevated", "Filled", "Tonal", "Outlined", "Text"]) {
+    await expect(table.getByRole("button", { name, exact: true })).toHaveCount(3);
+    await expect(table.getByRole("button", { name, exact: true }).last()).toBeDisabled();
+  }
+  await page.keyboard.press("Tab");
+  const button = table.getByRole("button", { name: "Filled", exact: true }).first();
+  await button.focus();
+  await expect(button).toHaveCSS("outline-style", "solid");
+  await expect(button).toBeEnabled();
+});
