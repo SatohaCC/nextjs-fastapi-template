@@ -1,0 +1,27 @@
+# VCS
+.jj/
+
+# Dependencies
+node_modules/
+backend/.venv
+
+# Centralized caches & build outputs
+.cache/
+frontend/.next/
+frontend/out/
+.vercel/
+*.tsbuildinfo
+
+# Python bytecode (fallback if run outside scripts)
+**/__pycache__/
+*.py[cod]
+*$py.class
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# OS / Editor
+.DS_Store
+Thumbs.db
