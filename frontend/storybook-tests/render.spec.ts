@@ -1,5 +1,41 @@
 import { expect, test } from "@playwright/test";
 
+test("タブは明暗テーマ・狭い幅でも選択でき、フォーカスと下線を表示する", async ({
+  page,
+}, testInfo) => {
+  for (const colorScheme of ["light", "dark"] as const) {
+    await page.emulateMedia({ colorScheme, reducedMotion: "reduce" });
+    await page.setViewportSize({ width: 390, height: 640 });
+    for (const variant of ["primary", "secondary"]) {
+      await page.goto(`/iframe.html?id=shared-ui-tabs--${variant}&viewMode=story`);
+      const first = page.getByRole("tab", { name: "概要" });
+      await expect(first).toHaveAttribute("aria-selected", "true");
+      await expect(first).toHaveCSS("border-top-width", "0px");
+      await expect(page.getByRole("tablist")).toHaveCSS("border-bottom-width", "1px");
+      await first.focus();
+      await expect(first).toHaveCSS("outline-style", "solid");
+      await page.keyboard.press("ArrowRight");
+      const second = page.getByRole("tab", { name: "詳細" });
+      await expect(second).toHaveAttribute("aria-selected", "true");
+      await expect(page.getByRole("tabpanel", { name: "詳細" })).toBeVisible();
+      const indicator = variant === "primary" ? second.locator("span") : second;
+      expect(await indicator.evaluate((el) => getComputedStyle(el, "::after").height)).toBe(
+        variant === "primary" ? "3px" : "2px",
+      );
+      await page.screenshot({ path: testInfo.outputPath(`tabs-${variant}-${colorScheme}.png`) });
+      expect(
+        await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth),
+      ).toBe(true);
+    }
+    await page.goto("/iframe.html?id=shared-ui-tabs--scrollable&viewMode=story");
+    const list = page.getByRole("tablist");
+    expect(await list.evaluate((el) => el.scrollWidth > el.clientWidth)).toBe(true);
+    expect(
+      await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth),
+    ).toBe(true);
+  }
+});
+
 test("すべてのストーリーを描画でき、StyleXのスタイルが適用される", async ({ page, request }) => {
   const response = await request.get("/index.json");
   expect(response.ok()).toBeTruthy();

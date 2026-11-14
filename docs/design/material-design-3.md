@@ -47,6 +47,14 @@ Badgeは任意のステータス文言を表示する製品用ラベルであり
 
 ## 確認方法
 
+### Tabs
+
+`shared/ui/tabs/Tabs`はラベル・パネル・選択値をPropsで受け取り、`@ui-sdk/react/tabs`でARIAの関連付けとキーボード操作を提供する。Primaryはラベル幅の3px下線、Secondaryはタブ全幅の2px下線。高さ48pxと色の対応はMaterial Web v0.192を基準にし、医療向けの既存Systemトークンを使用する。State Layerは既存部品と同じhover 8%、focus/press 10%の採用基準を維持する。選択インジケーターは即時に切り替え、独自のspring表現は追加しない。
+
+通常・無効・手動選択・制御された選択・横スクロールを`Tabs.stories.tsx`で確認できる。無効タブはヘッドレスUIの契約に従いフォーカス可能だが選択できない。ラベルは文字列を必須とし、アイコンのみのタブやルーティングは今回の対象に含めない。狭い画面ではタブ列の内側を横スクロールする。
+
+参照: [Material Web Tabs](https://github.com/material-components/material-web/blob/main/docs/components/tabs.md)、[Primary v0.192](https://github.com/material-components/material-web/blob/main/tokens/versions/v0_192/_md-comp-primary-navigation-tab.scss)、[Secondary v0.192](https://github.com/material-components/material-web/blob/main/tokens/versions/v0_192/_md-comp-secondary-navigation-tab.scss)。
+
 `pnpm check`、`pnpm test`、`pnpm build`、`pnpm test:e2e`、`pnpm test:storybook`を使用する。Storybookには各variantの個別ストーリーとサイズ・無効状態の比較表を用意した。
 
 ブラウザではlight/dark、desktop/mobile、キーボード操作とfocus outline、disabled、APIの更新・エラーからの復帰、モーション低減、横方向のはみ出し、初期表示のテキストコントラストを確認する。コントラストの数値確認は実際の色から行い、Tone差だけで適合を判定しない。これらの確認は全アクセシビリティ基準の認証を意味しない。
