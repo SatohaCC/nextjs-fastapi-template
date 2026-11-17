@@ -1,6 +1,3 @@
-# VCS
-.jj/
-
 # Dependencies
 node_modules/
 backend/.venv
@@ -25,3 +22,4 @@ frontend/out/
 # OS / Editor
 .DS_Store
 Thumbs.db
+frontend/debug-storybook.log
