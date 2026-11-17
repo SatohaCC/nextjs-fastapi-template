@@ -34,10 +34,16 @@ Referenceの色を置き換え、System / Componentの対応は維持する。to
 
 ## 実装の対応
 
-- Reference / System: `frontend/src/shared/styles/tokens.stylex.ts`
+- Reference / System: `frontend/src/shared/styles/tokens.stylex.ts`（`onError`・`scrim`・`shadow3` を追加）
 - Component: 各部品の `*.styles.ts` で意味を持つSystemトークンへ対応
 - Button: Filledはprimary/on-primary、Tonalはsecondary-container、Outlined/Textはprimary、Elevatedはsurface-container-low
 - Badge: neutralはsurface-container-highest、dangerはerror-container、successは製品拡張ロール
+- TextField: `@ui-sdk/react/field`・`input`・`textarea`を統合し、Outlined（`outline` / `primary`）とFilled（`surface-container-highest` + 下部アクティブインジケーター）を実装。単一行・複数行・接頭辞/接尾辞・`aria-invalid`・disabledに対応
+- Switch: `@ui-sdk/react/switch` + `field`で52x32dpトラックと16dp/24dpサムを実装。`primary` / `on-primary` / `surface-container-highest` / `outline`を使用
+- Checkbox: `@ui-sdk/react/checkbox` + `field`で40dp状態レイヤー領域と18dpボックスを実装。未選択・選択・不確定（mixed）・エラー（`error` / `on-error`）・disabledに対応
+- Select: `@ui-sdk/react/select` + `field`でOutlined/Filledトリガーと`surface-container`のポップアップメニュー・選択ハイライト（`secondary-container`）を実装
+- Dialog: `@ui-sdk/react/dialog`で`scrim`背景と`surface-container-high`・`cornerExtraLarge`（28px）・`shadow3`のモーダルダイアログを実装。Escape・閉じるボタン・トリガーへのフォーカス復帰に対応
+- RadioGroup: `@ui-sdk/react/radio` + `field`で40dp状態レイヤー領域と20dp外周リング・10dp選択ドットを実装。縦横レイアウト・項目説明文・エラー・disabled・矢印キー移動に対応
 - Shape: noneからfullまでの10段階を定義。画面幅に応じて構成を変え、端末の種類で分岐しない
 - Theme: CSSのprefers-color-schemeで初期描画からlight/darkに対応。テーマ用の追加Effectは使わない
 - 部品比較: `Button.stories.tsx` の「バリアント比較」でElevated / Filled / Tonal / Outlined / Textを、標準・小・無効の各行で一覧表示する。アプリ用のギャラリー部品は作らない
