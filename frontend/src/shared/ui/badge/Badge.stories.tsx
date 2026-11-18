@@ -19,7 +19,7 @@ export const Neutral: Story = {};
 export const Success: Story = {
   args: {
     tone: "success",
-    children: "ok (realtime-voice-backend)",
+    children: "ok (template-backend)",
   },
 };
 

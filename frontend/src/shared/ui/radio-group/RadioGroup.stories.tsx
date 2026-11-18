@@ -5,18 +5,18 @@ import { RadioGroup, type RadioGroupProps, type RadioOption } from "./RadioGroup
 const modes: readonly RadioOption[] = [
   {
     value: "realtime",
-    label: "リアルタイム文字起こし",
-    description: "発話と同時に画面へ逐次反映します。",
+    label: "即時処理",
+    description: "データを受信するたびに画面に反映します。",
   },
   {
     value: "batch",
-    label: "録音後に一括要約",
-    description: "通話終了後に精度優先で要約を作成します。",
+    label: "一括処理",
+    description: "収集したデータをまとめて処理します。",
   },
   {
     value: "archive",
-    label: "音声のみ保存（準備中）",
-    description: "文字起こしを行わず音声ファイルのみ保存します。",
+    label: "保存のみ（準備中）",
+    description: "処理を実行せずデータのみ保存します。",
     disabled: true,
   },
 ];
@@ -26,8 +26,8 @@ const meta = {
   component: RadioGroup,
   tags: ["autodocs"],
   args: {
-    label: "文字起こしモード",
-    description: "診察時の記録方法を選択してください。",
+    label: "処理モード",
+    description: "データの処理方法を選択してください。",
     items: modes,
     defaultValue: "realtime",
   },
@@ -40,14 +40,14 @@ export const Basic: Story = {};
 
 export const Horizontal: Story = {
   args: {
-    label: "音声品質",
+    label: "処理品質",
     description: undefined,
     orientation: "horizontal",
     defaultValue: "standard",
     items: [
       { value: "standard", label: "標準" },
-      { value: "high", label: "高音質" },
-      { value: "low", label: "省帯域" },
+      { value: "high", label: "高精度" },
+      { value: "low", label: "高速" },
     ],
   },
 };

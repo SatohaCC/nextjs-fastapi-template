@@ -2,11 +2,11 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useState } from "react";
 import { Select, type SelectOption, type SelectProps } from "./Select";
 
-const departments: readonly SelectOption[] = [
-  { value: "general", label: "総合診療科" },
-  { value: "cardiology", label: "循環器内科" },
-  { value: "respiratory", label: "呼吸器内科" },
-  { value: "pediatrics", label: "小児科（休診中）", disabled: true },
+const categories: readonly SelectOption[] = [
+  { value: "general", label: "一般" },
+  { value: "development", label: "開発" },
+  { value: "design", label: "デザイン" },
+  { value: "archived", label: "アーカイブ（選択不可）", disabled: true },
 ];
 
 const meta = {
@@ -14,10 +14,10 @@ const meta = {
   component: Select,
   tags: ["autodocs"],
   args: {
-    label: "診療科",
-    placeholder: "診療科を選択してください",
-    description: "音声文字起こしの専門用語辞書を切り替えます。",
-    items: departments,
+    label: "カテゴリ",
+    placeholder: "カテゴリを選択してください",
+    description: "項目をカテゴリで分類します。",
+    items: categories,
     variant: "outlined",
   },
 } satisfies Meta<typeof Select>;
@@ -30,14 +30,14 @@ export const Outlined: Story = {};
 export const Filled: Story = {
   args: {
     variant: "filled",
-    defaultValue: "cardiology",
+    defaultValue: "development",
   },
 };
 
 export const Invalid: Story = {
   args: {
     required: true,
-    errorMessage: "診療科を選択してください。",
+    errorMessage: "カテゴリを選択してください。",
   },
 };
 

@@ -23,7 +23,7 @@ export function Switch({ label, description, disabled = false, style, ...props }
           s.track,
           state.checked ? s.trackChecked : s.trackUnchecked,
           state.disabled && (state.checked ? s.trackDisabledChecked : s.trackDisabledUnchecked),
-          !label && style,
+          !(label || description) && style,
         ).className
       }
       {...props}
@@ -40,18 +40,22 @@ export function Switch({ label, description, disabled = false, style, ...props }
     </UiSwitch>
   );
 
-  if (!label) {
+  if (!label && !description) {
     return control;
   }
 
   return (
     <Field disabled={disabled} {...stylex.props(s.field, style)}>
       <div {...stylex.props(s.textGroup)}>
-        <FieldLabel
-          className={(state) => stylex.props(s.label, state.disabled && s.labelDisabled).className}
-        >
-          {label}
-        </FieldLabel>
+        {label && (
+          <FieldLabel
+            className={(state) =>
+              stylex.props(s.label, state.disabled && s.labelDisabled).className
+            }
+          >
+            {label}
+          </FieldLabel>
+        )}
         {description && (
           <FieldDescription
             className={(state) =>

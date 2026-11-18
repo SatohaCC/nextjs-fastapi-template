@@ -10,17 +10,17 @@ describe("TextField", () => {
 
     render(
       <TextField
-        label="患者氏名"
-        description="診察券の表記どおりに入力してください。"
+        label="表示名"
+        description="画面に表示する名前を入力してください。"
         placeholder="山田 花子"
         onValueChange={onValueChange}
       />,
     );
 
-    const input = screen.getByRole("textbox", { name: "患者氏名" });
-    expect(input).toHaveAccessibleDescription("診察券の表記どおりに入力してください。");
+    const input = screen.getByRole("textbox", { name: "表示名" });
+    expect(input).toHaveAccessibleDescription("画面に表示する名前を入力してください。");
 
-    await user.click(screen.getByText("患者氏名"));
+    await user.click(screen.getByText("表示名"));
     expect(input).toHaveFocus();
 
     await user.type(input, "佐藤");

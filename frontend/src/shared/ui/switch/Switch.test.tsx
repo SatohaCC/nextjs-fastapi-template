@@ -10,21 +10,21 @@ describe("Switch", () => {
 
     render(
       <Switch
-        label="自動音声認識"
-        description="発話を検出して文字起こしします。"
+        label="自動保存"
+        description="変更内容を自動で保存します。"
         onCheckedChange={onCheckedChange}
       />,
     );
 
-    const control = screen.getByRole("switch", { name: "自動音声認識" });
+    const control = screen.getByRole("switch", { name: "自動保存" });
     expect(control).toHaveAttribute("aria-checked", "false");
-    expect(control).toHaveAccessibleDescription("発話を検出して文字起こしします。");
+    expect(control).toHaveAccessibleDescription("変更内容を自動で保存します。");
 
     await user.click(control);
     expect(control).toHaveAttribute("aria-checked", "true");
     expect(onCheckedChange).toHaveBeenCalledWith(true, expect.anything());
 
-    await user.click(screen.getByText("自動音声認識"));
+    await user.click(screen.getByText("自動保存"));
     expect(control).toHaveAttribute("aria-checked", "false");
   });
 
@@ -44,4 +44,10 @@ describe("Switch", () => {
     );
     expect(screen.getByRole("switch", { name: "通知設定" })).toBeDisabled();
   });
+});
+
+it("preserves feedback with an accessible name supplied by aria-label", () => {
+  render(<Switch aria-label="Audio" description="Recording mode" />);
+  const control = screen.getByRole("switch", { name: "Audio" });
+  expect(control).toHaveAccessibleDescription(/Recording mode/);
 });

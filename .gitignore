@@ -5,6 +5,7 @@ backend/.venv
 # Centralized caches & build outputs
 .cache/
 frontend/.next/
+frontend/next-env.d.ts
 frontend/out/
 .vercel/
 *.tsbuildinfo

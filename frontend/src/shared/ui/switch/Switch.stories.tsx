@@ -7,8 +7,8 @@ const meta = {
   component: Switch,
   tags: ["autodocs"],
   args: {
-    label: "自動音声認識",
-    description: "発話を検出すると自動で文字起こしを開始します。",
+    label: "自動保存",
+    description: "変更内容を自動で保存します。",
     defaultChecked: false,
     disabled: false,
   },

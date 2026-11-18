@@ -7,8 +7,8 @@ const meta = {
   component: Checkbox,
   tags: ["autodocs"],
   args: {
-    label: "録音データの保存に同意する",
-    description: "診察記録の作成目的でのみ保存されます。",
+    label: "変更内容を保存する",
+    description: "後から変更内容を確認できます。",
     defaultChecked: false,
     disabled: false,
   },

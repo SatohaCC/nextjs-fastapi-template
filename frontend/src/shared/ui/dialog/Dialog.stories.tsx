@@ -9,9 +9,9 @@ const meta = {
   component: Dialog,
   tags: ["autodocs"],
   args: {
-    title: "録音セッションを終了しますか？",
-    description: "未保存の文字起こし下書きは現在の内容で保存されます。",
-    triggerLabel: "セッションを終了",
+    title: "編集を終了しますか？",
+    description: "下書きは現在の内容で保存されます。",
+    triggerLabel: "編集を終了",
     closeLabel: "閉じる",
     actions: (
       <>
@@ -53,7 +53,7 @@ export const WithFormContent: Story = {
 
 const termsParagraphs = Array.from({ length: 12 }, (_, index) => ({
   id: `term-${index + 1}`,
-  text: `第${index + 1}条: 本システムは医療従事者の記録作成を補助するものであり、最終的な診察内容の確認は担当者が行います。`,
+  text: `第${index + 1}条: 作業内容は保存ボタンを押した時点で記録されます。共有する前に内容を確認してください。`,
 }));
 
 export const ScrollableBody: Story = {

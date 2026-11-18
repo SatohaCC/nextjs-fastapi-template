@@ -1,7 +1,7 @@
 [project]
-name = "realtime-voice-backend"
+name = "template-backend"
 version = "0.1.0"
-description = "FastAPI backend for realtime-voice"
+description = "FastAPI backend for nextjs-fastapi-template"
 requires-python = ">=3.14"
 dependencies = [
     "fastapi>=0.115.0",

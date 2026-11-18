@@ -23,8 +23,8 @@ describe("Dialog", () => {
 
     render(
       <Dialog
-        title="録音の確認"
-        description="このセッションを終了します。"
+        title="編集内容の確認"
+        description="この編集を終了します。"
         triggerLabel="セッション終了"
         closeLabel="閉じる"
         onOpenChange={onOpenChange}
@@ -42,9 +42,9 @@ describe("Dialog", () => {
     const trigger = screen.getByRole("button", { name: "セッション終了" });
     await user.click(trigger);
 
-    const dialog = screen.getByRole("dialog", { name: "録音の確認" });
+    const dialog = screen.getByRole("dialog", { name: "編集内容の確認" });
     expect(dialog).toBeVisible();
-    expect(dialog).toHaveAccessibleDescription("このセッションを終了します。");
+    expect(dialog).toHaveAccessibleDescription("この編集を終了します。");
     expect(screen.getByText("保存後に一覧へ戻ります。")).toBeVisible();
     expect(onOpenChange).toHaveBeenCalledWith(true, expect.anything());
 

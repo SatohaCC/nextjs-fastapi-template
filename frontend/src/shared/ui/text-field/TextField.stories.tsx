@@ -7,9 +7,9 @@ const meta = {
   component: TextField,
   tags: ["autodocs"],
   args: {
-    label: "患者氏名",
+    label: "表示名",
     placeholder: "例: 山田 花子",
-    description: "診察券に記載されている氏名を入力してください。",
+    description: "画面に表示する名前を入力してください。",
     variant: "outlined",
   },
 } satisfies Meta<typeof TextField>;
@@ -27,7 +27,7 @@ export const Filled: Story = {
 
 export const WithAffix: Story = {
   args: {
-    label: "通話時間の上限",
+    label: "実行時間の上限",
     defaultValue: "15",
     inputMode: "numeric",
     trailing: "分",
@@ -58,7 +58,7 @@ export const Multiline: Story = {
     multiline: true,
     rows: 4,
     placeholder: "確認事項や症状の経緯を入力してください。",
-    description: "音声文字起こしの補足として保存されます。",
+    description: "入力内容の補足として保存されます。",
   },
 };
 

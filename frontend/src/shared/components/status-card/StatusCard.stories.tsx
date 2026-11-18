@@ -7,7 +7,7 @@ const meta = {
   tags: ["autodocs"],
   args: {
     label: "Backend API",
-    badgeText: "ok (realtime-voice-backend)",
+    badgeText: "ok (template-backend)",
     badgeTone: "success",
     actionLabel: "Refresh Status",
     isActionDisabled: false,

@@ -71,7 +71,11 @@ export function RadioGroup({
       loop={loop}
       aria-label={!label ? ariaLabel : undefined}
       aria-labelledby={!label ? ariaLabelledBy : undefined}
-      {...stylex.props(s.list, orientation === "horizontal" && s.listHorizontal, !label && style)}
+      {...stylex.props(
+        s.list,
+        orientation === "horizontal" && s.listHorizontal,
+        !(label || description || errorMessage) && style,
+      )}
     >
       {items.map((item) => {
         const itemDisabled = disabled || Boolean(item.disabled);
@@ -140,28 +144,30 @@ export function RadioGroup({
     </UiRadioGroup>
   );
 
-  if (!label) {
+  if (!label && !(description || errorMessage)) {
     return group;
   }
 
   return (
     <Field name={name} disabled={disabled} invalid={isInvalid} {...stylex.props(s.root, style)}>
-      <FieldLabel
-        className={(state) =>
-          stylex.props(
-            s.groupLabel,
-            state.invalid && s.groupLabelInvalid,
-            state.disabled && s.groupLabelDisabled,
-          ).className
-        }
-      >
-        {label}
-        {required && (
-          <span aria-hidden="true" {...stylex.props(s.requiredMark)}>
-            *
-          </span>
-        )}
-      </FieldLabel>
+      {label && (
+        <FieldLabel
+          className={(state) =>
+            stylex.props(
+              s.groupLabel,
+              state.invalid && s.groupLabelInvalid,
+              state.disabled && s.groupLabelDisabled,
+            ).className
+          }
+        >
+          {label}
+          {required && (
+            <span aria-hidden="true" {...stylex.props(s.requiredMark)}>
+              *
+            </span>
+          )}
+        </FieldLabel>
+      )}
       {description && (
         <FieldDescription
           className={(state) =>

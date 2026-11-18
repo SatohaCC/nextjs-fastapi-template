@@ -18,15 +18,15 @@ describe("Checkbox", () => {
 
     render(
       <Checkbox
-        label="録音データの保存に同意する"
-        description="診察記録の作成に利用します。"
+        label="変更内容を保存する"
+        description="後から変更内容を確認できます。"
         onCheckedChange={onCheckedChange}
       />,
     );
 
-    const checkbox = screen.getByRole("checkbox", { name: "録音データの保存に同意する" });
+    const checkbox = screen.getByRole("checkbox", { name: "変更内容を保存する" });
     expect(checkbox).toHaveAttribute("aria-checked", "false");
-    expect(checkbox).toHaveAccessibleDescription("診察記録の作成に利用します。");
+    expect(checkbox).toHaveAccessibleDescription("後から変更内容を確認できます。");
 
     await user.click(checkbox);
     expect(checkbox).toHaveAttribute("aria-checked", "true");
@@ -52,4 +52,12 @@ describe("Checkbox", () => {
     expect(disabledCheckbox).toBeDisabled();
     expect(disabledCheckbox).toHaveAttribute("aria-invalid", "true");
   });
+});
+
+it("preserves feedback with an accessible name supplied by aria-label", () => {
+  render(<Checkbox aria-label="Consent" description="Purpose" errorMessage="Required" />);
+  const control = screen.getByRole("checkbox", { name: "Consent" });
+  expect(control).toHaveAccessibleDescription(/Purpose/);
+  expect(control).toHaveAttribute("aria-invalid", "true");
+  expect(screen.getByText("Required")).toBeVisible();
 });

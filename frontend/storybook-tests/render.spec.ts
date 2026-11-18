@@ -97,7 +97,7 @@ test("TextField・Switch・Checkbox・Select・Dialogが明暗テーマと狭い
     ).toBe(true);
 
     await page.goto("/iframe.html?id=shared-ui-switch--off&viewMode=story");
-    const switchEl = page.getByRole("switch", { name: "自動音声認識" });
+    const switchEl = page.getByRole("switch", { name: "自動保存" });
     await switchEl.focus();
     await expect(switchEl).toHaveCSS("outline-style", "solid");
     await switchEl.click();
@@ -112,17 +112,17 @@ test("TextField・Switch・Checkbox・Select・Dialogが明暗テーマと狭い
     await expect(checkbox).toHaveAttribute("aria-checked", "true");
 
     await page.goto("/iframe.html?id=shared-ui-select--outlined&viewMode=story");
-    const combobox = page.getByRole("combobox", { name: /診療科/ });
+    const combobox = page.getByRole("combobox", { name: /カテゴリ/ });
     await combobox.focus();
     await expect(combobox).toHaveCSS("outline-style", "solid");
     await combobox.click();
-    await page.getByRole("option", { name: "循環器内科" }).click();
-    await expect(combobox).toHaveText(/循環器内科/);
+    await page.getByRole("option", { name: "開発" }).click();
+    await expect(combobox).toHaveText(/開発/);
 
     await page.goto("/iframe.html?id=shared-ui-dialog--basic&viewMode=story");
-    const trigger = page.getByRole("button", { name: "セッションを終了" });
+    const trigger = page.getByRole("button", { name: "編集を終了" });
     await trigger.click();
-    const dialog = page.getByRole("dialog", { name: "録音セッションを終了しますか？" });
+    const dialog = page.getByRole("dialog", { name: "編集を終了しますか？" });
     await expect(dialog).toBeVisible();
     await expect(dialog).toHaveCSS("border-top-width", "1px");
     await page.keyboard.press("Tab");
@@ -136,13 +136,13 @@ test("TextField・Switch・Checkbox・Select・Dialogが明暗テーマと狭い
     await expect(trigger).toBeFocused();
 
     await page.goto("/iframe.html?id=shared-ui-radiogroup--basic&viewMode=story");
-    const radio = page.getByRole("radio", { name: /リアルタイム文字起こし/ });
+    const radio = page.getByRole("radio", { name: /即時処理/ });
     await expect(radio).toHaveAttribute("aria-checked", "true");
     await expect(radio.locator("span").first()).toHaveCSS("transition-duration", "0s");
     await radio.focus();
     await expect(radio).toHaveCSS("outline-style", "solid");
     await page.keyboard.press("ArrowDown");
-    await expect(page.getByRole("radio", { name: /録音後に一括要約/ })).toHaveAttribute(
+    await expect(page.getByRole("radio", { name: /一括処理/ })).toHaveAttribute(
       "aria-checked",
       "true",
     );
