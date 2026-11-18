@@ -1,3 +1,4 @@
+import * as stylex from "@stylexjs/stylex";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
@@ -50,4 +51,13 @@ it("preserves feedback with an accessible name supplied by aria-label", () => {
   render(<Switch aria-label="Audio" description="Recording mode" />);
   const control = screen.getByRole("switch", { name: "Audio" });
   expect(control).toHaveAccessibleDescription(/Recording mode/);
+});
+
+const overrides = stylex.create({ width: (width: number) => ({ width }) });
+
+it("forwards the inline variables of a dynamic StyleX override", () => {
+  render(<Switch aria-label="Autosave" style={overrides.width(271)} />);
+  expect(
+    screen.getByRole("switch", { name: "Autosave", hidden: true }).getAttribute("style"),
+  ).toMatch(/--[\w-]+:\s*271px/);
 });

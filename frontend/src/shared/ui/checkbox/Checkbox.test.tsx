@@ -1,3 +1,4 @@
+import * as stylex from "@stylexjs/stylex";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
@@ -60,4 +61,13 @@ it("preserves feedback with an accessible name supplied by aria-label", () => {
   expect(control).toHaveAccessibleDescription(/Purpose/);
   expect(control).toHaveAttribute("aria-invalid", "true");
   expect(screen.getByText("Required")).toBeVisible();
+});
+
+const overrides = stylex.create({ width: (width: number) => ({ width }) });
+
+it("forwards the inline variables of a dynamic StyleX override", () => {
+  render(<Checkbox aria-label="Selection" style={overrides.width(271)} />);
+  expect(
+    screen.getByRole("checkbox", { name: "Selection", hidden: true }).getAttribute("style"),
+  ).toMatch(/--[\w-]+:\s*271px/);
 });

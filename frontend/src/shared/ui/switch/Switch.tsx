@@ -15,15 +15,17 @@ export interface SwitchProps
 
 /** Material Design 3 準拠のスイッチ（設定の即時オン・オフ切り替え）。 */
 export function Switch({ label, description, disabled = false, style, ...props }: SwitchProps) {
+  const hasField = Boolean(label || description);
   const control = (
     <UiSwitch
       disabled={disabled}
+      style={stylex.props(!hasField && style).style}
       className={(state) =>
         stylex.props(
           s.track,
           state.checked ? s.trackChecked : s.trackUnchecked,
           state.disabled && (state.checked ? s.trackDisabledChecked : s.trackDisabledUnchecked),
-          !(label || description) && style,
+          !hasField && style,
         ).className
       }
       {...props}
@@ -40,7 +42,7 @@ export function Switch({ label, description, disabled = false, style, ...props }
     </UiSwitch>
   );
 
-  if (!label && !description) {
+  if (!hasField) {
     return control;
   }
 

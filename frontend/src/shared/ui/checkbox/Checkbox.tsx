@@ -26,10 +26,12 @@ export function Checkbox({
   ...props
 }: CheckboxProps) {
   const isInvalid = invalid ?? (errorMessage ? true : undefined);
+  const hasField = Boolean(label || description || errorMessage || isInvalid);
 
   const control = (
     <UiCheckbox
       disabled={disabled}
+      style={stylex.props(!hasField && style).style}
       className={(state) => {
         const active = state.checked || state.indeterminate;
         return stylex.props(
@@ -37,7 +39,7 @@ export function Checkbox({
           active && s.controlChecked,
           isInvalid && s.controlInvalid,
           state.disabled && s.controlDisabled,
-          !(label || description || errorMessage || isInvalid) && style,
+          !hasField && style,
         ).className;
       }}
       {...props}
@@ -89,7 +91,7 @@ export function Checkbox({
     </UiCheckbox>
   );
 
-  if (!label && !(description || errorMessage || isInvalid)) {
+  if (!hasField) {
     return control;
   }
 

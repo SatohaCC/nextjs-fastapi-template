@@ -1,3 +1,4 @@
+import * as stylex from "@stylexjs/stylex";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
@@ -68,4 +69,13 @@ describe("Dialog", () => {
     await user.click(screen.getByRole("button", { name: "ダイアログを閉じる" }));
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
+});
+
+const overrides = stylex.create({ width: (width: number) => ({ width }) });
+
+it("forwards the inline variables of a dynamic StyleX override", () => {
+  render(<Dialog title="Settings" defaultOpen style={overrides.width(271)} />);
+  expect(screen.getByRole("dialog", { hidden: true }).getAttribute("style")).toMatch(
+    /--[\w-]+:\s*271px/,
+  );
 });

@@ -52,7 +52,7 @@ export function Dialog({
       <DialogContent
         initialFocus={initialFocus}
         finalFocus={finalFocus}
-        className={stylex.props(s.content, style).className}
+        {...stylex.props(s.content, style)}
       >
         <div {...stylex.props(s.header)}>
           <div {...stylex.props(s.headerText)}>
