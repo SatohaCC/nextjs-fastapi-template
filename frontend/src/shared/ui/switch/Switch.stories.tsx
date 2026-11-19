@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useState } from "react";
 import { Switch, type SwitchProps } from "./Switch";
+import { switchStoryStyles as s } from "./Switch.stories.styles";
 
 const meta = {
   title: "shared/ui/Switch",
@@ -44,6 +45,30 @@ export const WithoutDescription: Story = {
     description: undefined,
     label: "マイクの自動調整",
     defaultChecked: true,
+  },
+};
+
+export const WithoutLabel: Story = {
+  args: {
+    label: undefined,
+    description: undefined,
+    "aria-label": "単体スイッチ",
+    defaultChecked: false,
+  },
+};
+
+export const DynamicWidthStandalone: Story = {
+  args: {
+    label: undefined,
+    description: undefined,
+    "aria-label": "幅指定スイッチ",
+    style: s.width(104),
+  },
+};
+
+export const DynamicWidthField: Story = {
+  args: {
+    style: s.width(280),
   },
 };
 

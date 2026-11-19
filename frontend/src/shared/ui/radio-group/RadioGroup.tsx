@@ -1,13 +1,15 @@
 "use client";
 
 import * as stylex from "@stylexjs/stylex";
-import { Field, FieldDescription, FieldError, FieldLabel } from "@ui-sdk/react/field";
+import { Field, FieldError, FieldLabel, useFieldControl } from "@ui-sdk/react/field";
 import {
   Radio,
   type RadioGroupOptions,
   RadioIndicator,
   RadioGroup as UiRadioGroup,
 } from "@ui-sdk/react/radio";
+import { useId } from "react";
+import { mergeDescribedBy } from "../internal/mergeDescribedBy";
 import { radioGroupStyles as s } from "./RadioGroup.styles";
 
 export interface RadioOption {
@@ -34,6 +36,7 @@ export interface RadioGroupProps {
   loop?: boolean;
   "aria-label"?: string;
   "aria-labelledby"?: string;
+  "aria-describedby"?: string;
   style?: stylex.StyleXStyles;
 }
 
@@ -55,9 +58,22 @@ export function RadioGroup({
   loop = true,
   "aria-label": ariaLabel,
   "aria-labelledby": ariaLabelledBy,
+  "aria-describedby": ariaDescribedBy,
   style,
 }: RadioGroupProps) {
+  const outerField = useFieldControl();
+  const baseId = useId();
+  const descId = `${baseId}-description`;
+  const errorId = `${baseId}-error`;
   const isInvalid = invalid ?? (errorMessage ? true : undefined);
+  const showError = Boolean(errorMessage) && isInvalid !== false;
+  const hasFieldLayout = Boolean(label || description || showError);
+  const passStyleToGroup = Boolean(outerField) || !hasFieldLayout;
+  const extraDescribedBy = mergeDescribedBy(
+    ariaDescribedBy,
+    description ? descId : undefined,
+    showError ? errorId : undefined,
+  );
 
   const group = (
     <UiRadioGroup
@@ -71,24 +87,40 @@ export function RadioGroup({
       loop={loop}
       aria-label={!label ? ariaLabel : undefined}
       aria-labelledby={!label ? ariaLabelledBy : undefined}
+      aria-invalid={outerField && !hasFieldLayout ? (isInvalid ?? undefined) : undefined}
+      render={
+        extraDescribedBy
+          ? (groupProps) => (
+              <div
+                {...groupProps}
+                aria-describedby={mergeDescribedBy(
+                  typeof groupProps["aria-describedby"] === "string"
+                    ? groupProps["aria-describedby"]
+                    : undefined,
+                  extraDescribedBy,
+                )}
+              />
+            )
+          : undefined
+      }
       {...stylex.props(
         s.list,
         orientation === "horizontal" && s.listHorizontal,
-        !(label || description || errorMessage) && style,
+        passStyleToGroup && style,
       )}
     >
-      {items.map((item) => {
+      {items.map((item, index) => {
         const itemDisabled = disabled || Boolean(item.disabled);
+        const radioId = `${baseId}-radio-${index}`;
+        const descId = `${baseId}-desc-${index}`;
         return (
-          <Field
-            key={item.value}
-            disabled={itemDisabled}
-            invalid={isInvalid}
-            {...stylex.props(s.itemField)}
-          >
+          <div key={item.value} {...stylex.props(s.itemField)}>
             <Radio
+              id={radioId}
               value={item.value}
-              disabled={item.disabled}
+              disabled={itemDisabled}
+              aria-describedby={item.description ? descId : undefined}
+              aria-invalid={isInvalid ? true : undefined}
               className={(state) =>
                 stylex.props(
                   s.control,
@@ -120,36 +152,38 @@ export function RadioGroup({
               )}
             </Radio>
             <div {...stylex.props(s.textGroup)}>
-              <FieldLabel
-                className={(state) =>
-                  stylex.props(s.itemLabel, state.disabled && s.itemLabelDisabled).className
-                }
+              <label
+                htmlFor={radioId}
+                {...stylex.props(s.itemLabel, itemDisabled && s.itemLabelDisabled)}
               >
                 {item.label}
-              </FieldLabel>
+              </label>
               {item.description && (
-                <FieldDescription
-                  className={(state) =>
-                    stylex.props(s.itemDescription, state.disabled && s.itemDescriptionDisabled)
-                      .className
-                  }
+                <p
+                  id={descId}
+                  {...stylex.props(s.itemDescription, itemDisabled && s.itemDescriptionDisabled)}
                 >
                   {item.description}
-                </FieldDescription>
+                </p>
               )}
             </div>
-          </Field>
+          </div>
         );
       })}
     </UiRadioGroup>
   );
 
-  if (!label && !(description || errorMessage)) {
+  if (outerField && !hasFieldLayout) {
     return group;
   }
 
   return (
-    <Field name={name} disabled={disabled} invalid={isInvalid} {...stylex.props(s.root, style)}>
+    <Field
+      name={name}
+      disabled={disabled}
+      invalid={isInvalid}
+      {...stylex.props(hasFieldLayout ? s.root : s.standaloneRoot, hasFieldLayout && style)}
+    >
       {label && (
         <FieldLabel
           className={(state) =>
@@ -169,17 +203,19 @@ export function RadioGroup({
         </FieldLabel>
       )}
       {description && (
-        <FieldDescription
-          className={(state) =>
-            stylex.props(s.supporting, state.disabled && s.supportingDisabled).className
-          }
+        <p
+          id={descId}
+          data-slot="field-description"
+          {...stylex.props(s.supporting, disabled && s.supportingDisabled)}
         >
           {description}
-        </FieldDescription>
+        </p>
       )}
       {group}
-      {errorMessage ? (
-        <FieldError className={stylex.props(s.error).className}>{errorMessage}</FieldError>
+      {showError ? (
+        <div id={errorId} data-slot="field-error" {...stylex.props(s.error)}>
+          {errorMessage}
+        </div>
       ) : (
         <FieldError className={stylex.props(s.error).className} />
       )}

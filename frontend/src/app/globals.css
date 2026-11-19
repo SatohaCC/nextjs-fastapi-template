@@ -1,4 +1,11 @@
-@layer reset;
+@layer ui-sdk, reset;
+
+@layer ui-sdk {
+  :where([data-slot][hidden]:not([hidden="until-found"])) {
+    /* biome-ignore lint/complexity/noImportantStyles: ui-sdk のハイドレーション前 [hidden] 非表示契約に合わせるため */
+    display: none !important;
+  }
+}
 
 /* biome-ignore lint/suspicious/noUnknownAtRules: StyleX の CSS 注入ディレクティブ */
 @stylex;

@@ -9,6 +9,11 @@ export const radioGroupStyles = stylex.create({
     width: "100%",
     minWidth: 0,
   },
+  standaloneRoot: {
+    display: "inline-flex",
+    flexDirection: "column",
+    gap: "0.5rem",
+  },
   groupLabel: {
     fontSize: "0.875rem",
     lineHeight: "1.25rem",

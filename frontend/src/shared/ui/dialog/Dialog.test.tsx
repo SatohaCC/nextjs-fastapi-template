@@ -1,8 +1,30 @@
 import * as stylex from "@stylexjs/stylex";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { useRef } from "react";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
+import { TextField } from "../text-field/TextField";
 import { Dialog, DialogCloseButton } from "./Dialog";
+
+function FocusTargetDialog() {
+  const finalRef = useRef<HTMLButtonElement | null>(null);
+  return (
+    <>
+      <Dialog
+        title="フォーカス制御"
+        triggerLabel="開く"
+        initialFocus="#target-input"
+        finalFocus={() => finalRef.current}
+        actions={<DialogCloseButton variant="filled">閉じる</DialogCloseButton>}
+      >
+        <TextField id="target-input" label="入力欄" />
+      </Dialog>
+      <button ref={finalRef} type="button">
+        復帰先ボタン
+      </button>
+    </>
+  );
+}
 
 describe("Dialog", () => {
   const getAnimations = Element.prototype.getAnimations;
@@ -68,6 +90,19 @@ describe("Dialog", () => {
 
     await user.click(screen.getByRole("button", { name: "ダイアログを閉じる" }));
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+
+  it("initialFocusとfinalFocusで指定した要素へフォーカスを移動する", async () => {
+    const user = userEvent.setup();
+
+    render(<FocusTargetDialog />);
+
+    await user.click(screen.getByRole("button", { name: "開く" }));
+    expect(screen.getByRole("textbox", { name: "入力欄" })).toHaveFocus();
+
+    await user.click(screen.getByRole("button", { name: "閉じる" }));
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "復帰先ボタン" })).toHaveFocus();
   });
 });
 
