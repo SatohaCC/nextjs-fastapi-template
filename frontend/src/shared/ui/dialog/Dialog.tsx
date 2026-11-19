@@ -13,7 +13,7 @@ import {
   type DialogProps as UiDialogProps,
 } from "@ui-sdk/react/dialog";
 import type { ComponentProps, ReactNode } from "react";
-import { Button, type ButtonVariant } from "../button/Button";
+import { ButtonBase, type ButtonVariant } from "../button/Button";
 import { dialogStyles as s } from "./Dialog.styles";
 
 export interface DialogProps extends Omit<UiDialogProps, "children"> {
@@ -46,7 +46,9 @@ export function Dialog({
   return (
     <UiDialog {...props}>
       {triggerLabel && (
-        <DialogTrigger render={<Button variant={triggerVariant} />}>{triggerLabel}</DialogTrigger>
+        <DialogTrigger render={<ButtonBase variant={triggerVariant} />}>
+          {triggerLabel}
+        </DialogTrigger>
       )}
       <DialogBackdrop className={stylex.props(s.backdrop).className} />
       <DialogContent
@@ -100,12 +102,17 @@ export interface DialogCloseButtonProps
 export function DialogCloseButton({
   variant = "text",
   size = "md",
+  disabled = false,
   style,
   children,
   ...props
 }: DialogCloseButtonProps) {
   return (
-    <DialogClose render={<Button variant={variant} size={size} style={style} />} {...props}>
+    <DialogClose
+      disabled={disabled}
+      render={<ButtonBase variant={variant} size={size} overrideStyle={style} />}
+      {...props}
+    >
       {children}
     </DialogClose>
   );

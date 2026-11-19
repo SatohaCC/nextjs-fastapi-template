@@ -1,9 +1,10 @@
 "use client";
 
 import * as stylex from "@stylexjs/stylex";
-import { Field, FieldDescription, FieldLabel } from "@ui-sdk/react/field";
+import { Field, FieldError, FieldLabel, useFieldControl } from "@ui-sdk/react/field";
 import { SwitchThumb, Switch as UiSwitch } from "@ui-sdk/react/switch";
-import type { ComponentProps } from "react";
+import { type ComponentProps, useId } from "react";
+import { mergeDescribedBy } from "../internal/mergeDescribedBy";
 import { switchStyles as s } from "./Switch.styles";
 
 export interface SwitchProps
@@ -14,19 +15,46 @@ export interface SwitchProps
 }
 
 /** Material Design 3 準拠のスイッチ（設定の即時オン・オフ切り替え）。 */
-export function Switch({ label, description, disabled = false, style, ...props }: SwitchProps) {
-  const hasField = Boolean(label || description);
+export function Switch({
+  label,
+  description,
+  disabled = false,
+  style,
+  "aria-describedby": describedBy,
+  ...props
+}: SwitchProps) {
+  const outerField = useFieldControl();
+  const descId = useId();
+  const hasFieldLayout = Boolean(label || description);
+  const passStyleToControl = Boolean(outerField) || !hasFieldLayout;
+  const extraDescribedBy = mergeDescribedBy(describedBy, description ? descId : undefined);
   const control = (
     <UiSwitch
       disabled={disabled}
-      style={stylex.props(!hasField && style).style}
+      style={stylex.props(passStyleToControl && style).style}
       className={(state) =>
         stylex.props(
+          !state.disabled && stylex.defaultMarker(),
           s.track,
           state.checked ? s.trackChecked : s.trackUnchecked,
           state.disabled && (state.checked ? s.trackDisabledChecked : s.trackDisabledUnchecked),
-          !hasField && style,
+          passStyleToControl && style,
         ).className
+      }
+      render={
+        extraDescribedBy
+          ? (controlProps) => (
+              <button
+                {...controlProps}
+                aria-describedby={mergeDescribedBy(
+                  typeof controlProps["aria-describedby"] === "string"
+                    ? controlProps["aria-describedby"]
+                    : undefined,
+                  extraDescribedBy,
+                )}
+              />
+            )
+          : undefined
       }
       {...props}
     >
@@ -42,33 +70,41 @@ export function Switch({ label, description, disabled = false, style, ...props }
     </UiSwitch>
   );
 
-  if (!hasField) {
+  if (outerField && !hasFieldLayout) {
     return control;
   }
 
   return (
-    <Field disabled={disabled} {...stylex.props(s.field, style)}>
-      <div {...stylex.props(s.textGroup)}>
-        {label && (
-          <FieldLabel
-            className={(state) =>
-              stylex.props(s.label, state.disabled && s.labelDisabled).className
-            }
-          >
-            {label}
-          </FieldLabel>
+    <Field
+      disabled={disabled}
+      {...stylex.props(hasFieldLayout ? s.root : s.standaloneRoot, hasFieldLayout && style)}
+    >
+      <div {...stylex.props(hasFieldLayout ? s.field : s.standaloneField)}>
+        {(label || description) && (
+          <div {...stylex.props(s.textGroup)}>
+            {label && (
+              <FieldLabel
+                className={(state) =>
+                  stylex.props(s.label, state.disabled && s.labelDisabled).className
+                }
+              >
+                {label}
+              </FieldLabel>
+            )}
+            {description && (
+              <p
+                id={descId}
+                data-slot="field-description"
+                {...stylex.props(s.description, disabled && s.descriptionDisabled)}
+              >
+                {description}
+              </p>
+            )}
+          </div>
         )}
-        {description && (
-          <FieldDescription
-            className={(state) =>
-              stylex.props(s.description, state.disabled && s.descriptionDisabled).className
-            }
-          >
-            {description}
-          </FieldDescription>
-        )}
+        {control}
       </div>
-      {control}
+      <FieldError className={stylex.props(s.error).className} />
     </Field>
   );
 }

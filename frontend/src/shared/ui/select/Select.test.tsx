@@ -82,4 +82,58 @@ describe("Select", () => {
     expect(disabledTrigger).toBeDisabled();
     expect(disabledTrigger).toHaveAttribute("aria-invalid", "true");
   });
+
+  it("invalid={false}ではerrorMessageを抑止し、フォーム必須検証と送信値を維持する", async () => {
+    const user = userEvent.setup();
+    const { rerender } = render(
+      <Select
+        label="カテゴリ"
+        description="分類を選びます。"
+        items={items}
+        invalid={false}
+        errorMessage="表示されないエラー"
+      />,
+    );
+
+    const trigger = screen.getByRole("combobox", { name: "カテゴリ" });
+    expect(screen.queryByText("表示されないエラー")).not.toBeInTheDocument();
+    expect(trigger).not.toHaveAttribute("aria-invalid", "true");
+    expect(trigger).toHaveAccessibleDescription("分類を選びます。");
+
+    rerender(
+      <Select
+        label="カテゴリ"
+        description="分類を選びます。"
+        items={items}
+        errorMessage="サーバー側のエラー"
+      />,
+    );
+    expect(screen.getByText("サーバー側のエラー")).toBeVisible();
+    expect(trigger).toHaveAttribute("aria-invalid", "true");
+    expect(trigger).toHaveAccessibleDescription("分類を選びます。 サーバー側のエラー");
+
+    let submitted: FormDataEntryValue | null = "unset";
+    rerender(
+      <form
+        onSubmit={(event) => {
+          event.preventDefault();
+          submitted = new FormData(event.currentTarget).get("category");
+        }}
+      >
+        <Select label="カテゴリ" name="category" required items={items} />
+        <button type="submit">送信</button>
+      </form>,
+    );
+
+    await user.click(screen.getByRole("button", { name: "送信" }));
+    const formTrigger = screen.getByRole("combobox", { name: "カテゴリ" });
+    expect(formTrigger).toHaveAttribute("aria-invalid", "true");
+    expect(submitted).toBe("unset");
+
+    await user.click(formTrigger);
+    await user.click(screen.getByRole("option", { name: "開発" }));
+    await user.click(screen.getByRole("button", { name: "送信" }));
+    expect(formTrigger).not.toHaveAttribute("aria-invalid", "true");
+    expect(submitted).toBe("development");
+  });
 });

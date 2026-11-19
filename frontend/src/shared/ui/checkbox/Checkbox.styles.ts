@@ -9,10 +9,19 @@ export const checkboxStyles = stylex.create({
     width: "100%",
     minWidth: 0,
   },
+  standaloneRoot: {
+    display: "inline-flex",
+    flexDirection: "column",
+    gap: "0.25rem",
+  },
   row: {
     display: "flex",
     alignItems: "flex-start",
     gap: "0.5rem",
+  },
+  standaloneRow: {
+    display: "inline-flex",
+    alignItems: "flex-start",
   },
   control: {
     appearance: "none",
@@ -134,5 +143,8 @@ export const checkboxStyles = stylex.create({
     lineHeight: "1rem",
     color: tokens.error,
     paddingInlineStart: "2.25rem",
+  },
+  errorStandalone: {
+    paddingInlineStart: 0,
   },
 });

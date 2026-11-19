@@ -52,6 +52,25 @@ export const Disabled: Story = {
   },
 };
 
+export const FilledInvalid: Story = {
+  args: {
+    variant: "filled",
+    label: "連絡先メールアドレス",
+    type: "email",
+    defaultValue: "invalid-email",
+    errorMessage: "正しい形式のメールアドレスを入力してください。",
+    required: true,
+  },
+};
+
+export const FilledDisabled: Story = {
+  args: {
+    variant: "filled",
+    disabled: true,
+    defaultValue: "変更できない項目",
+  },
+};
+
 export const Multiline: Story = {
   args: {
     label: "申し送りメモ",

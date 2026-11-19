@@ -2,8 +2,10 @@
 
 import * as stylex from "@stylexjs/stylex";
 import { CheckboxIndicator, Checkbox as UiCheckbox } from "@ui-sdk/react/checkbox";
-import { Field, FieldDescription, FieldError, FieldLabel } from "@ui-sdk/react/field";
-import { type ComponentProps, useId } from "react";
+import { Field, FieldError, FieldLabel, useFieldControl } from "@ui-sdk/react/field";
+import type { ComponentProps } from "react";
+import { useId } from "react";
+import { mergeDescribedBy } from "../internal/mergeDescribedBy";
 import { checkboxStyles as s } from "./Checkbox.styles";
 
 export interface CheckboxProps
@@ -27,20 +29,25 @@ export function Checkbox({
   "aria-invalid": ariaInvalid,
   ...props
 }: CheckboxProps) {
+  const outerField = useFieldControl();
+  const baseId = useId();
+  const descId = `${baseId}-description`;
+  const errorId = `${baseId}-error`;
   const isInvalid = invalid ?? (errorMessage ? true : undefined);
-  const hasField = Boolean(label || description);
-  const errorId = useId();
-  const standaloneError = !hasField && errorMessage;
-  const standaloneDescription = standaloneError
-    ? [describedBy, errorId].filter(Boolean).join(" ")
-    : describedBy;
+  const showError = Boolean(errorMessage) && isInvalid !== false;
+  const hasFieldLayout = Boolean(label || description || showError);
+  const passStyleToControl = Boolean(outerField) || !hasFieldLayout;
+  const extraDescribedBy = mergeDescribedBy(
+    describedBy,
+    description ? descId : undefined,
+    showError ? errorId : undefined,
+  );
 
   const control = (
     <UiCheckbox
       disabled={disabled}
-      aria-describedby={standaloneDescription}
-      aria-invalid={hasField ? ariaInvalid : (isInvalid ?? ariaInvalid)}
-      style={stylex.props(!hasField && style).style}
+      aria-invalid={outerField && !hasFieldLayout ? (isInvalid ?? ariaInvalid) : ariaInvalid}
+      style={stylex.props(passStyleToControl && style).style}
       className={(state) => {
         const active = state.checked || state.indeterminate;
         return stylex.props(
@@ -48,9 +55,24 @@ export function Checkbox({
           active && s.controlChecked,
           isInvalid && s.controlInvalid,
           state.disabled && s.controlDisabled,
-          !hasField && style,
+          passStyleToControl && style,
         ).className;
       }}
+      render={
+        extraDescribedBy
+          ? (controlProps) => (
+              <button
+                {...controlProps}
+                aria-describedby={mergeDescribedBy(
+                  typeof controlProps["aria-describedby"] === "string"
+                    ? controlProps["aria-describedby"]
+                    : undefined,
+                  extraDescribedBy,
+                )}
+              />
+            )
+          : undefined
+      }
       {...props}
     >
       {(state) => {
@@ -100,45 +122,54 @@ export function Checkbox({
     </UiCheckbox>
   );
 
-  if (!hasField) {
-    return (
-      <>
-        {control}
-        {standaloneError && (
-          <div id={errorId} {...stylex.props(s.error)}>
-            {standaloneError}
-          </div>
-        )}
-      </>
-    );
+  if (outerField && !hasFieldLayout) {
+    return control;
   }
 
   return (
-    <Field disabled={disabled} invalid={isInvalid} {...stylex.props(s.root, style)}>
-      <div {...stylex.props(s.row)}>
+    <Field
+      disabled={disabled}
+      invalid={isInvalid}
+      {...stylex.props(hasFieldLayout ? s.root : s.standaloneRoot, hasFieldLayout && style)}
+    >
+      <div {...stylex.props(hasFieldLayout ? s.row : s.standaloneRow)}>
         {control}
-        <div {...stylex.props(s.textGroup)}>
-          {label && (
-            <FieldLabel
-              className={(state) =>
-                stylex.props(s.label, state.disabled && s.labelDisabled).className
-              }
-            >
-              {label}
-            </FieldLabel>
-          )}
-          {description && (
-            <FieldDescription
-              className={(state) =>
-                stylex.props(s.description, state.disabled && s.descriptionDisabled).className
-              }
-            >
-              {description}
-            </FieldDescription>
-          )}
-        </div>
+        {(label || description) && (
+          <div {...stylex.props(s.textGroup)}>
+            {label && (
+              <FieldLabel
+                className={(state) =>
+                  stylex.props(s.label, state.disabled && s.labelDisabled).className
+                }
+              >
+                {label}
+              </FieldLabel>
+            )}
+            {description && (
+              <p
+                id={descId}
+                data-slot="field-description"
+                {...stylex.props(s.description, disabled && s.descriptionDisabled)}
+              >
+                {description}
+              </p>
+            )}
+          </div>
+        )}
       </div>
-      <FieldError className={stylex.props(s.error).className}>{errorMessage}</FieldError>
+      {showError ? (
+        <div
+          id={errorId}
+          data-slot="field-error"
+          {...stylex.props(s.error, !(label || description) && s.errorStandalone)}
+        >
+          {errorMessage}
+        </div>
+      ) : (
+        <FieldError
+          className={stylex.props(s.error, !(label || description) && s.errorStandalone).className}
+        />
+      )}
     </Field>
   );
 }

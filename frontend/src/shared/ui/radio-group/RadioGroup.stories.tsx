@@ -67,6 +67,15 @@ export const Disabled: Story = {
   },
 };
 
+export const WithoutLabel: Story = {
+  args: {
+    label: undefined,
+    description: undefined,
+    "aria-label": "処理モード選択",
+    defaultValue: "realtime",
+  },
+};
+
 function ControlledRadioGroup(args: RadioGroupProps) {
   const [value, setValue] = useState<string | null>("realtime");
   return (

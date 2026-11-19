@@ -2,6 +2,18 @@ import * as stylex from "@stylexjs/stylex";
 import { tokens } from "../../styles/tokens.stylex";
 
 export const switchStyles = stylex.create({
+  root: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "0.25rem",
+    width: "100%",
+    minWidth: 0,
+  },
+  standaloneRoot: {
+    display: "inline-flex",
+    flexDirection: "column",
+    gap: "0.25rem",
+  },
   field: {
     display: "flex",
     alignItems: "center",
@@ -9,6 +21,10 @@ export const switchStyles = stylex.create({
     gap: "1rem",
     width: "100%",
     minWidth: 0,
+  },
+  standaloneField: {
+    display: "inline-flex",
+    alignItems: "center",
   },
   textGroup: {
     display: "flex",
@@ -99,28 +115,41 @@ export const switchStyles = stylex.create({
     },
   },
   thumb: {
+    position: "absolute",
+    insetBlock: 0,
+    marginBlock: "auto",
     display: "block",
     borderRadius: tokens.cornerFull,
-    transitionProperty: "transform, width, height, background-color",
+    transitionProperty: "inset-inline-start, width, height, background-color",
     transitionDuration: tokens.motionDuration,
     transitionTimingFunction: tokens.motionEasing,
   },
   thumbUnchecked: {
     width: "1rem",
     height: "1rem",
-    backgroundColor: tokens.outline,
-    transform: "translateX(0.375rem)",
+    insetInlineStart: "0.375rem",
+    backgroundColor: {
+      default: tokens.outline,
+      [stylex.when.ancestor(":hover")]: tokens.onSurfaceVariant,
+      [stylex.when.ancestor(":focus-visible")]: tokens.onSurfaceVariant,
+      [stylex.when.ancestor(":active")]: tokens.onSurfaceVariant,
+    },
   },
   thumbChecked: {
     width: "1.5rem",
     height: "1.5rem",
+    insetInlineStart: "1.375rem",
     backgroundColor: tokens.onPrimary,
-    transform: "translateX(1.375rem)",
   },
   thumbDisabledUnchecked: {
     backgroundColor: tokens.disabledContent,
   },
   thumbDisabledChecked: {
     backgroundColor: tokens.surface,
+  },
+  error: {
+    fontSize: "0.75rem",
+    lineHeight: "1rem",
+    color: tokens.error,
   },
 });

@@ -170,13 +170,7 @@ export function Select({
           {description}
         </FieldDescription>
       )}
-      {errorMessage ? (
-        <FieldError match className={stylex.props(s.error).className}>
-          {errorMessage}
-        </FieldError>
-      ) : (
-        <FieldError className={stylex.props(s.error).className} />
-      )}
+      <FieldError className={stylex.props(s.error).className}>{errorMessage}</FieldError>
     </Field>
   );
 }

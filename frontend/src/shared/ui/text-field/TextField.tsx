@@ -2,7 +2,7 @@
 
 import * as stylex from "@stylexjs/stylex";
 import { Field, FieldDescription, FieldError, FieldLabel } from "@ui-sdk/react/field";
-import { Input, InputGroup, type InputOptions } from "@ui-sdk/react/input";
+import { Input, type InputOptions } from "@ui-sdk/react/input";
 import { Textarea, type TextareaOptions } from "@ui-sdk/react/textarea";
 import type { ComponentProps, ReactNode } from "react";
 import { textFieldStyles as s } from "./TextField.styles";
@@ -84,16 +84,14 @@ export function TextField({
           </span>
         )}
       </FieldLabel>
-      <InputGroup
-        className={(state) =>
-          stylex.props(
-            s.controlBox,
-            multiline && s.controlBoxMultiline,
-            variant === "outlined" ? s.outlined : s.filled,
-            isInvalid && (variant === "outlined" ? s.outlinedInvalid : s.filledInvalid),
-            state.disabled && (variant === "outlined" ? s.outlinedDisabled : s.filledDisabled),
-          ).className
-        }
+      <div
+        {...stylex.props(
+          s.controlBox,
+          multiline && s.controlBoxMultiline,
+          variant === "outlined" ? s.outlined : s.filled,
+          isInvalid && (variant === "outlined" ? s.outlinedInvalid : s.filledInvalid),
+          disabled && (variant === "outlined" ? s.outlinedDisabled : s.filledDisabled),
+        )}
       >
         {leading && (
           <span aria-hidden="true" {...stylex.props(s.affix, disabled && s.affixDisabled)}>
@@ -143,7 +141,7 @@ export function TextField({
             {trailing}
           </span>
         )}
-      </InputGroup>
+      </div>
       {description && (
         <FieldDescription
           className={(state) =>

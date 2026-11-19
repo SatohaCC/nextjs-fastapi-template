@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Button } from "../button/Button";
 import { TextField } from "../text-field/TextField";
 import { Dialog, DialogCloseButton, type DialogProps } from "./Dialog";
+import { dialogStoryStyles as s } from "./Dialog.stories.styles";
 
 const meta = {
   title: "shared/ui/Dialog",
@@ -99,4 +100,11 @@ function ControlledDialog(args: DialogProps) {
 
 export const Controlled: Story = {
   render: (args) => <ControlledDialog {...args} />,
+};
+
+export const DynamicWidth: Story = {
+  args: {
+    defaultOpen: true,
+    style: s.width(300),
+  },
 };

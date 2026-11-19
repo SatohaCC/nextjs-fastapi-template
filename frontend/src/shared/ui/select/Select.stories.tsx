@@ -48,6 +48,22 @@ export const Disabled: Story = {
   },
 };
 
+export const FilledInvalid: Story = {
+  args: {
+    variant: "filled",
+    required: true,
+    errorMessage: "カテゴリを選択してください。",
+  },
+};
+
+export const FilledDisabled: Story = {
+  args: {
+    variant: "filled",
+    disabled: true,
+    defaultValue: "development",
+  },
+};
+
 function ControlledSelect(args: SelectProps) {
   const [value, setValue] = useState<string | null>("general");
   return (

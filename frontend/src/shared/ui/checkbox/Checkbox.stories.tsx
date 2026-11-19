@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useState } from "react";
 import { Checkbox, type CheckboxProps } from "./Checkbox";
+import { checkboxStoryStyles as s } from "./Checkbox.stories.styles";
 
 const meta = {
   title: "shared/ui/Checkbox",
@@ -44,6 +45,37 @@ export const Disabled: Story = {
   args: {
     disabled: true,
     defaultChecked: true,
+  },
+};
+
+export const DisabledUnchecked: Story = {
+  args: {
+    disabled: true,
+    defaultChecked: false,
+  },
+};
+
+export const WithoutLabel: Story = {
+  args: {
+    label: undefined,
+    description: undefined,
+    "aria-label": "単体チェックボックス",
+    defaultChecked: false,
+  },
+};
+
+export const DynamicWidthStandalone: Story = {
+  args: {
+    label: undefined,
+    description: undefined,
+    "aria-label": "幅指定チェックボックス",
+    style: s.width(280),
+  },
+};
+
+export const DynamicWidthField: Story = {
+  args: {
+    style: s.width(280),
   },
 };
 
