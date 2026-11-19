@@ -1,4 +1,5 @@
-import { expect, test } from "@playwright/test";
+import { expect, type Locator, test } from "@playwright/test";
+import { measureContrast } from "./contrast";
 
 test("タブは明暗テーマ・狭い幅でも選択でき、フォーカスと下線を表示する", async ({
   page,
@@ -153,9 +154,7 @@ test("TextField・Switch・Checkbox・Select・Dialogが明暗テーマと狭い
   }
 });
 
-test("DialogがLTR・RTLの幅320px/390pxで中央に収まり、Tab循環と200%拡大でも操作できる", async ({
-  page,
-}) => {
+test("DialogはLTR・RTLの狭い画面でも中央に収まる", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
 
   for (const dir of ["ltr", "rtl"] as const) {
@@ -172,32 +171,55 @@ test("DialogがLTR・RTLの幅320px/390pxで中央に収まり、Tab循環と200
       const dialog = page.getByRole("dialog", { name: "編集を終了しますか？" });
       await expect(dialog).toBeVisible();
 
-      const box = await dialog.boundingBox();
-      expect(box).not.toBeNull();
-      if (!box) throw new Error("Dialog bounding box is null");
-      expect(box.x).toBeGreaterThanOrEqual(0);
-      expect(box.x + box.width).toBeLessThanOrEqual(width);
-      expect(Math.abs(box.x - (width - (box.x + box.width)))).toBeLessThanOrEqual(2);
-
-      // Tab / Shift+Tab でフォーカスがダイアログ内に循環することを確認する。
-      const focusableCount = await dialog.evaluate(
-        (el) => el.querySelectorAll<HTMLElement>("button, [href], input, select, textarea").length,
-      );
-      expect(focusableCount).toBeGreaterThanOrEqual(3);
-      for (let i = 0; i < focusableCount + 1; i += 1) {
-        await page.keyboard.press("Tab");
-        expect(await dialog.evaluate((el) => el.contains(document.activeElement))).toBe(true);
-      }
-      await page.keyboard.press("Shift+Tab");
-      expect(await dialog.evaluate((el) => el.contains(document.activeElement))).toBe(true);
-
-      await page.keyboard.press("Escape");
-      await expect(dialog).toBeHidden();
-      await expect(trigger).toBeFocused();
+      const { left, right } = await dialog.evaluate((el) => {
+        const bounds = el.getBoundingClientRect();
+        return { left: bounds.left, right: bounds.right };
+      });
+      expect(left).toBeGreaterThanOrEqual(0);
+      expect(right).toBeLessThanOrEqual(width);
+      expect(Math.abs(left - (width - right))).toBeLessThanOrEqual(2);
     }
   }
+});
 
-  // 200%文字拡大時でも長文スクロール領域とアクションボタンに到達できることを確認する。
+test("DialogはTabを両方向に循環させ、Escapeでトリガーに戻る", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.setViewportSize({ width: 320, height: 640 });
+
+  for (const direction of ["ltr", "rtl"] as const) {
+    await test.step(direction, async () => {
+      await page.goto("/iframe.html?id=shared-ui-dialog--basic&viewMode=story");
+      await page.evaluate((dir) => {
+        document.documentElement.dir = dir;
+      }, direction);
+      const trigger = page.getByRole("button", { name: "編集を終了", exact: true });
+      await trigger.click();
+      const dialog = page.getByRole("dialog", { name: "編集を終了しますか？" });
+      const close = dialog.getByRole("button", { name: "閉じる", exact: true });
+      const cancel = dialog.getByRole("button", { name: "キャンセル" });
+      const confirm = dialog.getByRole("button", { name: "終了して保存" });
+      await expect(close).toBeFocused();
+
+      for (const target of [cancel, confirm, close]) {
+        await page.keyboard.press("Tab");
+        await expect(target).toBeFocused();
+      }
+
+      for (const target of [confirm, cancel, close]) {
+        await page.keyboard.press("Shift+Tab");
+        await expect(target).toBeFocused();
+      }
+
+      await page.keyboard.press("Escape");
+
+      await expect(dialog).toBeHidden();
+      await expect(trigger).toBeFocused();
+    });
+  }
+});
+
+test("Dialogは200%文字拡大時も確定ボタンで閉じられる", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
   await page.setViewportSize({ width: 390, height: 640 });
   await page.goto("/iframe.html?id=shared-ui-dialog--scrollable-body&viewMode=story");
   await page.evaluate(() => {
@@ -206,20 +228,37 @@ test("DialogがLTR・RTLの幅320px/390pxで中央に収まり、Tab循環と200
   const dialog = page.getByRole("dialog", { name: "利用規約の確認" });
   await expect(dialog).toBeVisible();
   const confirmButton = dialog.getByRole("button", { name: "終了して保存" });
-  await expect(confirmButton).toBeVisible();
+
   await confirmButton.click();
+
   await expect(dialog).toBeHidden();
 });
+
+function measureSwitchThumb(control: Locator) {
+  return control.evaluate((track) => {
+    const thumb = track.querySelector('[data-slot="switch-thumb"]');
+    if (!thumb) throw new Error("Switch のつまみが見つかりません");
+    const trackBox = track.getBoundingClientRect();
+    const thumbBox = thumb.getBoundingClientRect();
+    const leftGap = thumbBox.left - trackBox.left;
+    const rightGap = trackBox.right - thumbBox.right;
+
+    return {
+      inlineStart: getComputedStyle(track).direction === "rtl" ? rightGap : leftGap,
+      left: leftGap,
+      right: rightGap,
+      top: thumbBox.top - trackBox.top,
+      bottom: trackBox.bottom - thumbBox.bottom,
+    };
+  });
+}
 
 test("SwitchがLTR・RTLで鏡像配置され、全状態でつまみがトラック内に収まる", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.setViewportSize({ width: 390, height: 640 });
 
   for (const story of ["off", "on", "disabled-off", "disabled-on"] as const) {
-    const rects: Record<"ltr" | "rtl", { track: DOMRect; thumb: DOMRect }> = {} as Record<
-      "ltr" | "rtl",
-      { track: DOMRect; thumb: DOMRect }
-    >;
+    const offsets: number[] = [];
 
     for (const dir of ["ltr", "rtl"] as const) {
       await page.goto(`/iframe.html?id=shared-ui-switch--${story}&viewMode=story`);
@@ -229,46 +268,53 @@ test("SwitchがLTR・RTLで鏡像配置され、全状態でつまみがトラ�
 
       const sw = page.getByRole("switch", { name: "自動保存" });
       const thumb = sw.locator('[data-slot="switch-thumb"]');
+      await expect(sw).toHaveAttribute("aria-checked", String(story.endsWith("on")));
+      await expect(thumb).toBeVisible();
       await expect(thumb).toHaveCSS("transition-duration", "0s");
 
-      const trackBox = await sw.boundingBox();
-      const thumbBox = await thumb.boundingBox();
-      expect(trackBox).not.toBeNull();
-      expect(thumbBox).not.toBeNull();
-      if (!trackBox || !thumbBox) throw new Error("Switch bounding box is null");
+      const position = await measureSwitchThumb(sw);
 
       // 境界線2pxの内側に収まっていることを確認する。
-      expect(thumbBox.x).toBeGreaterThanOrEqual(trackBox.x + 2);
-      expect(thumbBox.x + thumbBox.width).toBeLessThanOrEqual(trackBox.x + trackBox.width - 2);
-      expect(thumbBox.y).toBeGreaterThanOrEqual(trackBox.y + 2);
-      expect(thumbBox.y + thumbBox.height).toBeLessThanOrEqual(trackBox.y + trackBox.height - 2);
-
-      rects[dir] = {
-        track: trackBox as unknown as DOMRect,
-        thumb: thumbBox as unknown as DOMRect,
-      };
+      expect(
+        Math.min(position.left, position.right, position.top, position.bottom),
+      ).toBeGreaterThanOrEqual(2);
+      offsets.push(position.inlineStart);
     }
 
-    const ltrStartGap = rects.ltr.thumb.x - rects.ltr.track.x;
-    const rtlStartGap =
-      rects.rtl.track.x + rects.rtl.track.width - (rects.rtl.thumb.x + rects.rtl.thumb.width);
-    expect(Math.abs(ltrStartGap - rtlStartGap)).toBeLessThanOrEqual(1);
+    const [ltrOffset, rtlOffset] = offsets;
+    expect(Math.abs(ltrOffset - rtlOffset)).toBeLessThanOrEqual(1);
   }
-
-  // Spaceキーとラベルクリックで切り替わることを確認する。
-  await page.goto("/iframe.html?id=shared-ui-switch--off&viewMode=story");
-  await page.evaluate(() => {
-    document.documentElement.dir = "rtl";
-  });
-  const sw = page.getByRole("switch", { name: "自動保存" });
-  await sw.focus();
-  await page.keyboard.press("Space");
-  await expect(sw).toHaveAttribute("aria-checked", "true");
-  await page.getByText("自動保存").click();
-  await expect(sw).toHaveAttribute("aria-checked", "false");
 });
 
-test("動的StyleXオーバーライドとCSSレイヤー順序がブラウザ計算値に反映される", async ({ page }) => {
+test("SwitchのつまみはSpaceキーとラベル操作でLTR・RTLの両方向に移動する", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.setViewportSize({ width: 390, height: 640 });
+
+  for (const direction of ["ltr", "rtl"] as const) {
+    await test.step(direction, async () => {
+      await page.goto("/iframe.html?id=shared-ui-switch--off&viewMode=story");
+      await page.evaluate((dir) => {
+        document.documentElement.dir = dir;
+      }, direction);
+      const control = page.getByRole("switch", { name: "自動保存" });
+      await expect(control).toHaveAttribute("aria-checked", "false");
+      const uncheckedOffset = (await measureSwitchThumb(control)).inlineStart;
+
+      await control.press("Space");
+
+      await expect(control).toHaveAttribute("aria-checked", "true");
+      expect((await measureSwitchThumb(control)).inlineStart).toBeGreaterThan(uncheckedOffset);
+
+      await page.getByText("自動保存", { exact: true }).click();
+
+      await expect(control).toHaveAttribute("aria-checked", "false");
+      const restoredOffset = (await measureSwitchThumb(control)).inlineStart;
+      expect(Math.abs(restoredOffset - uncheckedOffset)).toBeLessThanOrEqual(1);
+    });
+  }
+});
+
+test("動的StyleXオーバーライドが対象部位の幅に反映される", async ({ page }) => {
   await page.goto("/iframe.html?id=shared-ui-checkbox--dynamic-width-standalone&viewMode=story");
   const standaloneCb = page.getByRole("checkbox", { name: "幅指定チェックボックス" });
   await expect(standaloneCb).toHaveCSS("width", "280px");
@@ -286,180 +332,118 @@ test("動的StyleXオーバーライドとCSSレイヤー順序がブラウザ�
   await page.goto("/iframe.html?id=shared-ui-dialog--dynamic-width&viewMode=story");
   const dialog = page.getByRole("dialog");
   await expect(dialog).toHaveCSS("width", "300px");
-
-  const hasLayers = await page.evaluate(() => {
-    const texts: string[] = [];
-    for (const sheet of Array.from(document.styleSheets)) {
-      try {
-        for (const rule of Array.from(sheet.cssRules)) {
-          if (rule.cssText.includes("@layer")) {
-            texts.push(rule.cssText);
-          }
-        }
-      } catch {
-        // 外部シートは無視する。
-      }
-    }
-    return texts.some((text) => text.includes("ui-sdk"));
-  });
-  expect(hasLayers).toBe(true);
 });
 
-test("明暗テーマで操作状態を含む実測コントラストと200%文字拡大レイアウトを満たす", async ({
+test("CSSレイヤーでは通常宣言のresetがui-sdkより優先され、hiddenは非表示になる", async ({
   page,
 }) => {
-  await page.addInitScript(() => {
-    const canvas = document.createElement("canvas");
-    canvas.width = 1;
-    canvas.height = 1;
-    const ctx = canvas.getContext("2d", { willReadFrequently: true });
-    if (!ctx) throw new Error("2d canvas context unavailable");
-
-    const parseCssColor = (css: string): [number, number, number, number] => {
-      ctx.clearRect(0, 0, 1, 1);
-      ctx.fillStyle = "rgba(0, 0, 0, 0)";
-      ctx.fillStyle = css;
-      ctx.fillRect(0, 0, 1, 1);
-      const data = ctx.getImageData(0, 0, 1, 1).data;
-      return [data[0], data[1], data[2], data[3] / 255];
-    };
-
-    const composite = (
-      fg: [number, number, number, number],
-      bg: [number, number, number],
-    ): [number, number, number] => {
-      const a = fg[3];
-      return [
-        Math.round(fg[0] * a + bg[0] * (1 - a)),
-        Math.round(fg[1] * a + bg[1] * (1 - a)),
-        Math.round(fg[2] * a + bg[2] * (1 - a)),
-      ];
-    };
-
-    const luminance = ([r, g, b]: [number, number, number]) => {
-      const [R, G, B] = [r, g, b].map((v) => {
-        const s = v / 255;
-        return s <= 0.03928 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4;
-      });
-      return 0.2126 * R + 0.7152 * G + 0.0722 * B;
-    };
-
-    const ratio = (c1: [number, number, number], c2: [number, number, number]) => {
-      const l1 = luminance(c1);
-      const l2 = luminance(c2);
-      return (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05);
-    };
-
-    const resolveEffectiveBg = (el: Element): [number, number, number] => {
-      const chain: Element[] = [];
-      let cur: Element | null = el;
-      while (cur) {
-        chain.unshift(cur);
-        cur = cur.parentElement;
-      }
-      let acc: [number, number, number] = [255, 255, 255];
-      for (const node of chain) {
-        const style = getComputedStyle(node);
-        const bg = parseCssColor(style.backgroundColor);
-        if (bg[3] > 0) {
-          acc = composite(bg, acc);
-        }
-        const img = style.backgroundImage;
-        if (img?.startsWith("linear-gradient(")) {
-          const inner = img.slice("linear-gradient(".length, -1);
-          const firstStop = inner.split(/,(?![^(]*\))/)[0]?.trim();
-          if (firstStop) {
-            const stopColor = parseCssColor(firstStop);
-            if (stopColor[3] > 0) {
-              acc = composite(stopColor, acc);
-            }
-          }
-        }
-      }
-      return acc;
-    };
-
-    (window as unknown as Record<string, unknown>).__contrastHelper = {
-      measureTextContrast: (el: Element) => {
-        const bg = resolveEffectiveBg(el);
-        const fg = composite(parseCssColor(getComputedStyle(el).color), bg);
-        return ratio(fg, bg);
-      },
-      measureThumbContrast: (track: Element) => {
-        const thumb = track.querySelector('[data-slot="switch-thumb"]');
-        if (!thumb) throw new Error("switch-thumb not found");
-        const trackBg = resolveEffectiveBg(track);
-        const thumbBg = composite(parseCssColor(getComputedStyle(thumb).backgroundColor), trackBg);
-        return ratio(thumbBg, trackBg);
-      },
-    };
+  await page.goto("/iframe.html?id=shared-ui-dialog--dynamic-width&viewMode=story");
+  await expect(page.getByRole("dialog")).toBeVisible();
+  await page.evaluate(() => {
+    const probe = document.createElement("div");
+    probe.dataset.testid = "layer-order-probe";
+    probe.dataset.slot = "layer-order-probe";
+    probe.hidden = true;
+    document.body.append(probe);
   });
+
+  // 先にresetを書き、アプリ側のレイヤー順がない場合に期待値を満たさないようにする。
+  await page.addStyleTag({
+    content: `
+      @layer reset { [data-testid="layer-order-probe"] { color: rgb(0, 128, 0); display: block; } }
+      @layer ui-sdk { [data-testid="layer-order-probe"] { color: rgb(255, 0, 0); } }
+    `,
+  });
+
+  const probe = page.getByTestId("layer-order-probe");
+  await expect(probe).toHaveCSS("color", "rgb(0, 128, 0)");
+  await expect(probe).toHaveCSS("display", "none");
+});
+
+test("Switchのつまみとトラックを明暗テーマの通常・ホバー状態で見分けられる", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 640 });
 
   for (const colorScheme of ["light", "dark"] as const) {
     await page.emulateMedia({ colorScheme, reducedMotion: "reduce" });
-    await page.setViewportSize({ width: 390, height: 640 });
 
-    // Switch: 通常・hoverのコントラスト比（>= 3.0）
     for (const story of ["off", "on"] as const) {
-      await page.goto(`/iframe.html?id=shared-ui-switch--${story}&viewMode=story`);
-      const sw = page.getByRole("switch", { name: "自動保存" });
-      await sw.hover();
-      const contrast = await sw.evaluate((el) => {
-        const helper = (
-          window as unknown as {
-            __contrastHelper: { measureThumbContrast: (node: Element) => number };
-          }
-        ).__contrastHelper;
-        return helper.measureThumbContrast(el);
-      });
-      expect(contrast, `Switch ${story} hover (${colorScheme})`).toBeGreaterThanOrEqual(3);
-    }
+      await test.step(`${colorScheme} / ${story}`, async () => {
+        await page.goto(`/iframe.html?id=shared-ui-switch--${story}&viewMode=story`);
+        await page.mouse.move(0, 0);
+        const control = page.getByRole("switch", { name: "自動保存" });
+        await expect(control.locator('[data-slot="switch-thumb"]')).toBeVisible();
+        const normalContrast = await control.evaluate(measureContrast, "switch-thumb" as const);
 
-    // Button バリアント表: 通常テキスト (>= 4.5)
+        await control.hover();
+
+        const hoveredContrast = await control.evaluate(measureContrast, "switch-thumb" as const);
+        expect(normalContrast, "通常状態のコントラスト").toBeGreaterThanOrEqual(3);
+        expect(hoveredContrast, "ホバー状態のコントラスト").toBeGreaterThanOrEqual(3);
+      });
+    }
+  }
+});
+
+test("ButtonとBadgeの文字は明暗テーマで背景と十分に区別できる", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 640 });
+
+  for (const colorScheme of ["light", "dark"] as const) {
+    await page.emulateMedia({ colorScheme, reducedMotion: "reduce" });
     await page.goto("/iframe.html?id=shared-ui-button--variants&viewMode=story");
+
     for (const name of ["Elevated", "Filled", "Tonal", "Outlined", "Text"]) {
-      const btn = page.getByRole("button", { name, exact: true }).first();
-      await btn.hover();
-      const contrast = await btn.evaluate((el) => {
-        const helper = (
-          window as unknown as {
-            __contrastHelper: { measureTextContrast: (node: Element) => number };
-          }
-        ).__contrastHelper;
-        return helper.measureTextContrast(el);
+      await test.step(`${colorScheme} / Button ${name}`, async () => {
+        await page.mouse.move(0, 0);
+        const button = page.getByRole("button", { name, exact: true }).first();
+        await expect(button).toBeVisible();
+        const normalContrast = await button.evaluate(measureContrast, "text" as const);
+
+        await button.hover();
+
+        const hoveredContrast = await button.evaluate(measureContrast, "text" as const);
+        expect(normalContrast, "通常状態のコントラスト").toBeGreaterThanOrEqual(4.5);
+        expect(hoveredContrast, "ホバー状態のコントラスト").toBeGreaterThanOrEqual(4.5);
       });
-      expect(contrast, `Button ${name} hover (${colorScheme})`).toBeGreaterThanOrEqual(4.5);
     }
 
-    // Badge 各トーン: 通常テキスト (>= 4.5)
     for (const tone of ["neutral", "success", "danger"] as const) {
-      await page.goto(`/iframe.html?id=shared-ui-badge--${tone}&viewMode=story`);
-      const contrast = await page.locator("#storybook-root span").evaluate((el) => {
-        const helper = (
-          window as unknown as {
-            __contrastHelper: { measureTextContrast: (node: Element) => number };
-          }
-        ).__contrastHelper;
-        return helper.measureTextContrast(el);
-      });
-      expect(contrast, `Badge ${tone} (${colorScheme})`).toBeGreaterThanOrEqual(4.5);
-    }
+      await test.step(`${colorScheme} / Badge ${tone}`, async () => {
+        await page.goto(`/iframe.html?id=shared-ui-badge--${tone}&viewMode=story`);
+        const badge = page.locator("#storybook-root span");
+        await expect(badge).toBeVisible();
 
-    // 200%文字拡大時でも長文フォームが横溢れしないことを確認する。
+        const contrast = await badge.evaluate(measureContrast, "text" as const);
+
+        expect(contrast).toBeGreaterThanOrEqual(4.5);
+      });
+    }
+  }
+});
+
+test("フォーム部品は明暗テーマの200%文字拡大時も横にはみ出さない", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 640 });
+
+  for (const colorScheme of ["light", "dark"] as const) {
+    await page.emulateMedia({ colorScheme, reducedMotion: "reduce" });
+
     for (const storyId of [
       "shared-ui-textfield--with-affix",
       "shared-ui-select--outlined",
       "shared-ui-radiogroup--basic",
       "shared-ui-checkbox--checked",
     ]) {
-      await page.goto(`/iframe.html?id=${storyId}&viewMode=story`);
-      await page.evaluate(() => {
-        document.documentElement.style.fontSize = "32px";
+      await test.step(`${colorScheme} / ${storyId}`, async () => {
+        await page.goto(`/iframe.html?id=${storyId}&viewMode=story`);
+        await expect(page.locator("#storybook-root > *").first()).toBeVisible();
+
+        await page.evaluate(() => {
+          document.documentElement.style.fontSize = "32px";
+        });
+
+        expect(
+          await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth),
+        ).toBe(true);
       });
-      expect(
-        await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth),
-        `200% zoom overflow in ${storyId} (${colorScheme})`,
-      ).toBe(true);
     }
   }
 });
