@@ -6,7 +6,7 @@ import "./globals.css";
 import { layoutStyles } from "./layout.styles";
 
 export const metadata: Metadata = {
-  title: "Realtime Voice",
+  title: "サンプルページ | Next.js + FastAPI",
   description: "Next.js + FastAPI starter template",
 };
 

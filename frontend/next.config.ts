@@ -2,7 +2,7 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   async rewrites() {
-    if (process.env.NODE_ENV !== "development") {
+    if (process.env.NODE_ENV !== "development" && !process.env.BACKEND_URL) {
       return [];
     }
 

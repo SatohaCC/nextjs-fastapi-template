@@ -3,7 +3,7 @@
 import { useAppQuery } from "@/shared/lib/query/useAppQuery";
 
 export interface HealthResponse {
-  status: string;
+  status: "ok";
   service: string;
 }
 
@@ -12,7 +12,19 @@ async function fetchHealth(signal: AbortSignal): Promise<HealthResponse> {
   if (!response.ok) {
     throw new Error(`HTTP ${response.status}`);
   }
-  return (await response.json()) as HealthResponse;
+  const data: unknown = await response.json();
+  if (
+    typeof data !== "object" ||
+    data === null ||
+    !("status" in data) ||
+    data.status !== "ok" ||
+    !("service" in data) ||
+    typeof data.service !== "string" ||
+    !data.service.trim()
+  ) {
+    throw new Error("Invalid health response");
+  }
+  return { status: data.status, service: data.service };
 }
 
 export function useHealthStatus() {

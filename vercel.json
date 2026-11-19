@@ -4,7 +4,7 @@
     "frontend": {
       "root": "frontend",
       "framework": "nextjs",
-      "installCommand": "pnpm install --frozen-lockfile"
+      "installCommand": "corepack pnpm install --frozen-lockfile"
     },
     "backend": {
       "root": "backend",

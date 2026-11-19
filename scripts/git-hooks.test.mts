@@ -41,3 +41,28 @@ test("コミットを遮断し、正常なコミットと既存pushフックを�
     rmSync(root, { recursive: true, force: true });
   }
 });
+
+test("preserves parent configuration and existing commit-msg hooks", () => {
+  const root = mkdtempSync(path.join(os.tmpdir(), "git-hook-test-"));
+  const git = (...args: string[]) => execFileSync("git", ["-C", root, ...args], { encoding: "utf8" }).trim();
+  try {
+    git("init", "--quiet");
+    git("config", "--local", "core.hooksPath", ".git/hooks");
+    const nested = path.join(root, "template");
+    mkdirSync(nested);
+    assert.equal(installGitHooks(nested), false);
+    writeFileSync(path.join(root, ".git", "hooks", "commit-msg"), "#!/bin/sh\nexit 23\n");
+    assert.equal(installGitHooks(root), false);
+    assert.equal(git("config", "--local", "--get", "core.hooksPath"), ".git/hooks");
+    git("config", "--local", "template.previousHooksPath", ".git/hooks");
+    git("config", "--local", "core.hooksPath", ".githooks");
+    assert.equal(installGitHooks(root), false);
+    assert.equal(
+      path.resolve(git("config", "--local", "--get", "core.hooksPath")),
+      path.join(root, ".git", "hooks"),
+    );
+  } finally {
+    assert.equal(path.dirname(root), os.tmpdir());
+    rmSync(root, { recursive: true, force: true });
+  }
+});

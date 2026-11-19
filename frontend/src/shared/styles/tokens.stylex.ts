@@ -41,6 +41,7 @@ export const palette = stylex.defineVars({
   error80: "#F2B8B5",
   error90: "#F9DEDC",
   error30: "#8C1D18",
+  error20: "#601410",
   error10: "#410E0B",
   success10: "#0F432C",
   success90: "#C8EED8",
@@ -72,10 +73,12 @@ export const tokens = stylex.defineVars({
   outline: { default: palette.variant50, [DARK]: palette.variant60 },
   outlineVariant: { default: palette.variant80, [DARK]: palette.variant30 },
   error: { default: palette.error40, [DARK]: palette.error80 },
+  onError: { default: palette.neutral100, [DARK]: palette.error20 },
   errorContainer: { default: palette.error90, [DARK]: palette.error30 },
   onErrorContainer: { default: palette.error10, [DARK]: palette.error90 },
   successContainer: { default: palette.success90, [DARK]: palette.success20 },
   onSuccessContainer: { default: palette.success10, [DARK]: palette.success80 },
+  scrim: { default: "rgb(11 16 15 / 32%)", [DARK]: "rgb(11 16 15 / 52%)" },
   disabledContainer: { default: "rgb(25 31 29 / 12%)", [DARK]: "rgb(221 228 225 / 12%)" },
   disabledContent: { default: "rgb(25 31 29 / 38%)", [DARK]: "rgb(221 228 225 / 38%)" },
   cornerNone: "0px",
@@ -90,6 +93,7 @@ export const tokens = stylex.defineVars({
   cornerFull: "9999px",
   shadow1: "0 1px 3px rgb(0 0 0 / 18%), 0 1px 2px rgb(0 0 0 / 12%)",
   shadow2: "0 3px 8px rgb(0 0 0 / 18%), 0 1px 3px rgb(0 0 0 / 12%)",
+  shadow3: "0 6px 16px rgb(0 0 0 / 20%), 0 2px 6px rgb(0 0 0 / 14%)",
   stateHover:
     "linear-gradient(color-mix(in srgb, currentColor 8%, transparent), color-mix(in srgb, currentColor 8%, transparent))",
   stateFocus:

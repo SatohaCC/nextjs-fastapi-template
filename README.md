@@ -1,4 +1,4 @@
-# Realtime Voice
+# Next.js + FastAPI Template
 
 Next.js + FastAPI + pnpm 12 + Vercel のプロジェクトテンプレートです。
 
@@ -50,7 +50,7 @@ Backend の `CORS_ORIGINS` は、許可する Origin をカンマ区切りで指
 
 ## コマンド
 
-バージョン管理はGit共存モードのJujutsu（`jj`）を使います。作業手順は [Jujutsuのルール](.agents/rules/vcs.md) を参照してください。`jj` のコミット前はGitフックに頼らず `pnpm check` と必要なテストを実行します。
+バージョン管理には Git を使用します。作業手順は [バージョン管理ルール](.agents/rules/vcs.md) を参照してください。コミット前は Git フック（`pre-commit`）や `pnpm check`・必要なテストで検証します。
 
 | コマンド | 内容 |
 |---|---|
@@ -85,6 +85,17 @@ Linux でシステム依存も導入する場合は `playwright install chromium
 - `backend` サービスは `backend/` の `app.main:app` を FastAPI のエントリポイントとして読み込みます。
 - `/api/*` は Backend、それ以外は Frontend へ転送します。Backend に渡るパスは `/api/health` のままです。
 - 本番のAPI接続は同一ドメインのルーティングを使うため、開発用の `BACKEND_URL` は不要です。
+- Frontend のインストールは Corepack 経由で実行し、`package.json` に指定した pnpm のバージョンを使います。
+
+Vercel Services を介さずローカルで本番ビルドを確認する場合は、ビルド前に `BACKEND_URL` を設定します。API の転送先はビルド時に確定します。
+
+```powershell
+$env:BACKEND_URL = "http://127.0.0.1:8000"
+pnpm build
+pnpm --filter frontend start
+```
+
+FastAPI は別のターミナルで `pnpm dev:backend` を実行してください。
 
 Vercel の Git 連携では、この設定を持つリポジトリのルートからデプロイします。初回プレビューでは `/` の表示、`/api/health` のJSON応答、画面の更新操作を確認してください。`pnpm build` は Next.js のビルド検証であり、Vercel 上のサービス結合まで検証するものではありません。
 
@@ -101,5 +112,7 @@ Vercel の Git 連携では、この設定を持つリポジトリのルート�
 `pnpm check:paths` は追跡中・未追跡の無視されていないファイルを検査します。Windows のドライブ付きパス、Unix のホーム配下、file URI、UNCパス、絶対パスのリンクを検出すると失敗します。コミット直前のステージ内容だけを検査する場合は `pnpm check:paths --staged` を使います。検出したパスの値はログに出しません。除外済みの生成物やバイナリ、外部へ貼り付ける実行ログはこの検査の対象外です。
 
 ローカルでの `pnpm install` 時に Git の `pre-commit` フックを設定します。`git commit` 前にステージ済みの内容を検査し、混入があればコミットを中止します。再設定は `pnpm hooks:install` で実行できます。既存のコミット前・push前フックは引き継ぎ、以前のパスはローカルGit設定だけに保存します。CIやGit管理外ではインストール処理をスキップします。Gitフックを呼ばないツールによるコミットは対象外です。
+
+`commit-msg` など引き継ぎの対象外となるフックがある場合は、既存設定を保つため自動設定をスキップします。ローカルパス検査は `pnpm check:paths --staged` で実行できます。
 
 Python のロック対象は Windows x64 と Linux x64（manylinux 2.28 以降）、Python 3.14 です。別のOS・CPUを使う場合は `pnpm-workspace.yaml` の `supportedArchitectures` に追加し、`pnpm install --no-frozen-lockfile` でロックファイルを更新してください。
