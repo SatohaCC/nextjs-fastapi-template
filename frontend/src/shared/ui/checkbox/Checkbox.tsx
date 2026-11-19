@@ -3,7 +3,7 @@
 import * as stylex from "@stylexjs/stylex";
 import { CheckboxIndicator, Checkbox as UiCheckbox } from "@ui-sdk/react/checkbox";
 import { Field, FieldDescription, FieldError, FieldLabel } from "@ui-sdk/react/field";
-import type { ComponentProps } from "react";
+import { type ComponentProps, useId } from "react";
 import { checkboxStyles as s } from "./Checkbox.styles";
 
 export interface CheckboxProps
@@ -23,14 +23,23 @@ export function Checkbox({
   invalid,
   disabled = false,
   style,
+  "aria-describedby": describedBy,
+  "aria-invalid": ariaInvalid,
   ...props
 }: CheckboxProps) {
   const isInvalid = invalid ?? (errorMessage ? true : undefined);
-  const hasField = Boolean(label || description || errorMessage || isInvalid);
+  const hasField = Boolean(label || description);
+  const errorId = useId();
+  const standaloneError = !hasField && errorMessage;
+  const standaloneDescription = standaloneError
+    ? [describedBy, errorId].filter(Boolean).join(" ")
+    : describedBy;
 
   const control = (
     <UiCheckbox
       disabled={disabled}
+      aria-describedby={standaloneDescription}
+      aria-invalid={hasField ? ariaInvalid : (isInvalid ?? ariaInvalid)}
       style={stylex.props(!hasField && style).style}
       className={(state) => {
         const active = state.checked || state.indeterminate;
@@ -92,7 +101,16 @@ export function Checkbox({
   );
 
   if (!hasField) {
-    return control;
+    return (
+      <>
+        {control}
+        {standaloneError && (
+          <div id={errorId} {...stylex.props(s.error)}>
+            {standaloneError}
+          </div>
+        )}
+      </>
+    );
   }
 
   return (
@@ -120,13 +138,7 @@ export function Checkbox({
           )}
         </div>
       </div>
-      {errorMessage ? (
-        <FieldError match className={stylex.props(s.error).className}>
-          {errorMessage}
-        </FieldError>
-      ) : (
-        <FieldError className={stylex.props(s.error).className} />
-      )}
+      <FieldError className={stylex.props(s.error).className}>{errorMessage}</FieldError>
     </Field>
   );
 }
