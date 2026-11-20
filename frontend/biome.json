@@ -111,6 +111,19 @@
           }
         }
       }
+    },
+    {
+      "includes": ["**/*.test.ts", "**/*.test.tsx", "**/*.spec.ts", "**/*.spec.tsx"],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noConditionalExpect": "error",
+            "noFocusedTests": "error",
+            "noPlaywrightWaitForTimeout": "error",
+            "useExpect": "error"
+          }
+        }
+      }
     }
   ]
 }

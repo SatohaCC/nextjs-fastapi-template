@@ -132,7 +132,7 @@ function ControlledCheckboxCase({ description }: { description?: string }) {
   );
 }
 
-it("descriptionの追加・削除でも非制御・制御の値とフォーカスとaria-labelledbyを保持する", async () => {
+it("非制御のCheckboxは補足文の追加・削除後も名前・選択値・フォーカスを保持する", async () => {
   const user = userEvent.setup();
 
   function renderCase(description?: string) {
@@ -156,22 +156,31 @@ it("descriptionの追加・削除でも非制御・制御の値とフォーカ�
   expect(cb).toHaveAttribute("aria-checked", "true");
 
   rerender(renderCase("追加された補足文"));
+
+  expect(cb).toHaveAccessibleName("外部ラベル");
   expect(cb).toHaveAttribute("aria-checked", "true");
   expect(cb).toHaveFocus();
   expect(cb).toHaveAccessibleDescription(/外部説明/);
   expect(cb).toHaveAccessibleDescription(/追加された補足文/);
 
   rerender(renderCase(undefined));
+
+  expect(cb).toHaveAccessibleName("外部ラベル");
   expect(cb).toHaveAttribute("aria-checked", "true");
   expect(cb).toHaveFocus();
   expect(cb).toHaveAccessibleDescription("外部説明");
+});
 
-  rerender(<ControlledCheckboxCase />);
-  const controlled = screen.getByRole("checkbox", { name: "制御チェック" });
-  controlled.focus();
+it("制御されたCheckboxは補足文の更新後も不確定状態とフォーカスを保持する", () => {
+  const { rerender } = render(<ControlledCheckboxCase />);
+  const checkbox = screen.getByRole("checkbox", { name: "制御チェック" });
+  checkbox.focus();
+
   rerender(<ControlledCheckboxCase description="制御中の説明" />);
-  expect(controlled).toHaveAttribute("aria-checked", "mixed");
-  expect(controlled).toHaveFocus();
+
+  expect(checkbox).toHaveAttribute("aria-checked", "mixed");
+  expect(checkbox).toHaveFocus();
+  expect(checkbox).toHaveAccessibleDescription("制御中の説明");
 });
 
 it("invalid={false}では表示ラベルの有無にかかわらずerrorMessageを抑止する", () => {
