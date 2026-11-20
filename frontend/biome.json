@@ -38,6 +38,18 @@
       }
     }
   },
+  "plugins": [
+    {
+      "path": "./config/no-ambient-inputs.grit",
+      "includes": [
+        "src/shared/ui/**",
+        "src/shared/components/**",
+        "!**/*.test.*",
+        "!**/*.spec.*",
+        "!**/*.stories.*"
+      ]
+    }
+  ],
   "overrides": [
     {
       "includes": ["src/shared/ui/**"],
@@ -108,6 +120,30 @@
                     "message": "Import UI primitives from @/shared/ui and query helpers from @/shared/lib."
                   }
                 ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "includes": [
+        "src/shared/ui/**",
+        "src/shared/components/**",
+        "!**/*.test.*",
+        "!**/*.spec.*",
+        "!**/*.stories.*"
+      ],
+      "linter": {
+        "rules": {
+          "style": {
+            "noProcessEnv": "error",
+            "noRestrictedGlobals": {
+              "level": "error",
+              "options": {
+                "deniedGlobals": {
+                  "fetch": "呼び出し側でデータを取得し、Props で渡してください。"
+                }
               }
             }
           }
