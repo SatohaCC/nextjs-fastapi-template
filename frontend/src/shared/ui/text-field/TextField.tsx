@@ -151,11 +151,7 @@ export function TextField({
           {description}
         </FieldDescription>
       )}
-      {errorMessage ? (
-        <FieldError className={stylex.props(s.error).className}>{errorMessage}</FieldError>
-      ) : (
-        <FieldError className={stylex.props(s.error).className} />
-      )}
+      <FieldError className={stylex.props(s.error).className}>{errorMessage}</FieldError>
     </Field>
   );
 }
