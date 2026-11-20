@@ -47,6 +47,13 @@ export const palette = stylex.defineVars({
   success90: "#C8EED8",
   success80: "#A9DABD",
   success20: "#173A28",
+  codeSurface: "#102421",
+  codeSurfaceHeader: "#1A3430",
+  codeSurfaceWell: "#0A1917",
+  codeOnSurface: "#E7F5F0",
+  codeOnSurfaceVariant: "#BAD2C8",
+  codeAccent: "#9DE4CA",
+  codeText: "#B6F6D8",
 });
 
 export const tokens = stylex.defineVars({
@@ -78,6 +85,13 @@ export const tokens = stylex.defineVars({
   onErrorContainer: { default: palette.error10, [DARK]: palette.error90 },
   successContainer: { default: palette.success90, [DARK]: palette.success20 },
   onSuccessContainer: { default: palette.success10, [DARK]: palette.success80 },
+  codeSurface: palette.codeSurface,
+  codeSurfaceHeader: palette.codeSurfaceHeader,
+  codeSurfaceWell: palette.codeSurfaceWell,
+  onCodeSurface: palette.codeOnSurface,
+  onCodeSurfaceVariant: palette.codeOnSurfaceVariant,
+  codeAccent: palette.codeAccent,
+  codeText: palette.codeText,
   scrim: { default: "rgb(11 16 15 / 32%)", [DARK]: "rgb(11 16 15 / 52%)" },
   disabledContainer: { default: "rgb(25 31 29 / 12%)", [DARK]: "rgb(221 228 225 / 12%)" },
   disabledContent: { default: "rgb(25 31 29 / 38%)", [DARK]: "rgb(221 228 225 / 38%)" },
