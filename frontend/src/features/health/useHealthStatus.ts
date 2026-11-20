@@ -1,5 +1,6 @@
 "use client";
 
+import { ApiError, apiFetchJson } from "@/shared/lib/api/apiClient";
 import { useAppQuery } from "@/shared/lib/query/useAppQuery";
 
 export interface HealthResponse {
@@ -7,12 +8,7 @@ export interface HealthResponse {
   service: string;
 }
 
-async function fetchHealth(signal: AbortSignal): Promise<HealthResponse> {
-  const response = await fetch("/api/health", { signal, cache: "no-store" });
-  if (!response.ok) {
-    throw new Error(`HTTP ${response.status}`);
-  }
-  const data: unknown = await response.json();
+function parseHealthResponse(data: unknown): HealthResponse {
   if (
     typeof data !== "object" ||
     data === null ||
@@ -22,21 +18,28 @@ async function fetchHealth(signal: AbortSignal): Promise<HealthResponse> {
     typeof data.service !== "string" ||
     !data.service.trim()
   ) {
-    throw new Error("Invalid health response");
+    throw new ApiError("Invalid health response", { code: "INVALID_RESPONSE" });
   }
   return { status: data.status, service: data.service };
 }
 
+function fetchHealth(signal: AbortSignal): Promise<HealthResponse> {
+  return apiFetchJson("/api/health", {
+    signal,
+    parse: parseHealthResponse,
+  });
+}
+
 export function useHealthStatus() {
-  const { data, error, isLoading, refetch } = useAppQuery({
+  const { data, errorMessage, isLoading, isFetching, refetch } = useAppQuery({
     queryKey: ["health"],
     queryFn: ({ signal }) => fetchHealth(signal),
   });
 
   return {
     data,
-    error,
-    isLoading,
+    error: errorMessage,
+    isLoading: isLoading || isFetching,
     onRefresh: refetch,
   };
 }
