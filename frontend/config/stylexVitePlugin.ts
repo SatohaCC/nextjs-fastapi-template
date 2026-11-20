@@ -1,5 +1,16 @@
-import path from "node:path";
+import { createRequire } from "node:module";
 import { transformAsync } from "@babel/core";
+
+const require = createRequire(import.meta.url);
+const { createStylexBabelPluginOptions } = require("./stylexBabelOptions.cjs") as {
+  createStylexBabelPluginOptions: (options: {
+    rootDir: string;
+    dev?: boolean;
+    test?: boolean;
+    runtimeInjection?: boolean;
+    treeshakeCompensation?: boolean;
+  }) => Record<string, unknown>;
+};
 
 export function stylexVitePlugin({ rootDir, test = false }: { rootDir: string; test?: boolean }) {
   return {
@@ -23,13 +34,12 @@ export function stylexVitePlugin({ rootDir, test = false }: { rootDir: string; t
         plugins: [
           [
             "@stylexjs/babel-plugin",
-            {
+            createStylexBabelPluginOptions({
+              rootDir,
               dev: false,
               test,
               runtimeInjection: true,
-              aliases: { "@/*": [path.join(rootDir, "src", "*").replaceAll("\\", "/")] },
-              unstable_moduleResolution: { type: "commonJS", rootDir },
-            },
+            }),
           ],
         ],
       });

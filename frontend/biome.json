@@ -52,9 +52,10 @@
                     "group": [
                       "@/features/*",
                       "@/app/*",
+                      "@/shared/components/*",
+                      "@/shared/lib/*",
                       "@tanstack/react-query",
-                      "next/navigation",
-                      "next/router"
+                      "next/*"
                     ],
                     "message": "shared/ui must stay portable and Props-driven."
                   }
@@ -78,10 +79,11 @@
                     "group": [
                       "@/features/*",
                       "@/app/*",
+                      "@/shared/lib/*",
+                      "@/shared/ui/internal/*",
                       "@ui-sdk/*",
                       "@tanstack/react-query",
-                      "next/navigation",
-                      "next/router"
+                      "next/*"
                     ],
                     "message": "shared/components must compose shared/ui only and stay Props-driven."
                   }
@@ -102,7 +104,7 @@
               "options": {
                 "patterns": [
                   {
-                    "group": ["@ui-sdk/*", "@tanstack/react-query"],
+                    "group": ["@ui-sdk/*", "@tanstack/react-query", "@/shared/ui/internal/*"],
                     "message": "Import UI primitives from @/shared/ui and query helpers from @/shared/lib."
                   }
                 ]
