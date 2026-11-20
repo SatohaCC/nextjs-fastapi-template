@@ -8,17 +8,22 @@ export interface AppQueryOptions<TData> {
   enabled?: boolean;
 }
 
+/** React Query の useQuery をラップし、初回読込・再取得・構造化エラーを提供する。 */
 export function useAppQuery<TData>({ queryKey, queryFn, enabled }: AppQueryOptions<TData>) {
-  const { data, error, isFetching, refetch } = useQuery({
+  const { data, error, isLoading, isFetching, refetch } = useQuery({
     queryKey,
     queryFn: ({ signal }) => queryFn({ signal }),
     enabled,
   });
 
+  const normalizedError = error instanceof Error ? error : null;
+
   return {
     data: data ?? null,
-    error: error instanceof Error ? error.message : null,
-    isLoading: isFetching,
+    error: normalizedError,
+    errorMessage: normalizedError ? normalizedError.message : null,
+    isLoading,
+    isFetching,
     refetch: () => {
       void refetch();
     },
