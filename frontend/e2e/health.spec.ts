@@ -4,11 +4,11 @@ test("トップページでバックエンドのヘルスステータスを表�
   await page.goto("/");
 
   await expect(page.getByRole("heading", { name: "サンプルページ" })).toBeVisible();
-  await expect(page.getByText("Backend API")).toBeVisible();
+  await expect(page.getByText("バックエンド API")).toBeVisible();
   await expect(page.getByText("ok (template-backend)")).toBeVisible();
 
   const refreshed = page.waitForResponse((response) => response.url().endsWith("/api/health"));
-  await page.getByRole("button", { name: "Refresh Status" }).click();
+  await page.getByRole("button", { name: "状態を更新" }).click();
   expect((await refreshed).ok()).toBeTruthy();
   await expect(page.getByText("ok (template-backend)")).toBeVisible();
 });
@@ -19,11 +19,11 @@ test("狭い画面とダークテーマでも内容が収まり、モーショ�
   await page.goto("/");
   await expect(page.getByRole("heading", { name: "サンプルページ" })).toBeVisible();
   await expect(page.locator("main")).toHaveCSS("padding-left", "20px");
-  await expect(page.getByRole("button", { name: "Refresh Status", exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "状態を更新", exact: true })).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(
     true,
   );
-  await expect(page.getByRole("button", { name: "Refresh Status", exact: true })).toHaveCSS(
+  await expect(page.getByRole("button", { name: "状態を更新", exact: true })).toHaveCSS(
     "transition-duration",
     "0s",
   );
@@ -41,14 +41,14 @@ test("APIの失敗を表示し、更新操作で復帰できる", async ({ page 
     });
   });
   await page.goto("/");
-  await expect(page.getByRole("status").filter({ hasText: "Error: HTTP 503" })).toBeVisible();
+  await expect(page.getByRole("status").filter({ hasText: "エラー: HTTP 503" })).toBeVisible();
   healthy = true;
-  await page.getByRole("button", { name: "Refresh Status" }).click();
+  await page.getByRole("button", { name: "状態を更新" }).click();
   await expect(page.getByRole("status").filter({ hasText: "ok (template-backend)" })).toBeVisible();
 });
 
-test("reports a malformed HTTP 200 health response", async ({ page }) => {
+test("不正な形式のヘルス応答をエラーとして表示する", async ({ page }) => {
   await page.route("**/api/health", (route) => route.fulfill({ json: {} }));
   await page.goto("/");
-  await expect(page.getByRole("status")).toContainText("Error: Invalid health response");
+  await expect(page.getByRole("status")).toContainText("エラー: Invalid health response");
 });
