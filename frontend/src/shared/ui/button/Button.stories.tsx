@@ -9,7 +9,7 @@ const meta = {
   tags: ["autodocs"],
   args: {
     children: "Refresh Status",
-    variant: "primary",
+    variant: "filled",
     size: "md",
     disabled: false,
   },
@@ -18,14 +18,16 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Primary: Story = {};
-
-export const Secondary: Story = {
+export const Filled: Story = {};
+export const Tonal: Story = { args: { variant: "tonal" } };
+export const Outlined: Story = {
   args: {
-    variant: "secondary",
+    variant: "outlined",
     children: "Cancel",
   },
 };
+export const Text: Story = { args: { variant: "text" } };
+export const Elevated: Story = { args: { variant: "elevated" } };
 
 export const Small: Story = {
   args: {
@@ -41,11 +43,6 @@ export const Disabled: Story = {
   },
 };
 
-export const Filled: Story = { args: { variant: "filled" } };
-export const Tonal: Story = { args: { variant: "tonal" } };
-export const Outlined: Story = { args: { variant: "outlined" } };
-export const Text: Story = { args: { variant: "text" } };
-export const Elevated: Story = { args: { variant: "elevated" } };
 export const DisabledText: Story = { args: { variant: "text", disabled: true } };
 export const DisabledOutlined: Story = { args: { variant: "outlined", disabled: true } };
 

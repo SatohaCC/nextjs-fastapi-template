@@ -1,7 +1,10 @@
+import * as stylex from "@stylexjs/stylex";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { Button } from "./Button";
+
+const overrides = stylex.create({ width: (width: number) => ({ width }) });
 
 describe("Button", () => {
   it("renders children and invokes onClick when pressed", async () => {
@@ -31,5 +34,13 @@ describe("Button", () => {
     await user.click(button);
 
     expect(onClick).not.toHaveBeenCalled();
+  });
+
+  it("forwards inline variables of a dynamic StyleX override", () => {
+    render(<Button style={overrides.width(180)}>Save</Button>);
+
+    expect(screen.getByRole("button", { name: "Save" }).getAttribute("style")).toMatch(
+      /--[\w-]+:\s*180px/,
+    );
   });
 });
