@@ -23,7 +23,27 @@ target-version = "py314"
 cache-dir = "../.cache/ruff"
 
 [tool.ruff.lint]
-select = ["E", "F", "I", "UP", "B", "SIM"]
+select = ["E", "F", "I", "UP", "B", "SIM", "DTZ", "TID251"]
+
+[tool.ruff.lint.per-file-ignores]
+# 外部の値を取得するルーターやアダプターと、テストのセットアップを許可する。
+"!app/services/**" = ["TID251"]
+
+[tool.ruff.lint.flake8-tidy-imports.banned-api]
+"datetime.date.today".msg = "基準日をサービスの引数で受け取ってください。"
+"datetime.datetime.now".msg = "現在時刻をサービスの引数で受け取ってください。"
+"datetime.datetime.today".msg = "現在時刻をサービスの引数で受け取ってください。"
+"datetime.datetime.utcnow".msg = "現在時刻をサービスの引数で受け取ってください。"
+"os.environ".msg = "必要な設定値をサービスの引数で受け取ってください。"
+"os.getenv".msg = "必要な設定値をサービスの引数で受け取ってください。"
+"random.choice".msg = "選択結果か乱数生成器をサービスの引数で受け取ってください。"
+"random.randint".msg = "乱数値か乱数生成器をサービスの引数で受け取ってください。"
+"random.random".msg = "乱数値か乱数生成器をサービスの引数で受け取ってください。"
+"random.randrange".msg = "乱数値か乱数生成器をサービスの引数で受け取ってください。"
+"time.monotonic".msg = "計測値をサービスの引数で受け取ってください。"
+"time.perf_counter".msg = "計測値をサービスの引数で受け取ってください。"
+"time.time".msg = "現在時刻をサービスの引数で受け取ってください。"
+"uuid.uuid4".msg = "生成済みの ID をサービスの引数で受け取ってください。"
 
 [tool.ruff.format]
 quote-style = "double"
