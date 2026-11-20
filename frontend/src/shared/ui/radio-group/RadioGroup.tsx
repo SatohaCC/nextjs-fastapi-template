@@ -1,15 +1,14 @@
 "use client";
 
 import * as stylex from "@stylexjs/stylex";
-import { Field, FieldError, FieldLabel, useFieldControl } from "@ui-sdk/react/field";
+import { Field, FieldError, FieldLabel } from "@ui-sdk/react/field";
 import {
   Radio,
   type RadioGroupOptions,
   RadioIndicator,
   RadioGroup as UiRadioGroup,
 } from "@ui-sdk/react/radio";
-import { useId } from "react";
-import { mergeDescribedBy } from "../internal/mergeDescribedBy";
+import { mergeControlDescribedBy, useStandaloneField } from "../internal/useStandaloneField";
 import { radioGroupStyles as s } from "./RadioGroup.styles";
 
 export interface RadioOption {
@@ -61,19 +60,23 @@ export function RadioGroup({
   "aria-describedby": ariaDescribedBy,
   style,
 }: RadioGroupProps) {
-  const outerField = useFieldControl();
-  const baseId = useId();
-  const descId = `${baseId}-description`;
-  const errorId = `${baseId}-error`;
-  const isInvalid = invalid ?? (errorMessage ? true : undefined);
-  const showError = Boolean(errorMessage) && isInvalid !== false;
-  const hasFieldLayout = Boolean(label || description || showError);
-  const passStyleToGroup = Boolean(outerField) || !hasFieldLayout;
-  const extraDescribedBy = mergeDescribedBy(
+  const {
+    baseId,
+    descId,
+    errorId,
+    isInvalid,
+    showError,
+    hasFieldLayout,
+    isInsideOuterFieldOnly,
+    passStyleToControl: passStyleToGroup,
+    extraDescribedBy,
+  } = useStandaloneField({
+    label,
+    description,
+    errorMessage,
+    invalid,
     ariaDescribedBy,
-    description ? descId : undefined,
-    showError ? errorId : undefined,
-  );
+  });
 
   const group = (
     <UiRadioGroup
@@ -87,16 +90,14 @@ export function RadioGroup({
       loop={loop}
       aria-label={!label ? ariaLabel : undefined}
       aria-labelledby={!label ? ariaLabelledBy : undefined}
-      aria-invalid={outerField && !hasFieldLayout ? (isInvalid ?? undefined) : undefined}
+      aria-invalid={isInsideOuterFieldOnly ? (isInvalid ?? undefined) : undefined}
       render={
         extraDescribedBy
           ? (groupProps) => (
               <div
                 {...groupProps}
-                aria-describedby={mergeDescribedBy(
-                  typeof groupProps["aria-describedby"] === "string"
-                    ? groupProps["aria-describedby"]
-                    : undefined,
+                aria-describedby={mergeControlDescribedBy(
+                  groupProps["aria-describedby"],
                   extraDescribedBy,
                 )}
               />
@@ -173,7 +174,7 @@ export function RadioGroup({
     </UiRadioGroup>
   );
 
-  if (outerField && !hasFieldLayout) {
+  if (isInsideOuterFieldOnly) {
     return group;
   }
 

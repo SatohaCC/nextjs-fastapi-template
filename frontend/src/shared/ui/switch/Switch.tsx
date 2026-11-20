@@ -1,10 +1,10 @@
 "use client";
 
 import * as stylex from "@stylexjs/stylex";
-import { Field, FieldError, FieldLabel, useFieldControl } from "@ui-sdk/react/field";
+import { Field, FieldError, FieldLabel } from "@ui-sdk/react/field";
 import { SwitchThumb, Switch as UiSwitch } from "@ui-sdk/react/switch";
-import { type ComponentProps, useId } from "react";
-import { mergeDescribedBy } from "../internal/mergeDescribedBy";
+import type { ComponentProps } from "react";
+import { mergeControlDescribedBy, useStandaloneField } from "../internal/useStandaloneField";
 import { switchStyles as s } from "./Switch.styles";
 
 export interface SwitchProps
@@ -23,11 +23,12 @@ export function Switch({
   "aria-describedby": describedBy,
   ...props
 }: SwitchProps) {
-  const outerField = useFieldControl();
-  const descId = useId();
-  const hasFieldLayout = Boolean(label || description);
-  const passStyleToControl = Boolean(outerField) || !hasFieldLayout;
-  const extraDescribedBy = mergeDescribedBy(describedBy, description ? descId : undefined);
+  const { descId, hasFieldLayout, isInsideOuterFieldOnly, passStyleToControl, extraDescribedBy } =
+    useStandaloneField({
+      label,
+      description,
+      ariaDescribedBy: describedBy,
+    });
   const control = (
     <UiSwitch
       disabled={disabled}
@@ -46,10 +47,8 @@ export function Switch({
           ? (controlProps) => (
               <button
                 {...controlProps}
-                aria-describedby={mergeDescribedBy(
-                  typeof controlProps["aria-describedby"] === "string"
-                    ? controlProps["aria-describedby"]
-                    : undefined,
+                aria-describedby={mergeControlDescribedBy(
+                  controlProps["aria-describedby"],
                   extraDescribedBy,
                 )}
               />
@@ -70,7 +69,7 @@ export function Switch({
     </UiSwitch>
   );
 
-  if (outerField && !hasFieldLayout) {
+  if (isInsideOuterFieldOnly) {
     return control;
   }
 

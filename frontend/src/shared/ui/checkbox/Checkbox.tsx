@@ -2,10 +2,9 @@
 
 import * as stylex from "@stylexjs/stylex";
 import { CheckboxIndicator, Checkbox as UiCheckbox } from "@ui-sdk/react/checkbox";
-import { Field, FieldError, FieldLabel, useFieldControl } from "@ui-sdk/react/field";
+import { Field, FieldError, FieldLabel } from "@ui-sdk/react/field";
 import type { ComponentProps } from "react";
-import { useId } from "react";
-import { mergeDescribedBy } from "../internal/mergeDescribedBy";
+import { mergeControlDescribedBy, useStandaloneField } from "../internal/useStandaloneField";
 import { checkboxStyles as s } from "./Checkbox.styles";
 
 export interface CheckboxProps
@@ -29,24 +28,27 @@ export function Checkbox({
   "aria-invalid": ariaInvalid,
   ...props
 }: CheckboxProps) {
-  const outerField = useFieldControl();
-  const baseId = useId();
-  const descId = `${baseId}-description`;
-  const errorId = `${baseId}-error`;
-  const isInvalid = invalid ?? (errorMessage ? true : undefined);
-  const showError = Boolean(errorMessage) && isInvalid !== false;
-  const hasFieldLayout = Boolean(label || description || showError);
-  const passStyleToControl = Boolean(outerField) || !hasFieldLayout;
-  const extraDescribedBy = mergeDescribedBy(
-    describedBy,
-    description ? descId : undefined,
-    showError ? errorId : undefined,
-  );
+  const {
+    descId,
+    errorId,
+    isInvalid,
+    showError,
+    hasFieldLayout,
+    isInsideOuterFieldOnly,
+    passStyleToControl,
+    extraDescribedBy,
+  } = useStandaloneField({
+    label,
+    description,
+    errorMessage,
+    invalid,
+    ariaDescribedBy: describedBy,
+  });
 
   const control = (
     <UiCheckbox
       disabled={disabled}
-      aria-invalid={outerField && !hasFieldLayout ? (isInvalid ?? ariaInvalid) : ariaInvalid}
+      aria-invalid={isInsideOuterFieldOnly ? (isInvalid ?? ariaInvalid) : ariaInvalid}
       style={stylex.props(passStyleToControl && style).style}
       className={(state) => {
         const active = state.checked || state.indeterminate;
@@ -63,10 +65,8 @@ export function Checkbox({
           ? (controlProps) => (
               <button
                 {...controlProps}
-                aria-describedby={mergeDescribedBy(
-                  typeof controlProps["aria-describedby"] === "string"
-                    ? controlProps["aria-describedby"]
-                    : undefined,
+                aria-describedby={mergeControlDescribedBy(
+                  controlProps["aria-describedby"],
                   extraDescribedBy,
                 )}
               />
@@ -122,7 +122,7 @@ export function Checkbox({
     </UiCheckbox>
   );
 
-  if (outerField && !hasFieldLayout) {
+  if (isInsideOuterFieldOnly) {
     return control;
   }
 

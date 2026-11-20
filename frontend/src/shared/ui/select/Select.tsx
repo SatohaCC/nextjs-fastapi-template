@@ -11,6 +11,7 @@ import {
   Select as UiSelect,
   type SelectProps as UiSelectProps,
 } from "@ui-sdk/react/select";
+import { useMemo } from "react";
 import { selectStyles as s } from "./Select.styles";
 
 export interface SelectOption {
@@ -58,6 +59,7 @@ export function Select({
   style,
 }: SelectProps) {
   const isInvalid = invalid ?? (errorMessage ? true : undefined);
+  const selectItems = useMemo(() => [...items], [items]);
 
   return (
     <Field name={name} disabled={disabled} invalid={isInvalid} {...stylex.props(s.root, style)}>
@@ -75,11 +77,7 @@ export function Select({
         )}
       </FieldLabel>
       <UiSelect
-        items={items.map(({ value: itemValue, label: itemLabel, disabled: itemDisabled }) => ({
-          value: itemValue,
-          label: itemLabel,
-          disabled: itemDisabled,
-        }))}
+        items={selectItems}
         placeholder={placeholder}
         value={value}
         defaultValue={defaultValue}
