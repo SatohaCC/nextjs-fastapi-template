@@ -23,10 +23,7 @@ jobs:
       - name: Install dependencies (Frontend & Backend)
         run: pnpm install --frozen-lockfile
 
-      - name: Check local path leakage
-        run: pnpm check:paths
-
-      - name: Lint, typecheck & format check
+      - name: Check paths, lint, typecheck & format
         run: pnpm check
 
       - name: Test
