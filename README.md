@@ -51,7 +51,7 @@ Backend のプロセス環境変数では、許可する Origin をカンマ区�
 
 ### API 応答の実行時検証
 
-FastAPI の Pydantic モデルを更新したら `pnpm gen:api-types` で TypeScript 型を生成します。新しい API では、機能ディレクトリに Zod で応答スキーマを定義し、パーサの戻り値に生成型を指定します。パーサは `apiRequest` または `serverApiRequest` の `parse` に渡し、検証失敗を `ApiError` の `INVALID_RESPONSE` に変換します。実装例は [`tasksApi.ts`](frontend/src/features/tasks/tasksApi.ts) を参照してください。
+FastAPI の Pydantic モデルを更新したら `pnpm gen:api-types` で TypeScript 型を生成します。新しい API では `@/shared/lib/api/zodResponse` の `z` を使って機能ディレクトリに応答スキーマを定義し、パーサの戻り値に生成型を指定します。パーサは `apiRequest` または `serverApiRequest` の `parse` に渡します。`parseZodResponse` が検証失敗を `ApiError` の `INVALID_RESPONSE` に変換します。実装例は [`tasksApi.ts`](frontend/src/features/tasks/tasksApi.ts) を参照してください。
 
 ## コマンド
 

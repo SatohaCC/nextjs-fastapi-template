@@ -1,6 +1,6 @@
-import * as z from "zod";
 import { ApiError, apiRequest } from "@/shared/lib/api/apiClient";
 import type { components } from "@/shared/lib/api/schema";
+import { parseZodResponse, z } from "@/shared/lib/api/zodResponse";
 
 export type TaskItem = components["schemas"]["TaskResponse"];
 export type TaskList = components["schemas"]["TaskListResponse"];
@@ -43,25 +43,14 @@ const taskListSchema = z.object(
   "タスク一覧データの形式が不正です。",
 );
 
-function parseTaskResponse<T>(schema: z.ZodType<T>, data: unknown): T {
-  const result = schema.safeParse(data);
-  if (!result.success) {
-    throw new ApiError(result.error.issues[0]?.message ?? "タスクの応答形式が不正です。", {
-      code: "INVALID_RESPONSE",
-      cause: result.error,
-    });
-  }
-  return result.data;
-}
-
 /** TaskResponse ペイロードを検証・変換する。 */
 export function parseTaskItem(data: unknown): TaskItem {
-  return parseTaskResponse(taskItemSchema, data);
+  return parseZodResponse(taskItemSchema, data);
 }
 
 /** TaskListResponse ペイロードを検証・変換する。 */
 export function parseTaskList(data: unknown): TaskList {
-  return parseTaskResponse(taskListSchema, data);
+  return parseZodResponse(taskListSchema, data);
 }
 
 /** 条件に一致するタスク一覧を取得する。 */
