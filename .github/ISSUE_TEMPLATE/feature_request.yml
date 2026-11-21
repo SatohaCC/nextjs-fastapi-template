@@ -1,0 +1,26 @@
+name: 機能追加・改善要望
+description: 新機能の追加や既存機能の改善を提案します
+title: "feat: "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: background
+    attributes:
+      label: 背景・課題
+      description: 解決したい課題や背景を記載してください
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: 提案内容
+      description: 実現したい機能や変更案を記載してください
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: 完了条件
+      description: この要望が完了したと判断できる条件を記載してください
+      placeholder: |
+        - [ ] ...
