@@ -34,6 +34,18 @@ pnpm dev
 
 Backend のプロセス環境変数では、許可する Origin をカンマ区切りで指定する `CORS_ORIGINS`（既定値 `http://localhost:3000` と `http://127.0.0.1:3000`）、API ドキュメント公開を切り替える `DOCS_ENABLED`（既定値 `true`）、ログレベルを指定する `LOG_LEVEL`（既定値 `INFO`）、タスク永続化用 SQLite ファイルの保存先を指定する `DATABASE_PATH`（既定値 `data/app.db`）を設定できます。
 
+### タスク DB のマイグレーション
+
+タスクの保存は SQLAlchemy Core、テーブル定義の更新は Alembic が担当します。SQLite ファイルは `DATABASE_PATH` で指定し、既定では `backend/data/app.db` を使います。通常起動時に Alembic が最新のリビジョンを適用します。
+
+DB を先に準備したい場合は、依存関係をインストールした後に次を実行します。
+
+```powershell
+pnpm -C backend exec python -B -m alembic upgrade head
+```
+
+従来の SQLite ファイルを引き継ぐ場合は、サーバーを停止して DB をバックアップし、`DATABASE_PATH` に既存ファイルを指定して同じコマンドを実行します。初期リビジョンは既存の `tasks` テーブルの列構成を確認し、内容を保持したまま管理対象にします。適用後は `pnpm -C backend exec python -B -m alembic current` でリビジョンを確認できます。
+
 ## 構成
 
 - `frontend/src/app/`: App Router、レイアウト、ページ

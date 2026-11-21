@@ -7,6 +7,17 @@ environments = [
 requires-python = ">=3.14"
 
 [[packages]]
+name = "alembic"
+version = "1.20.1"
+
+[[packages.wheels]]
+name = "alembic-1.20.1-py3-none-any.whl"
+url = "https://files.pythonhosted.org/packages/11/3c/8740f5b4e1bd57333e4f84265b9b6363da4f7cf70f5622dd1e2fde7a0bd5/alembic-1.20.1-py3-none-any.whl"
+
+[packages.wheels.hashes]
+sha256 = "9970712cfb81ea26c8658d378aaa5b8f6ff9146e5bb111d70497c164016cf598"
+
+[[packages]]
 name = "annotated-doc"
 version = "0.0.6"
 
@@ -223,6 +234,17 @@ url = "https://files.pythonhosted.org/packages/c2/98/769712f356a1e897df3581bb0c3
 sha256 = "3f0b8114c44b2ac06ff5dacd08e07e8e807ff4f46083f2a1602685122559be41"
 
 [[packages]]
+name = "mako"
+version = "1.4.3"
+
+[[packages.wheels]]
+name = "mako-1.4.3-py3-none-any.whl"
+url = "https://files.pythonhosted.org/packages/6d/a0/053d6af3e8f871e0073b4a36732d9e65be77a72e5434c31b94f6af78a6bb/mako-1.4.3-py3-none-any.whl"
+
+[packages.wheels.hashes]
+sha256 = "723296007c870bfd6b3f0c3230dba7198096e5269297ebf5e4eff9e7ffa39d4f"
+
+[[packages]]
 name = "markdown-it-py"
 version = "4.3.0"
 
@@ -232,6 +254,24 @@ url = "https://files.pythonhosted.org/packages/c9/31/5f0ac2f1a1c67423c995c731a11
 
 [packages.wheels.hashes]
 sha256 = "7aa1511a46c39138de78d9eba92ce47e63124d8003fc98b3a351909e04239efa"
+
+[[packages]]
+name = "markupsafe"
+version = "3.0.4"
+
+[[packages.wheels]]
+name = "markupsafe-3.0.4-cp314-cp314-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl"
+url = "https://files.pythonhosted.org/packages/8f/db/d7282caf7ab03af44d5d6fdbaa019b35c7d7f1c90588b839c07cba640d6a/markupsafe-3.0.4-cp314-cp314-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl"
+
+[packages.wheels.hashes]
+sha256 = "a8e9f292fcda89b324f2f5c91d13f1424a153e40fc2756f38ee23b15835ff300"
+
+[[packages.wheels]]
+name = "markupsafe-3.0.4-cp314-cp314-win_amd64.whl"
+url = "https://files.pythonhosted.org/packages/80/f0/5792ff768a410f93ee3f84fc19345295ffc352d2c936b424cb37e514714c/markupsafe-3.0.4-cp314-cp314-win_amd64.whl"
+
+[packages.wheels.hashes]
+sha256 = "c1bc67752d5f21013cfe430df4062441714eab79f65a6a05e01505957e9c35fe"
 
 [[packages]]
 name = "mdurl"
@@ -427,6 +467,24 @@ url = "https://files.pythonhosted.org/packages/ec/8c/e4db9ae1e0ee233c04df007ab6d
 sha256 = "aa415d57c244299279901d776607fee3df7831c2a7435433fbfacde8632c6550"
 
 [[packages]]
+name = "sqlalchemy"
+version = "2.1.9"
+
+[[packages.wheels]]
+name = "sqlalchemy-2.1.9-cp314-cp314-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl"
+url = "https://files.pythonhosted.org/packages/29/13/dbb9d0aef7de6518f0b8b2de7850d3acec5b29693267a8d7596a4b0ecdb1/sqlalchemy-2.1.9-cp314-cp314-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl"
+
+[packages.wheels.hashes]
+sha256 = "0b6a25e87f313154e639632fdee02311c9b855ea957dc1a2c9e91ef1bd9b96cd"
+
+[[packages.wheels]]
+name = "sqlalchemy-2.1.9-cp314-cp314-win_amd64.whl"
+url = "https://files.pythonhosted.org/packages/f2/23/75d736f3ece18dd459b8d123743c47d0a2e021435af8a1801f3393d5cff4/sqlalchemy-2.1.9-cp314-cp314-win_amd64.whl"
+
+[packages.wheels.hashes]
+sha256 = "4790b72d53f7e38465d27733e33136cf63c5e68c6b3d2b231c771f4bbd0f4cef"
+
+[[packages]]
 name = "starlette"
 version = "1.10.0"
 
@@ -520,12 +578,14 @@ sha256 = "70293c25d79d1f084fdd665894481547575e429d2a75e8d72caec2f6b6b07af8"
 
 [tool.pnpm]
 requirements = [
+    "alembic>=1.16,<2",
     "fastapi>=0.115.0",
     "httpx>=0.28.0",
     "import-linter>=2.1",
     "mypy>=1.14.0",
     "pytest>=8.3.0",
     "ruff>=0.8.0",
+    "sqlalchemy>=2.0.44,<3",
     "uvicorn[standard]>=0.32.0",
 ]
 platforms = [

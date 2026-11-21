@@ -4,8 +4,10 @@ version = "0.1.0"
 description = "FastAPI backend for nextjs-fastapi-template"
 requires-python = ">=3.14"
 dependencies = [
+    "alembic>=1.16,<2",
     "fastapi>=0.115.0",
     "uvicorn[standard]>=0.32.0",
+    "sqlalchemy>=2.0.44,<3",
 ]
 
 [dependency-groups]

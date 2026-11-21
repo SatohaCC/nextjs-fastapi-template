@@ -1,17 +1,123 @@
 import sqlite3
+from contextlib import closing
 from datetime import UTC, datetime
 from pathlib import Path
 
 import pytest
+from alembic import command
+from alembic.config import Config
 from fastapi.testclient import TestClient
 
-from app.clients import ClientRegistry, SqliteTaskStore
+from app.clients import ClientRegistry, SqliteTaskStore, task_database
 from app.core.config import Settings
 from app.core.errors import AppError
 from app.main import create_app
 from app.routers.dependencies import TASK_STORE_CLIENT_NAME
 from app.schemas.tasks import TaskCreateRequest, TaskUpdateRequest
 from app.services import tasks as task_service
+
+_ALEMBIC_INI = Path(__file__).resolve().parents[1] / "alembic.ini"
+_LEGACY_TASKS_DDL = """
+    CREATE TABLE tasks (
+        id TEXT PRIMARY KEY,
+        title TEXT NOT NULL,
+        description TEXT NOT NULL,
+        status TEXT NOT NULL CHECK (status IN ('open', 'done')),
+        priority TEXT NOT NULL CHECK (priority IN ('low', 'medium', 'high')),
+        created_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL
+    )
+"""
+
+
+def test_alembic_adopts_existing_sqlite_tasks(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    db_path = tmp_path / "legacy.db"
+    legacy_task = (
+        "legacy-1",
+        "既存タスク",
+        "既存のメモ",
+        "done",
+        "high",
+        "2026-11-21T09:00:00+00:00",
+        "2026-11-21T09:05:00+00:00",
+    )
+    with closing(sqlite3.connect(db_path)) as connection, connection:
+        connection.execute(_LEGACY_TASKS_DDL)
+        connection.execute("CREATE INDEX idx_tasks_created_at ON tasks (created_at DESC)")
+        connection.execute("INSERT INTO tasks VALUES (?, ?, ?, ?, ?, ?, ?)", legacy_task)
+    monkeypatch.setenv("DATABASE_PATH", str(db_path))
+    config = Config(str(_ALEMBIC_INI))
+
+    command.upgrade(config, "head")
+    command.upgrade(config, "head")
+
+    with closing(sqlite3.connect(db_path)) as connection:
+        assert connection.execute("SELECT * FROM tasks").fetchall() == [legacy_task]
+        assert connection.execute("SELECT version_num FROM alembic_version").fetchall() == [
+            ("0001_create_tasks",)
+        ]
+    with TestClient(create_app(Settings(database_path=str(db_path)))) as client:
+        response = client.get("/api/tasks/legacy-1")
+        assert response.status_code == 200
+        assert response.json() == {
+            "id": "legacy-1",
+            "title": "既存タスク",
+            "description": "既存のメモ",
+            "status": "done",
+            "priority": "high",
+            "created_at": "2026-11-21T09:00:00Z",
+            "updated_at": "2026-11-21T09:05:00Z",
+        }
+
+
+@pytest.mark.parametrize(
+    ("schema_sql", "error_message"),
+    [
+        ("CREATE TABLE tasks (id TEXT PRIMARY KEY);", "テーブルが初期スキーマと一致しません"),
+        (_LEGACY_TASKS_DDL + " WITHOUT ROWID;", "rowid がありません"),
+        (
+            _LEGACY_TASKS_DDL + "; CREATE INDEX idx_tasks_created_at ON tasks (updated_at DESC);",
+            "インデックスが初期スキーマと一致しません",
+        ),
+    ],
+    ids=["columns", "rowid", "index"],
+)
+def test_alembic_rejects_incompatible_database(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    schema_sql: str,
+    error_message: str,
+) -> None:
+    db_path = tmp_path / "unrecognized.db"
+    with closing(sqlite3.connect(db_path)) as connection, connection:
+        connection.executescript(schema_sql)
+    monkeypatch.setenv("DATABASE_PATH", str(db_path))
+
+    with pytest.raises(RuntimeError, match=error_message):
+        command.upgrade(Config(str(_ALEMBIC_INI)), "head")
+
+    with closing(sqlite3.connect(db_path)) as connection:
+        tables = connection.execute("SELECT name FROM sqlite_master WHERE type = 'table'")
+        assert tables.fetchall() == [("tasks",)]
+
+
+def test_wal_initialization_retries_when_another_connection_holds_a_write_lock(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    database_path = tmp_path / "concurrent.db"
+    with (
+        closing(sqlite3.connect(database_path)) as writer,
+        closing(sqlite3.connect(database_path, timeout=0)) as startup,
+    ):
+        writer.execute("BEGIN IMMEDIATE")
+        monkeypatch.setattr(task_database, "sleep", lambda _seconds: writer.rollback())
+
+        task_database._enable_wal(startup)
+
+        assert not writer.in_transaction
+        assert startup.execute("PRAGMA journal_mode").fetchone() == ("wal",)
 
 
 def test_sqlite_task_store_persists_across_reopen_and_filters(tmp_path: Path) -> None:
@@ -130,8 +236,13 @@ def test_task_service_crud_and_error_cases() -> None:
         store.close()
 
 
-def test_tasks_api_crud_and_validation_flow(tmp_path: Path) -> None:
-    app = create_app(Settings(database_path=str(tmp_path / "api.db")))
+def test_tasks_api_crud_and_validation_flow(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    db_path = tmp_path / "api.db"
+    monkeypatch.setenv("DATABASE_PATH", str(db_path))
+    command.upgrade(Config(str(_ALEMBIC_INI)), "head")
+    app = create_app(Settings(database_path=str(db_path)))
 
     with TestClient(app) as client:
         invalid_create = client.post("/api/tasks", json={"title": "   ", "priority": "high"})
@@ -230,5 +341,5 @@ def test_task_store_can_be_overridden_by_client_startup(tmp_path: Path) -> None:
         assert client.get("/api/tasks").json()["total"] == 1
         assert not unused_db.exists()
 
-    with pytest.raises(sqlite3.ProgrammingError):
+    with pytest.raises(RuntimeError, match="タスクストアは閉じられています"):
         custom_store.list_tasks()
