@@ -49,6 +49,10 @@ Backend のプロセス環境変数では、許可する Origin をカンマ区�
 - `vercel.json`: Frontend / Backend の Services と公開ルーティング
 - `scripts/`: Node.js 26 で直接実行する TypeScript（`.mts`）の開発用スクリプトとテスト。型チェックは `pnpm typecheck:scripts`
 
+### API 応答の実行時検証
+
+FastAPI の Pydantic モデルを更新したら `pnpm gen:api-types` で TypeScript 型を生成します。新しい API では `@/shared/lib/api/zodResponse` の `z` を使って機能ディレクトリに応答スキーマを定義し、パーサの戻り値に生成型を指定します。パーサは `apiRequest` または `serverApiRequest` の `parse` に渡します。`parseZodResponse` が検証失敗を `ApiError` の `INVALID_RESPONSE` に変換します。実装例は [`tasksApi.ts`](frontend/src/features/tasks/tasksApi.ts) を参照してください。
+
 ## コマンド
 
 バージョン管理には Git を使用します。コミット手順は [git-commit Skill](.agents/skills/git-commit/SKILL.md) を参照してください。コミット前は Git フック（`pre-commit`）や `pnpm check`・必要なテストで検証します。
