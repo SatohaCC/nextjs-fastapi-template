@@ -182,8 +182,8 @@ importers:
         specifier: 0.1.0-beta.8
         version: 0.1.0-beta.8
       '@ui-sdk/react':
-        specifier: 0.1.0-beta.8
-        version: 0.1.0-beta.8(@types/react@19.3.0)(@ui-sdk/core@0.1.0-beta.8)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
+        specifier: 0.1.0-beta.9
+        version: 0.1.0-beta.9(@types/react@19.3.0)(@ui-sdk/core@0.1.0-beta.8)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
       next:
         specifier: ^16.0.0
         version: 16.4.6(@babel/core@8.1.2)(@playwright/test@1.65.1)(@types/node@26.6.6)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
@@ -1565,11 +1565,11 @@ packages:
   '@ui-sdk/core@0.1.0-beta.8':
     resolution: {integrity: sha512-ZgTs3wf9VSK6GpmDi3HPA77C2h6eHByqpHW2oJSOI0vFyrQj5TCVNqxR7N6f3c/VbckFebcXP/NmC9hliOCGzw==}
 
-  '@ui-sdk/react@0.1.0-beta.8':
-    resolution: {integrity: sha512-7VjIOlx4iZ8O+L6yXtKO77LXwcGx0Foef8pyG1CFp9s+oO0M9IbA4I0mlArYplupqnZlFvjX2+sjLmAIyRWofg==}
+  '@ui-sdk/react@0.1.0-beta.9':
+    resolution: {integrity: sha512-UgFiUlZWaKkBcZIW0usHiQhcyJug11M8NNluSlfs9UyaYjW/Ws18T8zWc3iAz4SSwRla6+41y3aScXh3pUDN0g==}
     peerDependencies:
       '@types/react': '>=19.2.10'
-      '@ui-sdk/core': ^0.1.0-beta.8
+      '@ui-sdk/core': ^0.1.0-beta.9
       react: '>=19'
       react-dom: '>=19'
     peerDependenciesMeta:
@@ -3687,7 +3687,7 @@ snapshots:
 
   '@ui-sdk/core@0.1.0-beta.8': {}
 
-  '@ui-sdk/react@0.1.0-beta.8(@types/react@19.3.0)(@ui-sdk/core@0.1.0-beta.8)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)':
+  '@ui-sdk/react@0.1.0-beta.9(@types/react@19.3.0)(@ui-sdk/core@0.1.0-beta.8)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)':
     dependencies:
       '@ui-sdk/core': 0.1.0-beta.8
       react: 19.3.1
