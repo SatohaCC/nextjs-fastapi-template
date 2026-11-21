@@ -24,7 +24,9 @@ const MAX_TRANSCRIPT_BYTES = 32 * 1024 * 1024;
 // TypeScript の TSxxxx や一般単語との誤衝突を避けるため、既知の Ruff ルール接頭辞を明示する。
 const RUFF_CODE_PREFIXES =
   "TID|RUF|PLC|PLE|PLR|PLW|ASYNC|PERF|FURB|TRY|SIM|RET|ARG|PTH|ERA|PGH|PIE|PYI|DTZ|BLE|FBT|ISC|ICN|INP|LOG|SLF|SLOT|INT|FIX|NPY|FAST|AIR|DOC|YTT|ANN|COM|EXE|T10|T20|UP|C4|C90|EM|FA|PT|DJ|PD|TD|PL|E|W|F|I|N|D|S|B|A|G|Q";
-const RUFF_HEADER_RE = new RegExp(`^${RUFF_CODE_PREFIXES}\\d{3,4}\\s+(?:\\[[^\\]]+\\]\\s+)?\\S`);
+const RUFF_HEADER_RE = new RegExp(
+  `^(?:${RUFF_CODE_PREFIXES})\\d{3,4}\\s+(?:\\[[^\\]]+\\]\\s+)?\\S`,
+);
 const RUFF_CODE_IN_SUMMARY_RE = new RegExp(`(?:^|[\\s:(])((?:${RUFF_CODE_PREFIXES})\\d{3,4})\\b`);
 const ANSI_ESCAPE_RE = new RegExp(`${String.fromCharCode(27)}\\[[0-9;?]*[ -/]*[@-~]`, "g");
 
@@ -439,17 +441,42 @@ function getHeadSha(root: string): string {
   }
 }
 
+function stripQuotedSegments(commandLine: string): string {
+  return commandLine.replace(/"(?:\\.|[^"\\])*"|'[^']*'/g, '""');
+}
+
+function hasCommitAllFlag(commandLine?: string): boolean {
+  if (!commandLine) {
+    return false;
+  }
+  const stripped = stripQuotedSegments(commandLine);
+  const match = /\bgit\b(?:\s+(?:-C\s+\S+|-[^\s]+))*\s+commit\b([^;&|\r\n]*)/.exec(stripped);
+  if (!match) {
+    return false;
+  }
+  const commitArgs = match[1] ?? "";
+  return /\s(?:-[A-Za-z]*a[A-Za-z]*|--all)(?=\s|$)/.test(commitArgs);
+}
+
 function getCommitDiff(root: string, commandLine?: string, headSha?: string): string {
   try {
+    if (hasCommitAllFlag(commandLine)) {
+      if (headSha && headSha !== "NO_HEAD") {
+        return runGit(root, ["diff", "HEAD"]);
+      }
+      const staged = runGit(root, ["diff", "--cached"]);
+      const unstaged = runGit(root, ["diff"]);
+      if (!staged.trim()) {
+        return unstaged;
+      }
+      if (!unstaged.trim()) {
+        return staged;
+      }
+      return `${staged}\n${unstaged}`;
+    }
     const staged = runGit(root, ["diff", "--cached"]);
     if (staged.trim()) {
       return staged;
-    }
-    const includesAllFlag = Boolean(
-      commandLine && /\s(?:-[A-Za-z]*a[A-Za-z]*|--all)(?=\s|$)/.test(commandLine),
-    );
-    if (includesAllFlag && headSha && headSha !== "NO_HEAD") {
-      return runGit(root, ["diff", "HEAD"]);
     }
     return "";
   } catch {

@@ -481,3 +481,83 @@ test("recordManualFailure と record-failure CLI で非ツール失敗を記録�
     rmSync(root, { recursive: true, force: true });
   }
 });
+
+test("extractDiagnosticSnippet は Ruff 接頭辞の誤マッチで TAP ヘッダ等を拾わない", () => {
+  const { root } = createTempRepo();
+  try {
+    const tapFailure = [
+      "TAP version 13",
+      "# Subtest: reports a failure",
+      "not ok 1 - reports a failure",
+      "  ---",
+      "  duration_ms: 1.23",
+      "  ...",
+      "AssertionError: expected 1 to equal 2",
+    ].join("\n");
+
+    const tapSnippet = extractDiagnosticSnippet(tapFailure, root);
+    assert.equal(
+      tapSnippet,
+      "not ok 1 - reports a failure | AssertionError: expected 1 to equal 2",
+    );
+
+    const ruffSnippet = extractDiagnosticSnippet(
+      "F401 [*] `os` imported but unused\nTID251 Banned import",
+      root,
+    );
+    assert.equal(ruffSnippet, "F401 [*] `os` imported but unused | TID251 Banned import");
+  } finally {
+    assert.equal(path.dirname(root), os.tmpdir());
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("handlePreToolUse は git commit -a / --all 時に未ステージの追跡変更も含めてレビューを要求する", () => {
+  const { root, git } = createTempRepo();
+  try {
+    writeFileSync(path.join(root, "staged.ts"), "export const x = 1;\n", "utf8");
+    git("add", "staged.ts");
+    markReviewed({ root, note: "staged のみ確認" });
+
+    writeFileSync(path.join(root, "README.md"), "modified tracked file\n", "utf8");
+
+    const deniedShort = handlePreToolUse(
+      { toolCall: { name: "run_command", args: { CommandLine: 'git commit -am "feat: change"' } } },
+      root,
+    );
+    assert.equal(deniedShort.decision, "deny");
+
+    const deniedLong = handlePreToolUse(
+      {
+        toolCall: {
+          name: "run_command",
+          args: { CommandLine: 'git commit --all -m "feat: change"' },
+        },
+      },
+      root,
+    );
+    assert.equal(deniedLong.decision, "deny");
+
+    const allowedMessageOnly = handlePreToolUse(
+      {
+        toolCall: {
+          name: "run_command",
+          args: { CommandLine: 'git commit -m "fix: -a option"' },
+        },
+      },
+      root,
+    );
+    assert.equal(allowedMessageOnly.decision, "allow");
+
+    git("add", "README.md");
+    markReviewed({ root, note: "全変更を確認" });
+    const allowedAfterReview = handlePreToolUse(
+      { toolCall: { name: "run_command", args: { CommandLine: 'git commit -am "feat: change"' } } },
+      root,
+    );
+    assert.equal(allowedAfterReview.decision, "allow");
+  } finally {
+    assert.equal(path.dirname(root), os.tmpdir());
+    rmSync(root, { recursive: true, force: true });
+  }
+});
