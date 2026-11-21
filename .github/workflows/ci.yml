@@ -29,7 +29,7 @@ jobs:
         run: echo "store_path=$(pnpm store path)" >> "$GITHUB_OUTPUT"
 
       - name: Cache pnpm store
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ${{ steps.pnpm-store.outputs.store_path }}
           key: pnpm-store-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml', 'backend/pylock.toml') }}
@@ -67,7 +67,7 @@ jobs:
         run: echo "store_path=$(pnpm store path)" >> "$GITHUB_OUTPUT"
 
       - name: Cache pnpm store
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ${{ steps.pnpm-store.outputs.store_path }}
           key: pnpm-store-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml', 'backend/pylock.toml') }}
@@ -99,7 +99,7 @@ jobs:
         run: echo "store_path=$(pnpm store path)" >> "$GITHUB_OUTPUT"
 
       - name: Cache pnpm store
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ${{ steps.pnpm-store.outputs.store_path }}
           key: pnpm-store-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml', 'backend/pylock.toml') }}
@@ -111,7 +111,7 @@ jobs:
 
       - name: Cache Playwright browsers
         id: playwright-cache
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ~/.cache/ms-playwright
           key: playwright-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
@@ -146,7 +146,7 @@ jobs:
         run: echo "store_path=$(pnpm store path)" >> "$GITHUB_OUTPUT"
 
       - name: Cache pnpm store
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ${{ steps.pnpm-store.outputs.store_path }}
           key: pnpm-store-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml', 'backend/pylock.toml') }}
@@ -158,7 +158,7 @@ jobs:
 
       - name: Cache Playwright browsers
         id: playwright-cache
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ~/.cache/ms-playwright
           key: playwright-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
