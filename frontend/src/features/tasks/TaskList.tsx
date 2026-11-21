@@ -1,6 +1,7 @@
 "use client";
 
 import * as stylex from "@stylexjs/stylex";
+import { memo } from "react";
 import { Alert } from "@/shared/ui/alert/Alert";
 import { Badge } from "@/shared/ui/badge/Badge";
 import { Button } from "@/shared/ui/button/Button";
@@ -34,7 +35,7 @@ export interface TaskListProps {
 }
 
 /** タスク一覧・状態切り替え・行操作メニューを描画する。 */
-export function TaskList({
+export const TaskList = memo(function TaskList({
   tasks,
   isLoading,
   isUpdating,
@@ -48,7 +49,7 @@ export function TaskList({
   if (isLoading) {
     return (
       <div {...stylex.props(s.loadingWrap)}>
-        <Spinner showLabel label="タスクを読み込んでいます..." />
+        <Spinner showLabel label="タスクを読み込んでいます…" />
         <Skeleton variant="rectangular" height={84} />
         <Skeleton variant="rectangular" height={84} />
         <Skeleton variant="rectangular" height={84} />
@@ -94,7 +95,9 @@ export function TaskList({
           <li key={task.id} {...stylex.props(s.item)}>
             <div {...stylex.props(s.checkboxWrap)}>
               <Checkbox
-                aria-label={`「${task.title}」を完了にする`}
+                aria-label={
+                  isDone ? `「${task.title}」を未完了に戻す` : `「${task.title}」を完了にする`
+                }
                 checked={isDone}
                 disabled={isUpdating}
                 onCheckedChange={(checked) => {
@@ -115,7 +118,7 @@ export function TaskList({
                   </Badge>
                 </div>
               </div>
-              {task.description && <p {...stylex.props(s.description)}>{task.description}</p>}
+              {task.description ? <p {...stylex.props(s.description)}>{task.description}</p> : null}
             </div>
 
             <div {...stylex.props(s.actions)}>
@@ -146,4 +149,4 @@ export function TaskList({
       })}
     </ul>
   );
-}
+});

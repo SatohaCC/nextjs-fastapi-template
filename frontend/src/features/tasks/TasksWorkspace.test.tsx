@@ -56,6 +56,7 @@ describe("TasksWorkspace", () => {
 
   afterEach(() => {
     vi.restoreAllMocks();
+    window.history.replaceState(null, "", "/");
   });
 
   it("空タイトル検証でフォーカスを戻し、新規作成後に一覧とトーストを更新できる", async () => {
@@ -167,16 +168,15 @@ describe("TasksWorkspace", () => {
     await user.click(toggleCheckbox);
 
     await waitFor(() => {
-      expect(screen.getByRole("checkbox", { name: "「既存タスク」を完了にする" })).toHaveAttribute(
-        "aria-checked",
-        "true",
-      );
+      expect(
+        screen.getByRole("checkbox", { name: "「既存タスク」を未完了に戻す" }),
+      ).toHaveAttribute("aria-checked", "true");
     });
 
     await user.click(screen.getByRole("button", { name: "「既存タスク」の操作" }));
     await user.click(screen.getByRole("menuitem", { name: "編集" }));
 
-    const dialog = screen.getByRole("dialog");
+    const dialog = await screen.findByRole("dialog");
     expect(dialog).toBeVisible();
     const editTitleInput = within(dialog).getByRole("textbox", { name: /タイトル/ });
     await user.clear(editTitleInput);
@@ -190,7 +190,7 @@ describe("TasksWorkspace", () => {
     await user.click(screen.getByRole("button", { name: "「編集後タスク」の操作" }));
     await user.click(screen.getByRole("menuitem", { name: "削除" }));
 
-    const deleteDialog = screen.getByRole("dialog");
+    const deleteDialog = await screen.findByRole("dialog");
     await user.click(within(deleteDialog).getByRole("button", { name: "削除する" }));
 
     await waitFor(() => {
@@ -237,7 +237,7 @@ describe("TasksWorkspace", () => {
       expect(screen.getByText("既存タスク")).toBeVisible();
     });
 
-    await user.type(screen.getByRole("textbox", { name: "キーワード検索" }), "SQLite");
+    await user.type(screen.getByRole("searchbox", { name: "キーワード検索" }), "SQLite");
     await user.click(screen.getByRole("radio", { name: "完了" }));
 
     await waitFor(() => {
@@ -245,6 +245,7 @@ describe("TasksWorkspace", () => {
         requestedUrls.some((url) => url.includes("status=done") && url.includes("q=SQLite")),
       ).toBe(true);
     });
+    expect(window.location.search).toBe("?status=done&q=SQLite");
   });
 
   it("新規作成の 422 フィールドエラーと 500 エラーを表示し、入力値を保持する", async () => {
@@ -403,7 +404,7 @@ describe("TasksWorkspace", () => {
     // キャンセル後に開き直すと前回の未保存編集内容が初期化されることを確認する。
     await user.click(screen.getByRole("button", { name: "「既存タスク」の操作" }));
     await user.click(screen.getByRole("menuitem", { name: "編集" }));
-    const firstDialog = screen.getByRole("dialog");
+    const firstDialog = await screen.findByRole("dialog");
     const firstTitle = within(firstDialog).getByRole("textbox", { name: /タイトル/ });
     await user.clear(firstTitle);
     await user.type(firstTitle, "破棄される編集");
@@ -414,7 +415,7 @@ describe("TasksWorkspace", () => {
 
     await user.click(screen.getByRole("button", { name: "「既存タスク」の操作" }));
     await user.click(screen.getByRole("menuitem", { name: "編集" }));
-    const editDialog = screen.getByRole("dialog");
+    const editDialog = await screen.findByRole("dialog");
     const editTitle = within(editDialog).getByRole("textbox", { name: /タイトル/ });
     expect(editTitle).toHaveValue("既存タスク");
 
@@ -433,7 +434,7 @@ describe("TasksWorkspace", () => {
     await user.click(within(editDialog).getByRole("button", { name: "変更を保存" }));
 
     await waitFor(() => {
-      expect(within(editDialog).getByRole("button", { name: "保存中..." })).toBeDisabled();
+      expect(within(editDialog).getByRole("button", { name: "保存中…" })).toBeDisabled();
     });
     expect(within(editDialog).getByRole("button", { name: "キャンセル" })).toBeDisabled();
     expect(within(editDialog).queryByRole("button", { name: "閉じる" })).not.toBeInTheDocument();
@@ -502,11 +503,11 @@ describe("TasksWorkspace", () => {
     await user.click(screen.getByRole("button", { name: "「削除対象1」の操作" }));
     await user.click(screen.getByRole("menuitem", { name: "削除" }));
 
-    const firstDeleteDialog = screen.getByRole("dialog");
+    const firstDeleteDialog = await screen.findByRole("dialog");
     await user.click(within(firstDeleteDialog).getByRole("button", { name: "削除する" }));
 
     await waitFor(() => {
-      expect(within(firstDeleteDialog).getByRole("button", { name: "削除中..." })).toBeDisabled();
+      expect(within(firstDeleteDialog).getByRole("button", { name: "削除中…" })).toBeDisabled();
     });
     expect(within(firstDeleteDialog).getByRole("button", { name: "キャンセル" })).toBeDisabled();
     expect(
@@ -536,8 +537,96 @@ describe("TasksWorkspace", () => {
     await user.click(screen.getByRole("button", { name: "「削除対象2」の操作" }));
     await user.click(screen.getByRole("menuitem", { name: "削除" }));
 
-    const secondDeleteDialog = screen.getByRole("dialog");
+    const secondDeleteDialog = await screen.findByRole("dialog");
     expect(within(secondDeleteDialog).getByText(/「削除対象2」を削除します/)).toBeVisible();
     expect(within(secondDeleteDialog).queryByText("削除できませんでした")).not.toBeInTheDocument();
+  });
+
+  it("検索入力をデバウンスして URL クエリを同期し、popstate で条件を復元できる", async () => {
+    const user = userEvent.setup();
+    const requestedUrls: string[] = [];
+
+    vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => {
+      const url = typeof input === "string" ? input : input.toString();
+      requestedUrls.push(url);
+      return new Response(JSON.stringify({ items: [makeTask()], total: 1 }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    });
+
+    window.history.replaceState(null, "", "/?utm_source=test");
+
+    render(
+      <QueryProvider>
+        <TasksWorkspace initialTasks={{ items: [makeTask()], total: 1 }} />
+      </QueryProvider>,
+    );
+
+    const searchInput = screen.getByRole("searchbox", { name: "キーワード検索" });
+    await user.type(searchInput, "SQLite");
+
+    await waitFor(() => {
+      expect(requestedUrls).toContain("/api/tasks?q=SQLite");
+    });
+    // 連続タイピング中の途中文字列（q=S など）では API 送信されない。
+    expect(requestedUrls.some((url) => url.includes("q=S&") || url.endsWith("q=S"))).toBe(false);
+    expect(window.location.search).toBe("?utm_source=test&q=SQLite");
+
+    window.history.replaceState(null, "", "/?priority=high");
+    window.dispatchEvent(new PopStateEvent("popstate"));
+
+    await waitFor(() => {
+      expect(requestedUrls).toContain("/api/tasks?priority=high");
+    });
+    expect(searchInput).toHaveValue("");
+  });
+
+  it("編集ダイアログに未保存変更がある場合、Escape 押下で破棄確認を表示し、破棄選択で閉じられる", async () => {
+    const user = userEvent.setup();
+
+    vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => {
+      const url = typeof input === "string" ? input : input.toString();
+      if (url.startsWith("/api/tasks")) {
+        return new Response(JSON.stringify({ items: [makeTask()], total: 1 }), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+      return new Response(null, { status: 404 });
+    });
+
+    render(
+      <QueryProvider>
+        <TasksWorkspace initialTasks={{ items: [makeTask()], total: 1 }} />
+      </QueryProvider>,
+    );
+
+    await user.click(screen.getByRole("button", { name: "「既存タスク」の操作" }));
+    await user.click(screen.getByRole("menuitem", { name: "編集" }));
+
+    const editDialog = await screen.findByRole("dialog");
+    const editTitle = within(editDialog).getByRole("textbox", { name: /タイトル/ });
+    await user.type(editTitle, "（変更中）");
+
+    const beforeUnloadEvent = new Event("beforeunload", { cancelable: true });
+    window.dispatchEvent(beforeUnloadEvent);
+    expect(beforeUnloadEvent.defaultPrevented).toBe(true);
+
+    await user.keyboard("{Escape}");
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+    expect(within(editDialog).getByText("未保存の変更があります")).toBeVisible();
+
+    await user.click(within(editDialog).getByRole("button", { name: "編集を続ける" }));
+    expect(within(editDialog).queryByText("未保存の変更があります")).not.toBeInTheDocument();
+    expect(editTitle).toHaveValue("既存タスク（変更中）");
+
+    await user.keyboard("{Escape}");
+    expect(within(editDialog).getByText("未保存の変更があります")).toBeVisible();
+
+    await user.click(within(editDialog).getByRole("button", { name: "変更を破棄して閉じる" }));
+    await waitFor(() => {
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    });
   });
 });
