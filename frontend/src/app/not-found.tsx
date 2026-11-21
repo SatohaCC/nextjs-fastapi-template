@@ -5,7 +5,7 @@ import { statusPageStyles as s } from "./status-page.styles";
 /** 存在しないルートや notFound() 呼び出し時に表示する 404 画面。 */
 export default function NotFound() {
   return (
-    <main {...stylex.props(s.page)}>
+    <main id="main-content" tabIndex={-1} {...stylex.props(s.page)}>
       <section aria-labelledby="not-found-title" {...stylex.props(s.card)}>
         <p {...stylex.props(s.code)}>404</p>
         <h1 id="not-found-title" {...stylex.props(s.title)}>

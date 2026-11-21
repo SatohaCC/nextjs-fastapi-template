@@ -6,10 +6,12 @@ const stacked = "@media (max-width: 850px)";
 
 export const pageStyles = stylex.create({
   page: {
+    paddingBottom: "1.5rem",
+  },
+  container: {
     maxWidth: "76rem",
     marginInline: "auto",
     paddingInline: { default: "2.5rem", [mobile]: "1.25rem" },
-    paddingBottom: "1.5rem",
   },
   header: {
     display: "flex",
@@ -24,9 +26,12 @@ export const pageStyles = stylex.create({
     display: "inline-flex",
     alignItems: "center",
     gap: "0.625rem",
+    borderRadius: tokens.cornerSmall,
     color: tokens.onSurface,
     fontWeight: 750,
     textDecoration: "none",
+    outline: { default: "none", ":focus-visible": `3px solid ${tokens.primary}` },
+    outlineOffset: "3px",
   },
   mark: {
     display: "grid",
@@ -44,10 +49,13 @@ export const pageStyles = stylex.create({
     display: "inline-flex",
     alignItems: "center",
     minHeight: "2.75rem",
+    borderRadius: tokens.cornerExtraSmall,
     fontSize: "0.875rem",
     color: tokens.onSurfaceVariant,
     textUnderlineOffset: "0.25rem",
     textDecorationLine: { default: "none", ":hover": "underline" },
+    outline: { default: "none", ":focus-visible": `3px solid ${tokens.primary}` },
+    outlineOffset: "3px",
   },
   hero: {
     display: "grid",
@@ -75,6 +83,7 @@ export const pageStyles = stylex.create({
     fontWeight: 780,
     letterSpacing: "-0.035em",
     marginBlock: "1rem 1.25rem",
+    textWrap: "balance",
   },
   description: { maxWidth: "26rem", fontSize: "1rem", lineHeight: 1.85 },
   action: {
@@ -92,6 +101,7 @@ export const pageStyles = stylex.create({
     fontSize: "0.875rem",
     fontWeight: 650,
     textDecoration: "none",
+    outline: { default: "none", ":focus-visible": `3px solid ${tokens.primary}` },
     outlineOffset: "4px",
   },
   terminal: {

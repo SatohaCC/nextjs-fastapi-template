@@ -26,6 +26,15 @@ body {
   font-family: system-ui, -apple-system, "Segoe UI", "Yu Gothic UI", "Hiragino Sans", sans-serif;
   line-height: 1.6;
 }
+a,
+button,
+input,
+select,
+textarea,
+summary,
+[role="button"] {
+  touch-action: manipulation;
+}
 html {
   scroll-behavior: smooth;
 }

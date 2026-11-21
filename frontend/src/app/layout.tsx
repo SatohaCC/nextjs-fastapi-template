@@ -1,5 +1,5 @@
 import * as stylex from "@stylexjs/stylex";
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 import { QueryProvider } from "@/shared/lib/query/QueryProvider";
 import "./globals.css";
@@ -10,10 +10,20 @@ export const metadata: Metadata = {
   description: "Next.js + FastAPI starter template",
 };
 
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#F5FAF9" },
+    { media: "(prefers-color-scheme: dark)", color: "#101514" },
+  ],
+};
+
 export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
   return (
     <html lang="ja">
       <body {...stylex.props(layoutStyles.body)}>
+        <a href="#main-content" {...stylex.props(layoutStyles.skipLink)}>
+          メインコンテンツへスキップ
+        </a>
         <QueryProvider>{children}</QueryProvider>
       </body>
     </html>
