@@ -1,6 +1,16 @@
 import * as stylex from "@stylexjs/stylex";
 
 export const taskEditDialogStyles = stylex.create({
+  bodyStack: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "1rem",
+  },
+  confirmActions: {
+    display: "flex",
+    flexWrap: "wrap",
+    gap: "0.5rem",
+  },
   form: {
     display: "flex",
     flexDirection: "column",

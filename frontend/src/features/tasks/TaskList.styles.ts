@@ -28,6 +28,8 @@ export const taskListStyles = stylex.create({
     borderColor: tokens.outlineVariant,
     backgroundColor: tokens.surfaceContainerLow,
     minWidth: 0,
+    contentVisibility: "auto",
+    containIntrinsicSize: "auto 84px",
   },
   checkboxWrap: {
     flexShrink: 0,

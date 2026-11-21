@@ -1,10 +1,11 @@
 "use client";
 
 import * as stylex from "@stylexjs/stylex";
-import { useId, useState } from "react";
+import { memo, useId, useRef, useState } from "react";
 import { Alert } from "@/shared/ui/alert/Alert";
 import { Button } from "@/shared/ui/button/Button";
 import { RadioGroup } from "@/shared/ui/radio-group/RadioGroup";
+import { Spinner } from "@/shared/ui/spinner/Spinner";
 import { TextField } from "@/shared/ui/text-field/TextField";
 import { Textarea } from "@/shared/ui/textarea/Textarea";
 import { taskCreateFormStyles as s } from "./TaskCreateForm.styles";
@@ -22,9 +23,13 @@ export interface TaskCreateFormProps {
 }
 
 /** 新規タスクを作成するフォームコンポーネント。 */
-export function TaskCreateForm({ isSubmitting, onCreate }: TaskCreateFormProps) {
+export const TaskCreateForm = memo(function TaskCreateForm({
+  isSubmitting,
+  onCreate,
+}: TaskCreateFormProps) {
   const headingId = useId();
   const titleId = useId();
+  const titleInputRef = useRef<HTMLInputElement>(null);
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -39,7 +44,7 @@ export function TaskCreateForm({ isSubmitting, onCreate }: TaskCreateFormProps) 
     const trimmedTitle = title.trim();
     if (!trimmedTitle) {
       setTitleError("タイトルを入力してください");
-      document.getElementById(titleId)?.focus();
+      titleInputRef.current?.focus();
       return;
     }
 
@@ -60,7 +65,7 @@ export function TaskCreateForm({ isSubmitting, onCreate }: TaskCreateFormProps) 
       const fieldError = extractFieldErrorMessage(error, "title");
       if (fieldError) {
         setTitleError(fieldError);
-        document.getElementById(titleId)?.focus();
+        titleInputRef.current?.focus();
         return;
       }
       setSubmitError(error instanceof Error ? error.message : "タスクの作成に失敗しました。");
@@ -82,19 +87,21 @@ export function TaskCreateForm({ isSubmitting, onCreate }: TaskCreateFormProps) 
         noValidate
         {...stylex.props(s.form)}
       >
-        {submitError && (
+        {submitError ? (
           <Alert tone="error" title="作成できませんでした">
             {submitError}
           </Alert>
-        )}
+        ) : null}
 
         <TextField
           id={titleId}
+          inputRef={titleInputRef}
           label="タイトル"
           name="title"
           required
+          autoComplete="off"
           maxLength={120}
-          placeholder="例: SQLite 永続化の動作確認"
+          placeholder="例: SQLite 永続化の動作確認…"
           value={title}
           onValueChange={(nextValue) => {
             setTitle(nextValue);
@@ -110,7 +117,7 @@ export function TaskCreateForm({ isSubmitting, onCreate }: TaskCreateFormProps) 
           name="description"
           rows={3}
           maxLength={1000}
-          placeholder="補足手順や確認観点があれば入力してください。"
+          placeholder="例: 確認観点や補足手順…"
           value={description}
           onValueChange={setDescription}
         />
@@ -130,10 +137,17 @@ export function TaskCreateForm({ isSubmitting, onCreate }: TaskCreateFormProps) 
 
         <div {...stylex.props(s.actions)}>
           <Button type="submit" variant="filled" disabled={isSubmitting}>
-            {isSubmitting ? "作成中..." : "タスクを追加"}
+            {isSubmitting ? (
+              <>
+                <Spinner size="sm" decorative />
+                作成中…
+              </>
+            ) : (
+              "タスクを追加"
+            )}
           </Button>
         </div>
       </form>
     </div>
   );
-}
+});

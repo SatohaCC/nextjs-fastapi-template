@@ -4,7 +4,18 @@ import * as stylex from "@stylexjs/stylex";
 import { useState } from "react";
 import { Alert } from "@/shared/ui/alert/Alert";
 import { Button } from "@/shared/ui/button/Button";
-import { Dialog, DialogCloseButton } from "@/shared/ui/dialog/Dialog";
+import {
+  DialogBody,
+  DialogCloseButton,
+  DialogCloseIconButton,
+  DialogHeader,
+  DialogHeaderText,
+  DialogHeading,
+  DialogPanel,
+  DialogRoot,
+  DialogSummary,
+} from "@/shared/ui/dialog/Dialog";
+import { Spinner } from "@/shared/ui/spinner/Spinner";
 import { taskDeleteDialogStyles as s } from "./TaskDeleteDialog.styles";
 import type { TaskItem } from "./tasksApi";
 
@@ -37,17 +48,24 @@ function TaskDeleteDialogBody({
 
   return (
     <div {...stylex.props(s.body)}>
-      {deleteError && (
+      {deleteError ? (
         <Alert tone="error" title="削除できませんでした">
           {deleteError}
         </Alert>
-      )}
+      ) : null}
       <div {...stylex.props(s.actions)}>
         <DialogCloseButton variant="text" disabled={isDeleting}>
           キャンセル
         </DialogCloseButton>
         <Button type="button" variant="filled" disabled={isDeleting} onClick={handleConfirm}>
-          {isDeleting ? "削除中..." : "削除する"}
+          {isDeleting ? (
+            <>
+              <Spinner size="sm" decorative />
+              削除中…
+            </>
+          ) : (
+            "削除する"
+          )}
         </Button>
       </div>
     </div>
@@ -57,7 +75,7 @@ function TaskDeleteDialogBody({
 /** タスク削除前に確認を求めるモーダルダイアログ。 */
 export function TaskDeleteDialog({ task, isDeleting, onClose, onConfirm }: TaskDeleteDialogProps) {
   return (
-    <Dialog
+    <DialogRoot
       open={task !== null}
       dismissible={!isDeleting}
       onOpenChange={(open, details) => {
@@ -69,22 +87,30 @@ export function TaskDeleteDialog({ task, isDeleting, onClose, onConfirm }: TaskD
           onClose();
         }
       }}
-      title="タスクを削除"
-      description={
-        task
-          ? `「${task.title}」を削除します。削除すると元に戻せません。`
-          : "このタスクを削除します。"
-      }
-      closeLabel={isDeleting ? undefined : "閉じる"}
     >
-      {task && (
-        <TaskDeleteDialogBody
-          key={task.id}
-          task={task}
-          isDeleting={isDeleting}
-          onConfirm={onConfirm}
-        />
-      )}
-    </Dialog>
+      <DialogPanel>
+        <DialogHeader>
+          <DialogHeaderText>
+            <DialogHeading>タスクを削除</DialogHeading>
+            <DialogSummary>
+              {task
+                ? `「${task.title}」を削除します。削除すると元に戻せません。`
+                : "このタスクを削除します。"}
+            </DialogSummary>
+          </DialogHeaderText>
+          {!isDeleting ? <DialogCloseIconButton label="閉じる" /> : null}
+        </DialogHeader>
+        {task ? (
+          <DialogBody>
+            <TaskDeleteDialogBody
+              key={task.id}
+              task={task}
+              isDeleting={isDeleting}
+              onConfirm={onConfirm}
+            />
+          </DialogBody>
+        ) : null}
+      </DialogPanel>
+    </DialogRoot>
   );
 }

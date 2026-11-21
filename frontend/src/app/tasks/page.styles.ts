@@ -2,6 +2,7 @@ import * as stylex from "@stylexjs/stylex";
 import { tokens } from "../../shared/styles/tokens.stylex";
 
 const mobile = "@media (max-width: 599px)";
+const stacked = "@media (max-width: 900px)";
 
 export const tasksPageStyles = stylex.create({
   page: {
@@ -23,9 +24,12 @@ export const tasksPageStyles = stylex.create({
     display: "inline-flex",
     alignItems: "center",
     gap: "0.625rem",
+    borderRadius: tokens.cornerSmall,
     color: tokens.onSurface,
     fontWeight: 750,
     textDecoration: "none",
+    outline: { default: "none", ":focus-visible": `3px solid ${tokens.primary}` },
+    outlineOffset: "3px",
   },
   mark: {
     display: "grid",
@@ -47,10 +51,13 @@ export const tasksPageStyles = stylex.create({
     display: "inline-flex",
     alignItems: "center",
     minHeight: "2.75rem",
+    borderRadius: tokens.cornerExtraSmall,
     fontSize: "0.875rem",
     color: tokens.onSurfaceVariant,
     textUnderlineOffset: "0.25rem",
     textDecorationLine: { default: "none", ":hover": "underline" },
+    outline: { default: "none", ":focus-visible": `3px solid ${tokens.primary}` },
+    outlineOffset: "3px",
   },
   activeLink: {
     color: tokens.primary,
@@ -78,11 +85,37 @@ export const tasksPageStyles = stylex.create({
     lineHeight: 1.25,
     fontWeight: 780,
     letterSpacing: "-0.025em",
+    textWrap: "balance",
   },
   description: {
     maxWidth: "46rem",
     fontSize: "0.9375rem",
     lineHeight: 1.7,
+  },
+  fallbackLayout: {
+    display: "grid",
+    gridTemplateColumns: {
+      default: "minmax(0, 22rem) minmax(0, 1fr)",
+      [stacked]: "minmax(0, 1fr)",
+    },
+    alignItems: "start",
+    gap: "1.5rem",
+  },
+  fallbackColumn: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "0.75rem",
+  },
+  fallbackCard: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "1rem",
+    padding: "1.25rem",
+    borderRadius: tokens.cornerLarge,
+    borderWidth: 1,
+    borderStyle: "solid",
+    borderColor: tokens.outlineVariant,
+    backgroundColor: tokens.surfaceContainerLow,
   },
   footer: {
     display: "flex",
