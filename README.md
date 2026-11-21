@@ -50,7 +50,7 @@ Backend の `CORS_ORIGINS` は、許可する Origin をカンマ区切りで指
 
 ## コマンド
 
-バージョン管理には Git を使用します。作業手順は [バージョン管理ルール](.agents/rules/vcs.md) を参照してください。コミット前は Git フック（`pre-commit`）や `pnpm check`・必要なテストで検証します。
+バージョン管理には Git を使用します。コミット手順は [git-commit Skill](.agents/skills/git-commit/SKILL.md) を参照してください。コミット前は Git フック（`pre-commit`）や `pnpm check`・必要なテストで検証します。
 
 | コマンド | 内容 |
 |---|---|

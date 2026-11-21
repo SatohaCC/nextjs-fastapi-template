@@ -8,11 +8,8 @@
 
 `frontend/` を変更する場合は、その配下の `AGENTS.md` も読む。プロジェクト固有のSkillは `.agents/skills/` にある。
 
-## コミットメッセージ
+## Git・コミット
 
-コミットメッセージは **Conventional Commitsの形式で、説明を日本語** にする。
-
-- 形式: `<type>(<任意のscope>): <日本語の説明>`。scopeが不要なら省略する。
-- typeは変更内容に合わせて `feat` / `fix` / `refactor` / `docs` / `test` / `chore` / `ci` 等を選ぶ。
-- 例: `chore: 初期テンプレートを整備`、`fix(ui): ステータス更新時の表示を修正`。
-- 本文を付ける場合も日本語で、変更理由や必要な補足を書く。ローカルの絶対パスや秘密情報を含めない。
+- 作業前に `git status`・`git diff` で既存のユーザー変更を確認し、依頼された作業範囲と区別する。`git checkout --` / `git reset --hard` / `git clean` 等で既存変更を消去したりエラーを隠蔽したりしない。
+- `git push` はユーザーから明示的に依頼・承認された場合のみ実行する。push 前に `pnpm check` と対象ブランチを確認し、`git push <remote> <branch>` のように対象を明示する。
+- コミット実行前、またはコミットメッセージの作成・修正（案のみを含む）を行う前に、必ず [git-commit Skill](.agents/skills/git-commit/SKILL.md) を読み、適用する。メッセージは **Conventional Commits 1.0.0 形式で、説明を日本語** にする。
