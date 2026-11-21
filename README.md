@@ -58,7 +58,7 @@ Backend の `CORS_ORIGINS` は、許可する Origin をカンマ区切りで指
 | `pnpm dev:frontend` / `pnpm dev:backend` | 各サーバーを単独起動 |
 | `pnpm lint` | Biome、Ruff、Backend の依存方向チェック |
 | `pnpm format` | Biome / Ruff による整形・修正 |
-| `pnpm check` | ローカルパス混入検査、Biome、TypeScript、mypy、Ruff、依存方向、Python の整形チェック |
+| `pnpm check` | ローカルパス混入検査、Biome、TypeScript、mypy、Ruff、依存方向、Python の整形、OpenAPI 生成型の一致チェック |
 | `pnpm check:paths` | Git対象のファイルとリンクにローカルの絶対パスがないか検査 |
 | `pnpm test` | 検査スクリプトのテスト、Frontend の Vitest、Backend の pytest |
 | `pnpm test:frontend` / `pnpm test:backend` | 各単体テストを個別実行 |
@@ -109,7 +109,7 @@ Vercel の Git 連携では、この設定を持つリポジトリのルート�
 - `frontend/.next/`: Next.js の開発・ビルド出力
 - Python の起動コマンドは `-B` で bytecode 生成を抑制。pytest のキャッシュは無効化
 
-`pnpm-lock.yaml` と `backend/pylock.toml` は依存関係を再現するためコミットします。
+`pnpm-lock.yaml` と `backend/pylock.toml` は依存関係を再現するためコミットします。Dependabot 等で `backend/pyproject.toml` のみ更新された場合は、`pnpm install --no-frozen-lockfile` を実行して `backend/pylock.toml` を同期してください。
 
 `pnpm check:paths` は追跡中・未追跡の無視されていないファイルを検査します。Windows のドライブ付きパス、Unix のホーム配下、file URI、UNCパス、絶対パスのリンクを検出すると失敗します。コミット直前のステージ内容だけを検査する場合は `pnpm check:paths --staged` を使います。検出したパスの値はログに出しません。除外済みの生成物やバイナリ、外部へ貼り付ける実行ログはこの検査の対象外です。
 
