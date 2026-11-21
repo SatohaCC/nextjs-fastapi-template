@@ -8,7 +8,7 @@ Next.js + FastAPI + pnpm 12 + Vercel のプロジェクトテンプレートで�
 - pnpm 12.18.0（ルートの `package.json` の `packageManager` / `engines` に指定）
 - Python 3.14（`backend/.python-version` に指定。pnpm の Python ワークスペース機能で環境を管理）
 
-Corepack を利用する場合は、初回に次を実行します。Corepack 自体が未導入なら先に導入してください。
+Corepack を利用する場合は、初回に次を実行します。Node.js 25 以降では Corepack が標準同梱されないため、未導入の場合は `npm install -g corepack` で先に導入するか、pnpm 12.18.0 本体を直接インストールしてください。
 
 ```powershell
 corepack enable
