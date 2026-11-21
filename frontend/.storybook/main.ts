@@ -1,6 +1,6 @@
 import path from "node:path";
 import type { StorybookConfig } from "@storybook/nextjs-vite";
-import { stylexVitePlugin } from "../config/stylexVitePlugin.ts";
+import { stylexVitePlugin } from "../config/stylexVitePlugin.mts";
 
 const config: StorybookConfig = {
   stories: ["../src/shared/**/*.stories.@(ts|tsx)"],

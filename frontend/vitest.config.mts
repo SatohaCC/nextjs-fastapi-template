@@ -1,14 +1,14 @@
 import path from "node:path";
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vitest/config";
-import { stylexVitePlugin } from "./config/stylexVitePlugin";
+import { stylexVitePlugin } from "./config/stylexVitePlugin.mts";
 
 export default defineConfig({
-  plugins: [stylexVitePlugin({ rootDir: __dirname, test: true }), react()],
-  cacheDir: path.resolve(__dirname, "../.cache/vitest"),
+  plugins: [stylexVitePlugin({ rootDir: import.meta.dirname, test: true }), react()],
+  cacheDir: path.resolve(import.meta.dirname, "../.cache/vitest"),
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./src"),
+      "@": path.resolve(import.meta.dirname, "./src"),
     },
   },
   test: {
