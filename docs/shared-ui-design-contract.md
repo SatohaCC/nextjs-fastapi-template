@@ -81,3 +81,15 @@ Storybook ビルドを Chromium で描画し、背景色と透過 State Layer（
   - `Checkbox`・`Switch`・`RadioGroup`:
     - 単体表示（`label`・`description`・表示対象 `errorMessage` がすべて無し、または外部 `<Field>` 内）ではコントロール本体（`role="checkbox"` / `role="switch"` / `role="radiogroup"`）に `className` とインライン `style` の両方を渡す。
     - 自身の `label`・`description`・表示対象 `errorMessage` を持つ場合は外側の `<Field>`（`[data-slot="field"]`）へ適用する。
+
+## 6. ブランドテーマの差し替え（`stylex.createTheme`）
+
+[tokens.stylex.ts](../frontend/src/shared/styles/tokens.stylex.ts) の `tokens` は `stylex.defineVars(...)` で定義されており、`stylex.createTheme(tokens, ...)` を使うことでコンポーネント側のコードを変更せずにサブツリー単位またはアプリ全体の配色を差し替えられる。実装例は [brandTheme.ts](../frontend/src/shared/styles/brandTheme.ts) と Storybook（`shared/styles/ThemeOverride`）を参照すること。
+
+1. **テーマ定義の基本ルール**
+   - 第 1 引数の `tokens` は StyleX コンパイラで静的解決できるよう、相対パス（`./tokens.stylex` 等）で import する。
+   - `primary` / `onPrimary` / `primaryContainer` / `onPrimaryContainer` / `secondary` などのセマンティックトークンを上書きする際は、`{ default: ..., "@media (prefers-color-scheme: dark)": ... }` の形式でライト・ダーク双方の値を定義する。
+   - 定義したテーマはルートコンテナ（例: `<body>` やセクションルート）へ `{...stylex.props(indigoBrandTheme)}` として渡すだけで子孫の共有 UI に伝播する。
+2. **差し替え後の検証手順**
+   - `pnpm check`・`pnpm test`・`pnpm build` に加え、`pnpm test:storybook` を実行して全ストーリーの描画および StyleX クラス生成を Chromium 上で確認する。
+   - 変更したカラーロール（`Button` / `Tabs` / `Switch` 等）について、ライト・ダーク両テーマおよび `:hover` 合成後を含めて通常文字 `≥ 4.5:1`・非テキスト UI `≥ 3.0:1` のコントラスト比を満たすことを確認する（計測手法は [contrast.ts](../frontend/storybook-tests/contrast.ts) を参照）。
