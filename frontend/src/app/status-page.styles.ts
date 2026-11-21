@@ -1,11 +1,6 @@
 import * as stylex from "@stylexjs/stylex";
 import { tokens } from "../shared/styles/tokens.stylex";
 
-const spin = stylex.keyframes({
-  from: { transform: "rotate(0deg)" },
-  to: { transform: "rotate(360deg)" },
-});
-
 export const statusPageStyles = stylex.create({
   page: {
     minHeight: "70vh",
@@ -91,21 +86,5 @@ export const statusPageStyles = stylex.create({
     color: tokens.onSurface,
     fontSize: "0.9375rem",
     fontWeight: 500,
-  },
-  spinner: {
-    width: "1.25rem",
-    height: "1.25rem",
-    borderRadius: tokens.cornerFull,
-    borderWidth: "2px",
-    borderStyle: "solid",
-    borderColor: tokens.outlineVariant,
-    borderTopColor: tokens.primary,
-    animationName: spin,
-    animationDuration: {
-      default: "900ms",
-      "@media (prefers-reduced-motion: reduce)": "0s",
-    },
-    animationTimingFunction: "linear",
-    animationIterationCount: "infinite",
   },
 });
