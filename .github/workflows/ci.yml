@@ -44,6 +44,9 @@ jobs:
       - name: Check paths, lint, typecheck & format
         run: pnpm check
 
+      - name: Check OpenAPI generated types
+        run: pnpm check:api-types
+
       - name: Run unit tests
         run: pnpm test
 
