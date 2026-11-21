@@ -44,15 +44,18 @@ export function TaskCreateForm({ isSubmitting, onCreate }: TaskCreateFormProps) 
     }
 
     setTitleError(null);
+    // 送信中も入力を受け付けるため、送信時点の値を控えておき完了後の初期化判定に使う。
+    const submitted = { title, description, priority };
     try {
       await onCreate({
         title: trimmedTitle,
         description: description.trim(),
         priority,
       });
-      setTitle("");
-      setDescription("");
-      setPriority("medium");
+      // 送信後に書き換えられた項目は未保存の入力として残し、送信時のままの項目だけ初期化する。
+      setTitle((current) => (current === submitted.title ? "" : current));
+      setDescription((current) => (current === submitted.description ? "" : current));
+      setPriority((current) => (current === submitted.priority ? "medium" : current));
     } catch (error) {
       const fieldError = extractFieldErrorMessage(error, "title");
       if (fieldError) {
