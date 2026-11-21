@@ -207,4 +207,56 @@ describe("Textarea", () => {
       "",
     );
   });
+
+  it("外部 Field 内で errorMessage を動的に追加・解除しても要素の同一性・フォーカス・入力値・FormData 送信を保持する", async () => {
+    const user = userEvent.setup();
+    let submitted: FormDataEntryValue | null = null;
+
+    function renderOuterField(errorMessage?: string) {
+      return (
+        <form
+          onSubmit={(event) => {
+            event.preventDefault();
+            submitted = new FormData(event.currentTarget).get("outerMemo");
+          }}
+        >
+          <Field name="outerMemo">
+            <FieldLabel>外部ラベル</FieldLabel>
+            <Textarea errorMessage={errorMessage} />
+            <FieldDescription>外部説明</FieldDescription>
+          </Field>
+          <button type="submit">送信</button>
+        </form>
+      );
+    }
+
+    const { rerender } = render(renderOuterField());
+    const initialNode = screen.getByRole("textbox", { name: "外部ラベル" });
+    await user.click(initialNode);
+    await user.type(initialNode, "入力途中のテキスト");
+    expect(initialNode).toHaveFocus();
+    expect(document.querySelectorAll('[data-slot="field"]')).toHaveLength(1);
+
+    rerender(renderOuterField("20文字以上で入力してください。"));
+    const withErrorNode = screen.getByRole("textbox", { name: "外部ラベル" });
+    expect(withErrorNode).toBe(initialNode);
+    expect(initialNode).toHaveFocus();
+    expect(initialNode).toHaveValue("入力途中のテキスト");
+    expect(initialNode).toHaveAttribute("aria-invalid", "true");
+    expect(initialNode).toHaveAccessibleDescription("外部説明 20文字以上で入力してください。");
+    expect(initialNode.closest('[data-slot="textarea-box"]')).toHaveAttribute("data-invalid", "");
+    expect(document.querySelectorAll('[data-slot="field"]')).toHaveLength(1);
+
+    rerender(renderOuterField());
+    const clearedNode = screen.getByRole("textbox", { name: "外部ラベル" });
+    expect(clearedNode).toBe(initialNode);
+    expect(initialNode).toHaveFocus();
+    expect(initialNode).toHaveValue("入力途中のテキスト");
+    expect(initialNode).not.toHaveAttribute("aria-invalid", "true");
+    expect(initialNode).toHaveAccessibleDescription("外部説明");
+    expect(initialNode.closest('[data-slot="textarea-box"]')).not.toHaveAttribute("data-invalid");
+
+    await user.click(screen.getByRole("button", { name: "送信" }));
+    expect(submitted).toBe("入力途中のテキスト");
+  });
 });

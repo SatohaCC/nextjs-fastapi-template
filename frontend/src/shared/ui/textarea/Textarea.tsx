@@ -112,7 +112,8 @@ export function Textarea({
     isInvalid,
     showError,
     hasFieldLayout,
-    isInsideOuterFieldOnly,
+    hasOuterField,
+    outerFieldDisabled,
     passStyleToControl,
     extraDescribedBy,
   } = useStandaloneField({
@@ -133,7 +134,7 @@ export function Textarea({
     >
       <UiTextarea
         id={id}
-        {...(isInsideOuterFieldOnly && name ? { name } : {})}
+        {...(hasOuterField && name ? { name } : {})}
         rows={rows}
         autoResize={autoResize}
         placeholder={placeholder}
@@ -148,7 +149,7 @@ export function Textarea({
         onSubmit={onSubmit}
         aria-label={ariaLabel}
         aria-labelledby={ariaLabelledBy}
-        aria-invalid={isInsideOuterFieldOnly ? (isInvalid ?? ariaInvalid) : ariaInvalid}
+        aria-invalid={hasOuterField ? (isInvalid ?? ariaInvalid) : ariaInvalid}
         className={(state) =>
           stylex.props(s.input, autoResize && s.inputAutoResize, state.disabled && s.inputDisabled)
             .className
@@ -170,8 +171,46 @@ export function Textarea({
     </TextareaControlBox>
   );
 
-  if (isInsideOuterFieldOnly) {
-    return controlBox;
+  const labelNode = label && (
+    <FieldLabel
+      className={(state) =>
+        stylex.props(s.label, state.invalid && s.labelInvalid, state.disabled && s.labelDisabled)
+          .className
+      }
+    >
+      {label}
+      {required && (
+        <span aria-hidden="true" {...stylex.props(s.requiredMark)}>
+          *
+        </span>
+      )}
+    </FieldLabel>
+  );
+
+  const descriptionNode = description && (
+    <p
+      id={descId}
+      data-slot="field-description"
+      {...stylex.props(s.supporting, (disabled || outerFieldDisabled) && s.supportingDisabled)}
+    >
+      {description}
+    </p>
+  );
+
+  // 外部 Field 内では補足・エラー有無が変わっても TextareaControlBox を再マウントさせない。
+  if (hasOuterField) {
+    return (
+      <>
+        {labelNode}
+        {controlBox}
+        {descriptionNode}
+        {showError && (
+          <div id={errorId} data-slot="field-error" {...stylex.props(s.error)}>
+            {errorMessage}
+          </div>
+        )}
+      </>
+    );
   }
 
   return (
@@ -181,34 +220,9 @@ export function Textarea({
       invalid={isInvalid}
       {...stylex.props(s.root, hasFieldLayout && style)}
     >
-      {label && (
-        <FieldLabel
-          className={(state) =>
-            stylex.props(
-              s.label,
-              state.invalid && s.labelInvalid,
-              state.disabled && s.labelDisabled,
-            ).className
-          }
-        >
-          {label}
-          {required && (
-            <span aria-hidden="true" {...stylex.props(s.requiredMark)}>
-              *
-            </span>
-          )}
-        </FieldLabel>
-      )}
+      {labelNode}
       {controlBox}
-      {description && (
-        <p
-          id={descId}
-          data-slot="field-description"
-          {...stylex.props(s.supporting, disabled && s.supportingDisabled)}
-        >
-          {description}
-        </p>
-      )}
+      {descriptionNode}
       {showError ? (
         <div id={errorId} data-slot="field-error" {...stylex.props(s.error)}>
           {errorMessage}

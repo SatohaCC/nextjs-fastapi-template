@@ -25,8 +25,10 @@ export function useStandaloneField({
   const isInvalid = invalid ?? (errorMessage ? true : undefined);
   const showError = Boolean(errorMessage) && isInvalid !== false;
   const hasFieldLayout = Boolean(label || description || showError);
-  const isInsideOuterFieldOnly = Boolean(outerField) && !hasFieldLayout;
-  const passStyleToControl = Boolean(outerField) || !hasFieldLayout;
+  const hasOuterField = Boolean(outerField);
+  const outerFieldDisabled = Boolean(outerField?.disabled);
+  const isInsideOuterFieldOnly = hasOuterField && !hasFieldLayout;
+  const passStyleToControl = hasOuterField || !hasFieldLayout;
   const extraDescribedBy = mergeDescribedBy(
     ariaDescribedBy,
     description ? descId : undefined,
@@ -40,6 +42,8 @@ export function useStandaloneField({
     isInvalid,
     showError,
     hasFieldLayout,
+    hasOuterField,
+    outerFieldDisabled,
     isInsideOuterFieldOnly,
     passStyleToControl,
     extraDescribedBy,
