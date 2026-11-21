@@ -57,4 +57,36 @@ describe("useAppQuery", () => {
     expect(result.current.isFetching).toBe(false);
     expect(result.current.data).toBe("loaded");
   });
+
+  it("initialData 指定時はローディングなしで初期表示し、refetch で最新値を取得できる", async () => {
+    let callCount = 0;
+    const queryFn = vi.fn(async () => {
+      callCount += 1;
+      return callCount === 1 ? "revalidated" : "refetched";
+    });
+
+    const { result } = renderHook(
+      () =>
+        useAppQuery({
+          queryKey: ["initial-data-query"],
+          queryFn,
+          initialData: "ssr-initial",
+        }),
+      { wrapper },
+    );
+
+    expect(result.current.isLoading).toBe(false);
+    expect(result.current.data).toBe("ssr-initial");
+
+    await waitFor(() => {
+      expect(result.current.data).toBe("revalidated");
+    });
+
+    result.current.refetch();
+
+    await waitFor(() => {
+      expect(result.current.data).toBe("refetched");
+    });
+    expect(queryFn).toHaveBeenCalledTimes(2);
+  });
 });

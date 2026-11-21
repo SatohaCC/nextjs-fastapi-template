@@ -15,6 +15,11 @@ frontend/out/
 *.py[cod]
 *$py.class
 
+# SQLite local runtime databases
+backend/data/
+*.db-wal
+*.db-shm
+
 # Environment variables
 .env
 .env.*

@@ -244,6 +244,15 @@ type RequestBodyOption<TBody> = [TBody] extends [undefined]
     : { body: TBody };
 
 export type ApiQueryParams = Record<string, string | number | boolean | null | undefined>;
+export type ApiPathParams = Record<string, string | number>;
+
+type ExtractPathParamNames<P extends string> = P extends `${string}{${infer Param}}${infer Rest}`
+  ? Param | ExtractPathParamNames<Rest>
+  : never;
+
+type PathParamsOption<P extends ApiPath> = [ExtractPathParamNames<P & string>] extends [never]
+  ? { params?: never }
+  : { params: Record<ExtractPathParamNames<P & string>, string | number> };
 
 export type ApiRequestOptions<P extends ApiPath, M extends ApiMethodForPath<P>> = {
   method: M;
@@ -252,14 +261,31 @@ export type ApiRequestOptions<P extends ApiPath, M extends ApiMethodForPath<P>> 
   cache?: RequestCache;
   query?: ApiQueryParams;
   baseUrl?: string;
-} & RequestBodyOption<ApiJsonRequestBody<P, M>> &
+} & PathParamsOption<P> &
+  RequestBodyOption<ApiJsonRequestBody<P, M>> &
   ([ApiJsonResponse<P, M>] extends [undefined]
     ? { parse?: never }
     : { parse: (data: unknown) => ApiJsonResponse<P, M> });
 
-function buildRequestUrl(path: string, baseUrl?: string, query?: ApiQueryParams): string {
+function interpolatePathParams(path: string, pathParams?: ApiPathParams): string {
+  return path.replace(/\{([^}]+)\}/g, (_match, key: string) => {
+    const value = pathParams && Object.hasOwn(pathParams, key) ? pathParams[key] : undefined;
+    if (value === undefined) {
+      throw new Error(`パスパラメータ "${key}" が指定されていません。`);
+    }
+    return encodeURIComponent(String(value));
+  });
+}
+
+function buildRequestUrl(
+  path: string,
+  baseUrl?: string,
+  pathParams?: ApiPathParams,
+  query?: ApiQueryParams,
+): string {
+  const resolvedPath = interpolatePathParams(path, pathParams);
   const normalizedBase = baseUrl ? baseUrl.replace(/\/+$/, "") : "";
-  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+  const normalizedPath = resolvedPath.startsWith("/") ? resolvedPath : `/${resolvedPath}`;
   const fullPath = `${normalizedBase}${normalizedPath}`;
   if (!query) {
     return fullPath;
@@ -279,18 +305,29 @@ export function apiRequest<P extends ApiPath, M extends ApiMethodForPath<P>>(
   path: P,
   options: ApiRequestOptions<P, M>,
 ): Promise<ApiJsonResponse<P, M>> {
-  const { method, signal, headers, cache, query, baseUrl, body, parse } = options as {
+  const {
+    method,
+    signal,
+    headers,
+    cache,
+    params: pathParams,
+    query,
+    baseUrl,
+    body,
+    parse,
+  } = options as {
     method: string;
     signal?: AbortSignal;
     headers?: HeadersInit;
     cache?: RequestCache;
+    params?: ApiPathParams;
     query?: ApiQueryParams;
     baseUrl?: string;
     body?: unknown;
     parse?: (data: unknown) => ApiJsonResponse<P, M>;
   };
 
-  const url = buildRequestUrl(String(path), baseUrl, query);
+  const url = buildRequestUrl(String(path), baseUrl, pathParams, query);
   const httpMethod = method.toUpperCase();
 
   if (typeof parse === "function") {

@@ -1,4 +1,5 @@
 import * as stylex from "@stylexjs/stylex";
+import Link from "next/link";
 import { HealthStatusContainer } from "@/features/health/HealthStatusContainer";
 import { pageStyles as s } from "./page.styles";
 
@@ -27,6 +28,9 @@ export default function HomePage() {
           Next.js + FastAPI Template
         </a>
         <nav aria-label="ページ内ナビゲーション" {...stylex.props(s.nav)}>
+          <Link href="/tasks" {...stylex.props(s.link)}>
+            タスク管理
+          </Link>
           <a href="#connection" {...stylex.props(s.link)}>
             接続状態
           </a>
