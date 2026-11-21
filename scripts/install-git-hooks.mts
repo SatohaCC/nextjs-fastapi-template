@@ -31,6 +31,7 @@ export function installGitHooks(root: string): boolean {
           !entry.isDirectory() &&
           !entry.name.endsWith(".sample") &&
           entry.name !== "pre-commit" &&
+          entry.name !== "commit-msg" &&
           entry.name !== "pre-push",
       )
     ) {
@@ -40,7 +41,7 @@ export function installGitHooks(root: string): boolean {
     }
     if (!installed) git("config", "--local", "template.previousHooksPath", previousDir);
   }
-  for (const event of ["pre-commit", "pre-push"]) chmodSync(path.join(hooksDir, event), 0o755);
+  for (const event of ["pre-commit", "commit-msg", "pre-push"]) chmodSync(path.join(hooksDir, event), 0o755);
   git("config", "--local", "core.hooksPath", ".githooks");
   return true;
 }
@@ -48,6 +49,6 @@ export function installGitHooks(root: string): boolean {
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const root = path.resolve(import.meta.dirname, "..");
   if (!process.env.CI && installGitHooks(root)) {
-    console.log("コミット前のローカルパス検査を設定しました。");
+    console.log("ローカルパスとコミットメッセージの検査を設定しました。");
   }
 }

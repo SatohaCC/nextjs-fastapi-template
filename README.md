@@ -75,7 +75,9 @@ FastAPI の Pydantic モデルを更新したら `pnpm gen:api-types` で TypeSc
 | `pnpm dev:frontend` / `pnpm dev:backend` | 各サーバーを単独起動 |
 | `pnpm lint` | Biome、Ruff、Backend の依存方向チェック |
 | `pnpm format` | Biome / Ruff による整形・修正 |
-| `pnpm check` | ローカルパス混入検査、Biome、TypeScript、mypy、Ruff、依存方向、Python の整形、OpenAPI 生成型の一致チェック |
+| `pnpm check` | 依存のインストール状況、ローカルパス、Biome、フロントエンドの依存方向・StyleX の配置、TypeScript、mypy、Ruff、Backend の依存方向・整形、OpenAPI 生成型を検査 |
+| `pnpm check:deps` | ルートと `frontend` の JavaScript 直接依存に未インストールのものがないか検査 |
+| `pnpm check:frontend-boundaries` | 相対パスとエイリアスの依存先、StyleX 定義のファイル配置と参照パスを検査 |
 | `pnpm check:paths` | Git対象のファイルとリンクにローカルの絶対パスがないか検査 |
 | `pnpm test` | 検査スクリプトのテスト、Frontend の Vitest、Backend の pytest |
 | `pnpm test:frontend` / `pnpm test:backend` | 各単体テストを個別実行 |
@@ -130,9 +132,11 @@ Vercel の Git 連携では、この設定を持つリポジトリのルート�
 
 `pnpm check:paths` は追跡中・未追跡の無視されていないファイルを検査します。Windows のドライブ付きパス、Unix のホーム配下、file URI、UNCパス、絶対パスのリンクを検出すると失敗します。コミット直前のステージ内容だけを検査する場合は `pnpm check:paths --staged` を使います。検出したパスの値はログに出しません。除外済みの生成物やバイナリ、外部へ貼り付ける実行ログはこの検査の対象外です。
 
-ローカルでの `pnpm install` 時に Git の `pre-commit` フックを設定します。`git commit` 前にステージ済みの内容を検査し、混入があればコミットを中止します。再設定は `pnpm hooks:install` で実行できます。既存のコミット前・push前フックは引き継ぎ、以前のパスはローカルGit設定だけに保存します。CIやGit管理外ではインストール処理をスキップします。Gitフックを呼ばないツールによるコミットは対象外です。
+ローカルでの `pnpm install` 時に Git フックを設定します。`pre-commit` はステージ済みのローカルパスを、`commit-msg` はコミット件名の Conventional Commits 形式を検査します。Git が生成する標準のマージ・取り消し件名と、形式に合う fixup・squash・amend 件名も受け付けます。再設定は `pnpm hooks:install` で実行できます。既存の `pre-commit`・`commit-msg`・`pre-push` を引き継ぎ、以前のパスはローカル Git 設定だけに保存します。CI や Git 管理外ではインストール処理をスキップします。
 
-`commit-msg` など引き継ぎの対象外となるフックがある場合は、既存設定を保つため自動設定をスキップします。ローカルパス検査は `pnpm check:paths --staged` で実行できます。
+`post-commit` など引き継ぎ対象外のフックがある場合は、既存設定を保つため自動設定をスキップします。ローカルパス検査は `pnpm check:paths --staged` で実行できます。
+
+ブランチ切り替え後に `zod` などのモジュールが見つからない場合は `pnpm check:deps` で確認できます。不足があればリポジトリのルートで `pnpm install --frozen-lockfile` を実行します。
 
 Python のロック対象は Windows x64 と Linux x64（manylinux 2.28 以降）、Python 3.14 です。別のOS・CPUを使う場合は `pnpm-workspace.yaml` の `supportedArchitectures` に追加し、`pnpm install --no-frozen-lockfile` でロックファイルを更新してください。
 
