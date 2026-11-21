@@ -1,12 +1,6 @@
+import * as z from "zod";
 import { ApiError, apiRequest } from "@/shared/lib/api/apiClient";
 import type { components } from "@/shared/lib/api/schema";
-import {
-  expectArray,
-  expectNonEmptyString,
-  expectNumber,
-  expectRecord,
-  expectString,
-} from "@/shared/lib/api/validators";
 
 export type TaskItem = components["schemas"]["TaskResponse"];
 export type TaskList = components["schemas"]["TaskListResponse"];
@@ -24,40 +18,50 @@ export interface TaskFilterState {
   q: string;
 }
 
-function parseTaskStatus(value: unknown): TaskStatus {
-  if (value === "open" || value === "done") {
-    return value;
-  }
-  throw new ApiError("タスクのステータスが不正です。", { code: "INVALID_RESPONSE" });
+function nonBlankString(message: string) {
+  return z.string(message).refine((value) => value.trim().length > 0, message);
 }
 
-function parseTaskPriority(value: unknown): TaskPriority {
-  if (value === "low" || value === "medium" || value === "high") {
-    return value;
+const taskItemSchema = z.object(
+  {
+    id: nonBlankString("タスク ID が不正です。"),
+    title: nonBlankString("タスクタイトルが不正です。"),
+    description: z.string("タスク説明が不正です。"),
+    status: z.enum(["open", "done"], "タスクのステータスが不正です。"),
+    priority: z.enum(["low", "medium", "high"], "タスクの優先度が不正です。"),
+    created_at: nonBlankString("作成日時が不正です。"),
+    updated_at: nonBlankString("更新日時が不正です。"),
+  },
+  "タスクデータの形式が不正です。",
+);
+
+const taskListSchema = z.object(
+  {
+    items: z.array(taskItemSchema, "タスク一覧の配列が不正です。"),
+    total: z.number("タスク件数が不正です。"),
+  },
+  "タスク一覧データの形式が不正です。",
+);
+
+function parseTaskResponse<T>(schema: z.ZodType<T>, data: unknown): T {
+  const result = schema.safeParse(data);
+  if (!result.success) {
+    throw new ApiError(result.error.issues[0]?.message ?? "タスクの応答形式が不正です。", {
+      code: "INVALID_RESPONSE",
+      cause: result.error,
+    });
   }
-  throw new ApiError("タスクの優先度が不正です。", { code: "INVALID_RESPONSE" });
+  return result.data;
 }
 
 /** TaskResponse ペイロードを検証・変換する。 */
 export function parseTaskItem(data: unknown): TaskItem {
-  const record = expectRecord(data, "タスクデータの形式が不正です。");
-  return {
-    id: expectNonEmptyString(record.id, "タスク ID が不正です。"),
-    title: expectNonEmptyString(record.title, "タスクタイトルが不正です。"),
-    description: expectString(record.description, "タスク説明が不正です。"),
-    status: parseTaskStatus(record.status),
-    priority: parseTaskPriority(record.priority),
-    created_at: expectNonEmptyString(record.created_at, "作成日時が不正です。"),
-    updated_at: expectNonEmptyString(record.updated_at, "更新日時が不正です。"),
-  };
+  return parseTaskResponse(taskItemSchema, data);
 }
 
 /** TaskListResponse ペイロードを検証・変換する。 */
 export function parseTaskList(data: unknown): TaskList {
-  const record = expectRecord(data, "タスク一覧データの形式が不正です。");
-  const items = expectArray(record.items, parseTaskItem, "タスク一覧の配列が不正です。");
-  const total = expectNumber(record.total, "タスク件数が不正です。");
-  return { items, total };
+  return parseTaskResponse(taskListSchema, data);
 }
 
 /** 条件に一致するタスク一覧を取得する。 */
