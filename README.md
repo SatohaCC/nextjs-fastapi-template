@@ -4,7 +4,7 @@ Next.js + FastAPI + pnpm 12 + Vercel のプロジェクトテンプレートで�
 
 ## 必要な環境
 
-- Node.js 24.x
+- Node.js 26.x
 - pnpm 12.18.0（ルートの `package.json` の `packageManager` / `engines` に指定）
 - Python 3.14（`backend/.python-version` に指定。pnpm の Python ワークスペース機能で環境を管理）
 
@@ -46,7 +46,7 @@ Backend の `CORS_ORIGINS` は、許可する Origin をカンマ区切りで指
 - `.agents/skills/`: React の責務分離、Effect の要否判断の Skill
 - `.github/workflows/ci.yml`: 静的検証、単体テスト、E2E、Storybook描画、本番ビルド
 - `vercel.json`: Frontend / Backend の Services と公開ルーティング
-- `scripts/`: Node.js 24 で直接実行する TypeScript（`.mts`）の開発用スクリプトとテスト。型チェックは `pnpm typecheck:scripts`
+- `scripts/`: Node.js 26 で直接実行する TypeScript（`.mts`）の開発用スクリプトとテスト。型チェックは `pnpm typecheck:scripts`
 
 ## コマンド
 
