@@ -8,6 +8,12 @@
 
 `frontend/` を変更する場合は、その配下の `AGENTS.md` も読む。プロジェクト固有のSkillは `.agents/skills/` にある。
 
+## 開発作業
+
+- このリポジトリへの変更を伴う開発作業は、着手時に [dev-workflow Skill](.agents/skills/dev-workflow/SKILL.md) を読み、入口として使う。
+- 親 Issue で依頼全体を追い、実装・検証・PR はサブ Issue ごとに行う。小さな変更でも親 Issue の下にサブ Issue を1件用意する。すでに対象のサブ Issue がある場合は再利用する。
+- 開発依頼には、このリポジトリでの親・サブ Issue の起票と紐付け、サブ Issue ごとの PR 作成を含む。
+
 ## Git・コミット
 
 - 作業前に `git status`・`git diff` で既存のユーザー変更を確認し、依頼された作業範囲と区別する。`git checkout --` / `git reset --hard` / `git clean` 等で既存変更を消去したりエラーを隠蔽したりしない。
