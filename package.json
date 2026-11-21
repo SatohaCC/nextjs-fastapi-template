@@ -31,7 +31,8 @@
     "test:e2e": "pnpm --filter frontend test:e2e",
     "storybook": "pnpm --filter frontend storybook",
     "build-storybook": "pnpm --filter frontend build-storybook",
-    "test:storybook": "pnpm --filter frontend test:storybook"
+    "test:storybook": "pnpm --filter frontend test:storybook",
+    "gen:api-types": "node scripts/generate-api-types.mts"
   },
   "devDependencies": {
     "concurrently": "^10.0.7"

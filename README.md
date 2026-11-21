@@ -67,6 +67,7 @@ Backend の `CORS_ORIGINS` は、許可する Origin をカンマ区切りで指
 | `pnpm storybook` | Storybook を http://localhost:6006 で起動 |
 | `pnpm build-storybook` | Storybook の静的ビルド |
 | `pnpm test:storybook` | 静的ビルド後、全ストーリーの描画と StyleX の適用を Chromium で検証 |
+| `pnpm gen:api-types` | FastAPI の OpenAPI スキーマから Frontend 用 TypeScript 型を生成 |
 
 E2E / Storybook のブラウザ検証前に、初回のみ Chromium をインストールします。
 
