@@ -31,3 +31,4 @@ Thumbs.db
 frontend/debug-storybook.log
 
 graphify-out
+/docs/reference/
