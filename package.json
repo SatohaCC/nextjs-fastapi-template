@@ -20,7 +20,7 @@
     "format": "pnpm format:frontend && pnpm format:backend",
     "format:frontend": "pnpm --filter frontend format",
     "format:backend": "pnpm -C backend exec ruff format .",
-    "check": "pnpm check:paths && pnpm lint:frontend && pnpm typecheck && pnpm lint:backend && pnpm -C backend exec ruff format --check .",
+    "check": "pnpm check:paths && pnpm lint:frontend && pnpm typecheck && pnpm lint:backend && pnpm -C backend exec ruff format --check . && pnpm check:api-types",
     "check:paths": "node scripts/check-local-paths.mts",
     "typecheck": "pnpm typecheck:scripts && pnpm --filter frontend typecheck && pnpm -C backend exec mypy .",
     "typecheck:scripts": "pnpm --filter frontend exec tsc --project ../scripts/tsconfig.json",
