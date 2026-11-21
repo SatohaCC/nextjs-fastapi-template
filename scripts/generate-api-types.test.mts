@@ -76,3 +76,35 @@ test("OpenAPI スキーマのプリミティブ・Union・参照・オブジェ�
   assert.match(first, /requestBody: \{/);
   assert.match(first, /204: \{\s+content\?: never;\s+\};/);
 });
+
+test("allOf で Union を含む複数メンバーを結合する際に各メンバーを括弧で囲む", () => {
+  const spec: OpenApiDocument = {
+    components: {
+      schemas: {
+        Item: { type: "string" },
+        SingleAllOf: {
+          allOf: [{ $ref: "#/components/schemas/Item" }],
+        },
+        UnionIntersection: {
+          allOf: [
+            {
+              anyOf: [
+                { type: "object", required: ["a"], properties: { a: { type: "string" } } },
+                { type: "object", required: ["b"], properties: { b: { type: "string" } } },
+              ],
+            },
+            { type: "object", required: ["id"], properties: { id: { type: "string" } } },
+          ],
+        },
+      },
+    },
+  };
+
+  const output = openApiToTypeScript(spec);
+
+  assert.match(output, /SingleAllOf: components\["schemas"\]\["Item"\];/);
+  assert.match(
+    output,
+    /UnionIntersection: \(\{\s+a: string;\s+\} \| \{\s+b: string;\s+\}\) & \(\{\s+id: string;\s+\}\);/,
+  );
+});

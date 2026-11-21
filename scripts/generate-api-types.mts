@@ -106,7 +106,9 @@ function schemaToTs(schema: OpenApiSchema | undefined, depth: number): string {
 
   if (Array.isArray(schema.allOf)) {
     const rendered = Array.from(new Set(schema.allOf.map((item) => schemaToTs(item, depth))));
-    return rendered.length > 0 ? rendered.join(" & ") : "unknown";
+    if (rendered.length === 0) return "unknown";
+    if (rendered.length === 1) return rendered[0];
+    return rendered.map((part) => `(${part})`).join(" & ");
   }
 
   if (Array.isArray(schema.type)) {
