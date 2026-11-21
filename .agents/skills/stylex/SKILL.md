@@ -12,7 +12,7 @@ description: StyleX を使う React UI のスタイルを実装・レビュー�
 
 ## スタイルの実装・レビュー
 
-1. 周辺コンポーネントのスタイル定義と既存トークンを確認する。このリポジトリの `frontend/` を変更するときは [フロントエンドの作業ルール](../../../frontend/AGENTS.md) を読む。共有 UI では [共有 UI の設計規約](../../rules/frontend-shared-ui.md) に従い、`stylex.create()` を `*.styles.ts` に置き、`tokens.stylex.ts` のセマンティックトークンを相対パスで参照する。
+1. 周辺コンポーネントのスタイル定義と既存トークンを確認する。このリポジトリの `frontend/` を変更するときは [フロントエンドの作業ルール](../../../frontend/AGENTS.md) を読む。`shared/ui`・`shared/components` を変更するときは、[共有 UI の設計規約](../../rules/frontend-shared-ui.md) のファイル構成と StyleX 分離に従う。
 2. `stylex.create()` の静的スタイルにはコンパイラが解決できる値を使う。状態やバリアントは定義済みスタイルを `stylex.props()` で合成し、実行時に決まる連続値には動的スタイルを使う。疑似クラスやメディアクエリはプロパティ値の `default` と並べて指定する。
 3. `stylex.props()` を展開する要素では `className` とインラインの `style` の受け渡しを確認する。呼び出し元から StyleX のスタイルを受け取る契約なら、型と合成順を明示する。変更した状態や表示幅で実際のスタイル適用を確認し、共有 UI は設計規約に記載のチェック・テスト・ビルドを実行する。
 

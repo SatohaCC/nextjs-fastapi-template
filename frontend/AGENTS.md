@@ -1,3 +1,9 @@
+# Frontend の作業ルール
+
+画面や共有部品を変更するときは、[Frontend の依存方向と共有 UI の規約](../.agents/rules/frontend-shared-ui.md) を確認する。表示とデータ取得・アプリケーション状態の境界を設計・変更するときは、[react-presentational-container](../.agents/skills/react-presentational-container/SKILL.md) を使う。
+
+`ui-sdk` Skill のサンプルを使う場合も、この規約に沿って部品の置き場所と import 元を決める。画面では既存の `@/shared/ui` の部品を優先し、新しい基本部品が必要なら `src/shared/ui/` で追加・拡張する。
+
 <!-- BEGIN:nextjs-agent-rules -->
 
 ## This is NOT the Next.js you know
