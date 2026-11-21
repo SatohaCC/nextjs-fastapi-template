@@ -27,7 +27,7 @@
   "devDependencies": {
     "@babel/core": "^8.1.2",
     "@biomejs/biome": "^2.6.7",
-    "@playwright/test": "^1.65.0",
+    "@playwright/test": "^1.65.1",
     "@storybook/nextjs-vite": "^10.6.7",
     "@stylexjs/babel-plugin": "^0.19.2",
     "@stylexjs/postcss-plugin": "^0.19.2",
