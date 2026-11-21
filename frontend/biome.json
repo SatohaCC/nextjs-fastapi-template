@@ -7,7 +7,14 @@
   },
   "files": {
     "ignoreUnknown": false,
-    "includes": ["**", "!**/.next", "!next-env.d.ts", "!**/node_modules", "!**/storybook-static"]
+    "includes": [
+      "**",
+      "!**/.next",
+      "!next-env.d.ts",
+      "!src/shared/lib/api/schema.d.ts",
+      "!**/node_modules",
+      "!**/storybook-static"
+    ]
   },
   "formatter": {
     "enabled": true,

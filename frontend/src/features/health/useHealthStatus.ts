@@ -1,12 +1,10 @@
 "use client";
 
 import { ApiError, apiFetchJson } from "@/shared/lib/api/apiClient";
+import type { components } from "@/shared/lib/api/schema";
 import { useAppQuery } from "@/shared/lib/query/useAppQuery";
 
-export interface HealthResponse {
-  status: "ok";
-  service: string;
-}
+export type HealthResponse = components["schemas"]["HealthResponse"];
 
 function parseHealthResponse(data: unknown): HealthResponse {
   if (
