@@ -44,11 +44,6 @@ export const textFieldStyles = stylex.create({
     transitionDuration: tokens.motionDuration,
     transitionTimingFunction: tokens.motionEasing,
   },
-  controlBoxMultiline: {
-    alignItems: "flex-start",
-    paddingBlock: "0.875rem",
-    minHeight: "5.5rem",
-  },
   outlined: {
     backgroundColor: "transparent",
     borderRadius: tokens.cornerExtraSmall,
@@ -140,10 +135,6 @@ export const textFieldStyles = stylex.create({
       color: tokens.onSurfaceVariant,
       opacity: 1,
     },
-  },
-  textarea: {
-    resize: "vertical",
-    minHeight: "3.75rem",
   },
   inputDisabled: {
     color: tokens.disabledContent,

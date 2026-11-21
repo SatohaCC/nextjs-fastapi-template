@@ -22,7 +22,10 @@ export const spinnerStyles = stylex.create({
     borderRightColor: tokens.outlineVariant,
     borderBottomColor: tokens.outlineVariant,
     borderLeftColor: tokens.outlineVariant,
-    animationName: spin,
+    animationName: {
+      default: spin,
+      "@media (prefers-reduced-motion: reduce)": "none",
+    },
     animationDuration: {
       default: "900ms",
       "@media (prefers-reduced-motion: reduce)": "0s",

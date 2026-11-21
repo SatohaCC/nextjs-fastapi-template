@@ -118,16 +118,18 @@ export const switchStyles = stylex.create({
     position: "absolute",
     insetBlock: 0,
     marginBlock: "auto",
+    insetInlineStart: "0.125rem",
+    width: "1.5rem",
+    height: "1.5rem",
     display: "block",
     borderRadius: tokens.cornerFull,
-    transitionProperty: "inset-inline-start, width, height, background-color",
+    transformOrigin: "center",
+    transitionProperty: "transform, background-color",
     transitionDuration: tokens.motionDuration,
     transitionTimingFunction: tokens.motionEasing,
   },
   thumbUnchecked: {
-    width: "1rem",
-    height: "1rem",
-    insetInlineStart: "0.375rem",
+    transform: "translateX(0) scale(0.6667)",
     backgroundColor: {
       default: tokens.outline,
       [stylex.when.ancestor(":hover")]: tokens.onSurfaceVariant,
@@ -136,9 +138,10 @@ export const switchStyles = stylex.create({
     },
   },
   thumbChecked: {
-    width: "1.5rem",
-    height: "1.5rem",
-    insetInlineStart: "1.375rem",
+    transform: {
+      default: "translateX(1.25rem) scale(1)",
+      ":dir(rtl)": "translateX(-1.25rem) scale(1)",
+    },
     backgroundColor: tokens.onPrimary,
   },
   thumbDisabledUnchecked: {

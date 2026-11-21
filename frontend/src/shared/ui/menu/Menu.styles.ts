@@ -9,6 +9,7 @@ export const menuStyles = stylex.create({
     maxWidth: "min(calc(100vw - 1.5rem), 22rem)",
     maxHeight: "var(--available-height, 20rem)",
     overflowY: "auto",
+    overscrollBehavior: "contain",
     paddingBlock: "0.5rem",
     paddingInline: 0,
     borderRadius: tokens.cornerMedium,
@@ -37,6 +38,8 @@ export const menuStyles = stylex.create({
   },
   itemHighlighted: {
     backgroundImage: tokens.stateHover,
+    outline: "2px solid transparent",
+    outlineOffset: -2,
   },
   itemDestructive: {
     color: tokens.error,

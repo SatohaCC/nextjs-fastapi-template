@@ -1,7 +1,20 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { useRef } from "react";
 import { describe, expect, it, vi } from "vitest";
 import { TextField } from "./TextField";
+
+function InputRefTestCase() {
+  const inputRef = useRef<HTMLInputElement>(null);
+  return (
+    <>
+      <TextField label="フォーカス対象" inputRef={inputRef} />
+      <button type="button" onClick={() => inputRef.current?.focus()}>
+        入力欄へ移動
+      </button>
+    </>
+  );
+}
 
 describe("TextField", () => {
   it("ラベル・説明文と入力欄を関連付け、入力変更を通知する", async () => {
@@ -42,14 +55,22 @@ describe("TextField", () => {
     expect(input).toHaveAccessibleDescription("形式が正しくありません。");
   });
 
-  it("無効状態のときは入力できず、複数行モードではtextareaとして描画される", () => {
+  it("無効状態のときは入力できず、数値 0 や意味のある trailing も支援技術へ露出し、inputRef でフォーカスできる", async () => {
+    const user = userEvent.setup();
     const { rerender } = render(<TextField label="無効項目" disabled defaultValue="固定" />);
     expect(screen.getByRole("textbox", { name: "無効項目" })).toBeDisabled();
 
-    rerender(<TextField label="メモ" multiline rows={4} />);
-    const textarea = screen.getByRole("textbox", { name: "メモ" });
-    expect(textarea.tagName).toBe("TEXTAREA");
-    expect(textarea).toHaveAttribute("rows", "4");
+    rerender(<TextField label="上限値" leading={0} trailing="分" defaultValue="15" />);
+    const zeroLeading = screen.getByText("0");
+    const unitTrailing = screen.getByText("分");
+    expect(zeroLeading).toBeVisible();
+    expect(zeroLeading).not.toHaveAttribute("aria-hidden");
+    expect(unitTrailing).toBeVisible();
+    expect(unitTrailing).not.toHaveAttribute("aria-hidden");
+
+    rerender(<InputRefTestCase />);
+    await user.click(screen.getByRole("button", { name: "入力欄へ移動" }));
+    expect(screen.getByRole("textbox", { name: "フォーカス対象" })).toHaveFocus();
   });
 
   it("invalid={false}ではerrorMessageを抑止し、フォーム必須検証と送信値を維持する", async () => {

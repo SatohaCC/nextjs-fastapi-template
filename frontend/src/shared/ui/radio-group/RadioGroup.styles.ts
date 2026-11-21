@@ -45,7 +45,7 @@ export const radioGroupStyles = stylex.create({
   itemField: {
     display: "flex",
     alignItems: "flex-start",
-    gap: "0.5rem",
+    gap: 0,
     minWidth: 0,
   },
   control: {
@@ -137,6 +137,7 @@ export const radioGroupStyles = stylex.create({
     fontWeight: 500,
     color: tokens.onSurface,
     cursor: "pointer",
+    paddingInlineStart: "0.5rem",
   },
   itemLabelDisabled: {
     color: tokens.disabledContent,
@@ -146,6 +147,7 @@ export const radioGroupStyles = stylex.create({
     fontSize: "0.8125rem",
     lineHeight: "1.25rem",
     color: tokens.onSurfaceVariant,
+    paddingInlineStart: "0.5rem",
   },
   itemDescriptionDisabled: {
     color: tokens.disabledContent,

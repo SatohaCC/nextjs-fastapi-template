@@ -13,20 +13,26 @@ export const toastStyles = stylex.create({
     pointerEvents: "none",
   },
   regionTop: {
-    top: "1rem",
+    top: "calc(1rem + env(safe-area-inset-top, 0px))",
   },
   regionBottom: {
-    bottom: "1rem",
+    bottom: "calc(1rem + env(safe-area-inset-bottom, 0px))",
   },
   alignStart: {
-    insetInlineStart: "1rem",
+    insetInlineStart: {
+      default: "calc(1rem + env(safe-area-inset-left, 0px))",
+      ":dir(rtl)": "calc(1rem + env(safe-area-inset-right, 0px))",
+    },
   },
   alignCenter: {
     insetInline: 0,
     marginInline: "auto",
   },
   alignEnd: {
-    insetInlineEnd: "1rem",
+    insetInlineEnd: {
+      default: "calc(1rem + env(safe-area-inset-right, 0px))",
+      ":dir(rtl)": "calc(1rem + env(safe-area-inset-left, 0px))",
+    },
   },
   list: {
     display: "flex",

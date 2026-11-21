@@ -100,10 +100,9 @@ function SharedSettingsForm({
             emitChange({ displayName: next });
           }}
         />
-        <TextField
+        <Textarea
           label="詳細メモ"
           name="memo"
-          multiline
           value={memo}
           onValueChange={(next) => {
             setMemo(next);

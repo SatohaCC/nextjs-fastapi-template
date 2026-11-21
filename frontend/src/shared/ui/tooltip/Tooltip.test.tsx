@@ -101,7 +101,6 @@ describe("Tooltip", () => {
       <Tooltip
         content="保存を実行します"
         triggerRender={<Button variant="filled">保存操作</Button>}
-        triggerStyle={overrides.width(200)}
       >
         保存操作
       </Tooltip>,

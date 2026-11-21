@@ -17,6 +17,20 @@ import {
 import { type CSSProperties, cloneElement, isValidElement, type ReactNode } from "react";
 import { toastStyles as s } from "./Toast.styles";
 
+const CLOSE_ICON = (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    aria-hidden="true"
+    {...stylex.props(s.closeIcon)}
+  >
+    <path d="M18 6 6 18M6 6l12 12" />
+  </svg>
+);
+
 export type { Toaster, ToastOptions, ToastType };
 export { createToaster, toast };
 
@@ -120,17 +134,7 @@ export function ToastViewport({
                     stylex.props(s.closeButton, isInverse && s.buttonFocusInverse).className
                   }
                 >
-                  <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    aria-hidden="true"
-                    {...stylex.props(s.closeIcon)}
-                  >
-                    <path d="M18 6 6 18M6 6l12 12" />
-                  </svg>
+                  {CLOSE_ICON}
                 </UiToastClose>
               )}
             </div>

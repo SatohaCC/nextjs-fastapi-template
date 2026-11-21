@@ -7,7 +7,7 @@ const meta = {
   tags: ["autodocs"],
   args: {
     size: "md",
-    label: "読み込み中...",
+    label: "読み込み中…",
     showLabel: true,
   },
 } satisfies Meta<typeof Spinner>;
@@ -29,6 +29,6 @@ export const Large: Story = {
   args: {
     size: "lg",
     showLabel: true,
-    label: "データを取得しています...",
+    label: "データを取得しています…",
   },
 };
