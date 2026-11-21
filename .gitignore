@@ -24,3 +24,5 @@ frontend/out/
 .DS_Store
 Thumbs.db
 frontend/debug-storybook.log
+
+graphify-out
