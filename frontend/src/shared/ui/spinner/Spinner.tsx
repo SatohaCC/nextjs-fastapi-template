@@ -3,18 +3,27 @@ import { spinnerStyles as s } from "./Spinner.styles";
 
 export type SpinnerSize = "sm" | "md" | "lg";
 
-export interface SpinnerProps {
+interface SpinnerBaseProps {
   size?: SpinnerSize;
-  label?: string;
-  showLabel?: boolean;
-  decorative?: boolean;
   style?: stylex.StyleXStyles;
 }
+
+export type SpinnerProps =
+  | (SpinnerBaseProps & {
+      decorative: true;
+      label?: never;
+      showLabel?: never;
+    })
+  | (SpinnerBaseProps & {
+      decorative?: false;
+      label?: string;
+      showLabel?: boolean;
+    });
 
 /** 読み込み中状態を示すアクセシブルなスピナー部品。 */
 export function Spinner({
   size = "md",
-  label = "読み込み中",
+  label = "読み込み中…",
   showLabel = false,
   decorative = false,
   style,

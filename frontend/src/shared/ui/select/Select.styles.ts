@@ -161,6 +161,7 @@ export const selectStyles = stylex.create({
     minWidth: "var(--anchor-width, 12rem)",
     maxHeight: "var(--available-height, 20rem)",
     overflowY: "auto",
+    overscrollBehavior: "contain",
     paddingBlock: "0.5rem",
     borderRadius: tokens.cornerMedium,
     backgroundColor: tokens.surfaceContainer,
@@ -187,6 +188,8 @@ export const selectStyles = stylex.create({
   },
   itemHighlighted: {
     backgroundImage: tokens.stateHover,
+    outline: "2px solid transparent",
+    outlineOffset: -2,
   },
   itemSelected: {
     backgroundColor: tokens.secondaryContainer,

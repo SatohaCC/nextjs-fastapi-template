@@ -17,7 +17,10 @@ export const skeletonStyles = stylex.create({
   base: {
     display: "block",
     backgroundColor: tokens.surfaceContainerHighest,
-    animationName: pulse,
+    animationName: {
+      default: pulse,
+      "@media (prefers-reduced-motion: reduce)": "none",
+    },
     animationDuration: {
       default: "1.4s",
       "@media (prefers-reduced-motion: reduce)": "0s",

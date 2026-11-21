@@ -17,7 +17,7 @@ export const checkboxStyles = stylex.create({
   row: {
     display: "flex",
     alignItems: "flex-start",
-    gap: "0.5rem",
+    gap: 0,
   },
   standaloneRow: {
     display: "inline-flex",
@@ -125,6 +125,7 @@ export const checkboxStyles = stylex.create({
     fontWeight: 500,
     color: tokens.onSurface,
     cursor: "pointer",
+    paddingInlineStart: "0.5rem",
   },
   labelDisabled: {
     color: tokens.disabledContent,
@@ -134,6 +135,7 @@ export const checkboxStyles = stylex.create({
     fontSize: "0.8125rem",
     lineHeight: "1.25rem",
     color: tokens.onSurfaceVariant,
+    paddingInlineStart: "0.5rem",
   },
   descriptionDisabled: {
     color: tokens.disabledContent,

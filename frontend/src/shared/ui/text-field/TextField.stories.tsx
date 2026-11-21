@@ -71,16 +71,6 @@ export const FilledDisabled: Story = {
   },
 };
 
-export const Multiline: Story = {
-  args: {
-    label: "補足メモ",
-    multiline: true,
-    rows: 4,
-    placeholder: "確認事項や背景の経緯を入力してください。",
-    description: "入力内容の補足として保存されます。",
-  },
-};
-
 function ControlledTextField(args: TextFieldProps) {
   const [value, setValue] = useState("初期入力");
   return (

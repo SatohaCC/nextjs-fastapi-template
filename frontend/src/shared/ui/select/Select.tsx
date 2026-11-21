@@ -14,6 +14,23 @@ import {
 import { useMemo } from "react";
 import { selectStyles as s } from "./Select.styles";
 
+const CHEVRON_PATH = <path d="m6 9 6 6 6-6" />;
+
+const CHECK_ICON = (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2.5"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+    {...stylex.props(s.indicator)}
+  >
+    <path d="M5 12l5 5L20 7" />
+  </svg>
+);
+
 export interface SelectOption {
   value: string;
   label: string;
@@ -119,7 +136,7 @@ export function Select({
                   state.disabled && s.chevronDisabled,
                 )}
               >
-                <path d="m6 9 6 6 6-6" />
+                {CHEVRON_PATH}
               </svg>
             </>
           )}
@@ -142,18 +159,7 @@ export function Select({
             >
               <span>{item.label}</span>
               <SelectItemIndicator className={stylex.props(s.indicator).className}>
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  aria-hidden="true"
-                  {...stylex.props(s.indicator)}
-                >
-                  <path d="M5 12l5 5L20 7" />
-                </svg>
+                {CHECK_ICON}
               </SelectItemIndicator>
             </SelectItem>
           ))}

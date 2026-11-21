@@ -13,13 +13,10 @@ import type { ComponentProps, ReactNode } from "react";
 import { type ButtonSize, type ButtonVariant, getButtonStyles } from "../internal/buttonStyles";
 import { tooltipStyles as s } from "./Tooltip.styles";
 
-export interface TooltipProps {
+interface TooltipBaseProps {
   content: string;
   shortcut?: string;
   children: ReactNode;
-  triggerVariant?: ButtonVariant;
-  triggerSize?: ButtonSize;
-  triggerRender?: ComponentProps<typeof TooltipTrigger>["render"];
   triggerAriaLabel?: string;
   side?: TooltipContentProps["side"];
   align?: TooltipContentProps["align"];
@@ -32,9 +29,22 @@ export interface TooltipProps {
   open?: boolean;
   defaultOpen?: boolean;
   onOpenChange?: UiTooltipProps["onOpenChange"];
-  triggerStyle?: stylex.StyleXStyles;
   style?: stylex.StyleXStyles;
 }
+
+export type TooltipProps =
+  | (TooltipBaseProps & {
+      triggerRender: NonNullable<ComponentProps<typeof TooltipTrigger>["render"]>;
+      triggerVariant?: never;
+      triggerSize?: never;
+      triggerStyle?: never;
+    })
+  | (TooltipBaseProps & {
+      triggerRender?: never;
+      triggerVariant?: ButtonVariant;
+      triggerSize?: ButtonSize;
+      triggerStyle?: stylex.StyleXStyles;
+    });
 
 /** Material Design 3 準拠の補足ヒントツールチップ。 */
 export function Tooltip({
@@ -87,7 +97,7 @@ export function Tooltip({
         {...stylex.props(s.content, style)}
       >
         <span>{content}</span>
-        {shortcut && <TooltipShortcut className={stylex.props(s.shortcut).className} />}
+        {shortcut ? <TooltipShortcut className={stylex.props(s.shortcut).className} /> : null}
       </TooltipContent>
     </UiTooltip>
   );
