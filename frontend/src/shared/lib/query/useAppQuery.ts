@@ -6,14 +6,21 @@ export interface AppQueryOptions<TData> {
   queryKey: readonly unknown[];
   queryFn: (context: { signal: AbortSignal }) => Promise<TData>;
   enabled?: boolean;
+  initialData?: TData;
 }
 
 /** React Query の useQuery をラップし、初回読込・再取得・構造化エラーを提供する。 */
-export function useAppQuery<TData>({ queryKey, queryFn, enabled }: AppQueryOptions<TData>) {
+export function useAppQuery<TData>({
+  queryKey,
+  queryFn,
+  enabled,
+  initialData,
+}: AppQueryOptions<TData>) {
   const { data, error, isLoading, isFetching, refetch } = useQuery({
     queryKey,
     queryFn: ({ signal }) => queryFn({ signal }),
     enabled,
+    ...(initialData !== undefined ? { initialData } : {}),
   });
 
   const normalizedError = error instanceof Error ? error : null;

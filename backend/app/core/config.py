@@ -30,6 +30,12 @@ def _parse_log_level(raw: str | None, *, default: str = "INFO") -> str:
     raise ValueError(f"不正なログレベル設定です: {raw}")
 
 
+def _parse_database_path(raw: str | None, *, default: str = "data/app.db") -> str:
+    if raw is None or not raw.strip():
+        return default
+    return raw.strip()
+
+
 @dataclass(frozen=True)
 class Settings:
     """環境変数から読み込むアプリケーション設定。"""
@@ -41,6 +47,7 @@ class Settings:
     )
     docs_enabled: bool = True
     log_level: str = "INFO"
+    database_path: str = "data/app.db"
 
 
 def load_settings() -> Settings:
@@ -49,6 +56,7 @@ def load_settings() -> Settings:
         cors_origins=_parse_origins(os.getenv("CORS_ORIGINS")),
         docs_enabled=_parse_bool(os.getenv("DOCS_ENABLED"), default=True),
         log_level=_parse_log_level(os.getenv("LOG_LEVEL"), default="INFO"),
+        database_path=_parse_database_path(os.getenv("DATABASE_PATH")),
     )
 
 

@@ -14,11 +14,13 @@ from starlette.datastructures import Headers, MutableHeaders
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.types import ASGIApp, Message, Receive, Scope, Send
 
-from app.clients import ClientRegistry
+from app.clients import ClientRegistry, SqliteTaskStore
 from app.core.config import Settings, load_settings
 from app.core.errors import AppError
 from app.core.logging import configure_logging, request_id_context
+from app.routers.dependencies import TASK_STORE_CLIENT_NAME
 from app.routers.health import router as health_router
+from app.routers.tasks import router as tasks_router
 from app.schemas.error import ErrorResponse, ValidationErrorDetail
 
 REQUEST_ID_HEADER = "X-Request-ID"
@@ -152,6 +154,11 @@ def create_app(
                 maybe_coro = client_startup(application, registry)
                 if inspect.isawaitable(maybe_coro):
                     await maybe_coro
+            if TASK_STORE_CLIENT_NAME not in registry:
+                registry.register(
+                    TASK_STORE_CLIENT_NAME,
+                    SqliteTaskStore(resolved_settings.database_path),
+                )
             yield
         finally:
             await registry.aclose_all()
@@ -234,6 +241,7 @@ def create_app(
         )
 
     application.include_router(health_router)
+    application.include_router(tasks_router)
     return application
 
 

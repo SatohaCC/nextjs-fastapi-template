@@ -188,12 +188,32 @@ describe("apiRequest", () => {
     );
   });
 
-  it("存在しないパスや未定義メソッドを型レベルで検知できる", () => {
+  it("パスパラメータ付き OpenAPI パスを展開・URL エンコードして呼び出せる", async () => {
+    const fetchMock = vi
+      .spyOn(globalThis, "fetch")
+      .mockResolvedValue(new Response(null, { status: 204 }));
+
+    await apiRequest("/api/tasks/{task_id}", {
+      method: "delete",
+      params: { task_id: "task/1 2" },
+    });
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/tasks/task%2F1%202",
+      expect.objectContaining({ method: "DELETE", cache: "no-store" }),
+    );
+  });
+
+  it("存在しないパス・未定義メソッド・パスパラメータ不整合を型レベルで検知できる", () => {
     const verifyTypeConstraints = () => {
       // @ts-expect-error OpenAPI schema に存在しないパスは許可しない
       void apiRequest("/api/non-existent", { method: "get", parse: (raw) => raw });
       // @ts-expect-error /api/health に定義されていない HTTP メソッドは許可しない
       void apiRequest("/api/health", { method: "post", parse: (raw) => raw });
+      // @ts-expect-error {task_id} パラメータが必須のパスで params 欠落は許可しない
+      void apiRequest("/api/tasks/{task_id}", { method: "delete" });
+      // @ts-expect-error パスパラメータのないパスで params 指定は許可しない
+      void apiRequest("/api/health", { method: "get", params: { id: "1" }, parse: (raw) => raw });
     };
 
     expect(typeof verifyTypeConstraints).toBe("function");

@@ -26,12 +26,13 @@ pnpm dev
 `pnpm-workspace.yaml` の `python.enabled: true` により、Frontend・Backend の依存関係をまとめてインストールします。通常の開発起動には環境変数の設定は不要です。
 
 - Frontend: http://localhost:3000
+- タスク管理 CRUD サンプル: http://localhost:3000/tasks
 - Backend: http://127.0.0.1:8000/api/health
 - FastAPI APIドキュメント: http://127.0.0.1:8000/docs
 
 開発時は Next.js が `/api/*` を Backend に転送します。転送先を変更する場合は、ルートの `.env.example` を `frontend/.env.local` にコピーし、`BACKEND_URL` を編集して Frontend を再起動してください。Next.js は `frontend/` をアプリのルートとして環境変数を読み込みます。
 
-Backend のプロセス環境変数では、許可する Origin をカンマ区切りで指定する `CORS_ORIGINS`（既定値 `http://localhost:3000` と `http://127.0.0.1:3000`）、API ドキュメント公開を切り替える `DOCS_ENABLED`（既定値 `true`）、ログレベルを指定する `LOG_LEVEL`（既定値 `INFO`）を設定できます。
+Backend のプロセス環境変数では、許可する Origin をカンマ区切りで指定する `CORS_ORIGINS`（既定値 `http://localhost:3000` と `http://127.0.0.1:3000`）、API ドキュメント公開を切り替える `DOCS_ENABLED`（既定値 `true`）、ログレベルを指定する `LOG_LEVEL`（既定値 `INFO`）、タスク永続化用 SQLite ファイルの保存先を指定する `DATABASE_PATH`（既定値 `data/app.db`）を設定できます。
 
 ## 構成
 

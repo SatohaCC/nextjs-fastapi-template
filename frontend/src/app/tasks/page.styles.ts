@@ -1,0 +1,101 @@
+import * as stylex from "@stylexjs/stylex";
+import { tokens } from "../../shared/styles/tokens.stylex";
+
+const mobile = "@media (max-width: 599px)";
+
+export const tasksPageStyles = stylex.create({
+  page: {
+    maxWidth: "76rem",
+    marginInline: "auto",
+    paddingInline: { default: "2.5rem", [mobile]: "1.25rem" },
+    paddingBottom: "2.5rem",
+  },
+  header: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    flexWrap: "wrap",
+    gap: "0.5rem 1.5rem",
+    minHeight: "5rem",
+    paddingBlock: "0.75rem",
+  },
+  brand: {
+    display: "inline-flex",
+    alignItems: "center",
+    gap: "0.625rem",
+    color: tokens.onSurface,
+    fontWeight: 750,
+    textDecoration: "none",
+  },
+  mark: {
+    display: "grid",
+    placeItems: "center",
+    width: "2rem",
+    height: "2rem",
+    borderRadius: tokens.cornerMedium,
+    backgroundColor: tokens.primary,
+    color: tokens.onPrimary,
+    fontFamily: "monospace",
+    fontSize: "1rem",
+  },
+  nav: {
+    display: "flex",
+    flexWrap: "wrap",
+    gap: "1.25rem",
+  },
+  link: {
+    display: "inline-flex",
+    alignItems: "center",
+    minHeight: "2.75rem",
+    fontSize: "0.875rem",
+    color: tokens.onSurfaceVariant,
+    textUnderlineOffset: "0.25rem",
+    textDecorationLine: { default: "none", ":hover": "underline" },
+  },
+  activeLink: {
+    color: tokens.primary,
+    fontWeight: 700,
+  },
+  hero: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "0.5rem",
+    paddingBlock: "1.5rem",
+    paddingInline: { default: "2rem", [mobile]: "1.25rem" },
+    marginBottom: "1.5rem",
+    borderRadius: tokens.cornerExtraLarge,
+    backgroundColor: tokens.primaryContainer,
+    color: tokens.onPrimaryContainer,
+  },
+  eyebrow: {
+    fontFamily: "monospace",
+    fontWeight: 650,
+    fontSize: "0.8125rem",
+    letterSpacing: "0.12em",
+  },
+  title: {
+    fontSize: "clamp(1.75rem, 3.5vw, 2.5rem)",
+    lineHeight: 1.25,
+    fontWeight: 780,
+    letterSpacing: "-0.025em",
+  },
+  description: {
+    maxWidth: "46rem",
+    fontSize: "0.9375rem",
+    lineHeight: 1.7,
+  },
+  footer: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    flexWrap: "wrap",
+    gap: "0.5rem",
+    borderTopWidth: 1,
+    borderTopStyle: "solid",
+    borderTopColor: tokens.outlineVariant,
+    marginTop: "2.5rem",
+    paddingTop: "0.5rem",
+    color: tokens.onSurfaceVariant,
+    fontSize: "0.8125rem",
+  },
+});
