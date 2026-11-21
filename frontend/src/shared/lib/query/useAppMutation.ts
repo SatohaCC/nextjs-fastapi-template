@@ -9,6 +9,10 @@ export interface AppMutationOptions<TData, TVariables> {
   onError?: (error: Error, variables: TVariables) => void;
 }
 
+function normalizeMutationError(error: unknown): Error {
+  return error instanceof Error ? error : new Error(String(error));
+}
+
 /** React Query の useMutation をラップし、更新系リクエストとキャッシュ無効化を共通化する。 */
 export function useAppMutation<TData, TVariables = void>({
   mutationFn,
@@ -29,12 +33,14 @@ export function useAppMutation<TData, TVariables = void>({
       onSuccess?.(data, variables);
     },
     onError: (error, variables) => {
-      const normalized = error instanceof Error ? error : new Error(String(error));
-      onError?.(normalized, variables);
+      onError?.(normalizeMutationError(error), variables);
     },
   });
 
-  const normalizedError = mutation.error instanceof Error ? mutation.error : null;
+  const normalizedError =
+    mutation.error !== null && mutation.error !== undefined
+      ? normalizeMutationError(mutation.error)
+      : null;
 
   return {
     data: mutation.data ?? null,

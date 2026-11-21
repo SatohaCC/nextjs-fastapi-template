@@ -52,3 +52,22 @@ test("不正な形式のヘルス応答をエラーとして表示する", async
   await page.goto("/");
   await expect(page.getByRole("status")).toContainText("エラー: Invalid health response");
 });
+
+test("トップページでセキュリティヘッダーとアイコンが正しく配信される", async ({
+  page,
+  request,
+}) => {
+  const response = await page.goto("/");
+  expect(response).not.toBeNull();
+  expect(response?.status()).toBe(200);
+  const headers = response?.headers() ?? {};
+  expect(headers["x-powered-by"]).toBeUndefined();
+  expect(headers["x-content-type-options"]).toBe("nosniff");
+  expect(headers["x-frame-options"]).toBe("DENY");
+  expect(headers["referrer-policy"]).toBe("strict-origin-when-cross-origin");
+
+  const iconHref = await page.locator('link[rel="icon"]').first().getAttribute("href");
+  expect(iconHref).toBeTruthy();
+  const iconResponse = await request.get(iconHref ?? "/icon.svg");
+  expect(iconResponse.status()).toBe(200);
+});

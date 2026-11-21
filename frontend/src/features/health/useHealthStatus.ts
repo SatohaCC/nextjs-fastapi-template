@@ -1,28 +1,23 @@
 "use client";
 
-import { ApiError, apiFetchJson } from "@/shared/lib/api/apiClient";
+import { apiRequest } from "@/shared/lib/api/apiClient";
 import type { components } from "@/shared/lib/api/schema";
+import { expectLiteral, expectNonEmptyString, expectRecord } from "@/shared/lib/api/validators";
 import { useAppQuery } from "@/shared/lib/query/useAppQuery";
 
 export type HealthResponse = components["schemas"]["HealthResponse"];
 
 function parseHealthResponse(data: unknown): HealthResponse {
-  if (
-    typeof data !== "object" ||
-    data === null ||
-    !("status" in data) ||
-    data.status !== "ok" ||
-    !("service" in data) ||
-    typeof data.service !== "string" ||
-    !data.service.trim()
-  ) {
-    throw new ApiError("Invalid health response", { code: "INVALID_RESPONSE" });
-  }
-  return { status: data.status, service: data.service };
+  const record = expectRecord(data, "Invalid health response");
+  return {
+    status: expectLiteral(record.status, "ok", "Invalid health response"),
+    service: expectNonEmptyString(record.service, "Invalid health response"),
+  };
 }
 
 function fetchHealth(signal: AbortSignal): Promise<HealthResponse> {
-  return apiFetchJson("/api/health", {
+  return apiRequest("/api/health", {
+    method: "get",
     signal,
     parse: parseHealthResponse,
   });
