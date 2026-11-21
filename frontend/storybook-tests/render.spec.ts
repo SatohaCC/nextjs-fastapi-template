@@ -447,3 +447,369 @@ test("フォーム部品は明暗テーマの200%文字拡大時も横にはみ�
     }
   }
 });
+
+test("Alert は明暗テーマで十分なコントラストを持ち、閉じる操作と狭幅表示が破綻しない", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 640 });
+
+  for (const colorScheme of ["light", "dark"] as const) {
+    await page.emulateMedia({ colorScheme, reducedMotion: "reduce" });
+
+    for (const spec of [
+      {
+        storyId: "shared-ui-alert--info",
+        title: "設定の案内",
+        message: "変更内容は保存ボタンを押した後に反映されます。",
+        expectedRole: "status" as const,
+      },
+      {
+        storyId: "shared-ui-alert--success",
+        title: "保存しました",
+        message: "プロジェクト設定の更新が完了しました。",
+        expectedRole: "status" as const,
+      },
+      {
+        storyId: "shared-ui-alert--warning",
+        title: "接続が不安定です",
+        message: "再試行するか、ネットワーク設定を確認してください。",
+        expectedRole: "alert" as const,
+      },
+      {
+        storyId: "shared-ui-alert--error-tone",
+        title: "保存に失敗しました",
+        message: "入力内容を確認し、時間をおいて再度お試しください。",
+        expectedRole: "alert" as const,
+      },
+    ]) {
+      await test.step(`${colorScheme} / ${spec.storyId}`, async () => {
+        await page.goto(`/iframe.html?id=${spec.storyId}&viewMode=story`);
+        await expect(page.getByRole(spec.expectedRole)).toBeVisible();
+
+        const titleContrast = await page
+          .getByText(spec.title)
+          .evaluate(measureContrast, "text" as const);
+        const messageContrast = await page
+          .getByText(spec.message)
+          .evaluate(measureContrast, "text" as const);
+        expect(titleContrast).toBeGreaterThanOrEqual(4.5);
+        expect(messageContrast).toBeGreaterThanOrEqual(4.5);
+
+        expect(
+          await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth),
+        ).toBe(true);
+      });
+    }
+  }
+
+  await page.goto("/iframe.html?id=shared-ui-alert--dismissible&viewMode=story");
+  await expect(page.getByText("アップデートがあります")).toBeVisible();
+  await page.getByRole("button", { name: "閉じる" }).click();
+  await expect(page.getByText("アップデートがあります")).toBeHidden();
+  await expect(page.getByRole("button", { name: "通知を再表示" })).toBeVisible();
+});
+
+test("Toast は明暗テーマ・LTR/RTL で十分なコントラストと表示・閉じる操作を保つ", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 640 });
+
+  for (const colorScheme of ["light", "dark"] as const) {
+    await page.emulateMedia({ colorScheme, reducedMotion: "reduce" });
+
+    for (const spec of [
+      {
+        storyId: "shared-ui-toast--default-tone",
+        title: "設定を下書き保存しました",
+        description: "準備ができたら公開してください。",
+      },
+      {
+        storyId: "shared-ui-toast--success-tone",
+        title: "設定を保存しました",
+        description: "すべての変更が反映されています。",
+      },
+      {
+        storyId: "shared-ui-toast--error-tone",
+        title: "通信エラーが発生しました",
+        description: "サーバーへ接続できませんでした。",
+      },
+    ]) {
+      await test.step(`${colorScheme} / ${spec.storyId}`, async () => {
+        await page.goto(`/iframe.html?id=${spec.storyId}&viewMode=story`);
+        const titleLocator = page.getByText(spec.title);
+        const descLocator = page.getByText(spec.description);
+        await expect(titleLocator).toBeVisible();
+        await expect(descLocator).toBeVisible();
+
+        expect(
+          await titleLocator.evaluate(measureContrast, "text" as const),
+        ).toBeGreaterThanOrEqual(4.5);
+        expect(await descLocator.evaluate(measureContrast, "text" as const)).toBeGreaterThanOrEqual(
+          4.5,
+        );
+      });
+    }
+
+    await page.goto("/iframe.html?id=shared-ui-toast--default-tone&viewMode=story");
+    const actionButton = page.getByRole("button", { name: "再実行" });
+    const closeButton = page.getByRole("button", { name: "通知を閉じる" });
+    await expect(actionButton).toBeVisible();
+    const actionContrast = await actionButton.evaluate(measureContrast, "text" as const);
+    expect(actionContrast).toBeGreaterThanOrEqual(4.5);
+
+    const inverseTextColor = await page
+      .getByText("設定を下書き保存しました")
+      .evaluate((el) => getComputedStyle(el).color);
+    await page.keyboard.press("Tab");
+    await expect(page.locator('[data-slot="toast"]')).toBeFocused();
+    await page.keyboard.press("Tab");
+    await expect(actionButton).toBeFocused();
+    expect(await actionButton.evaluate((el) => getComputedStyle(el).outlineColor)).toBe(
+      inverseTextColor,
+    );
+    await page.keyboard.press("Tab");
+    await expect(closeButton).toBeFocused();
+    expect(await closeButton.evaluate((el) => getComputedStyle(el).outlineColor)).toBe(
+      inverseTextColor,
+    );
+  }
+
+  for (const dir of ["ltr", "rtl"] as const) {
+    await test.step(`${dir} interactive`, async () => {
+      await page.emulateMedia({ colorScheme: "light", reducedMotion: "reduce" });
+      await page.goto("/iframe.html?id=shared-ui-toast--interactive&viewMode=story");
+      await page.evaluate((nextDir) => {
+        document.documentElement.dir = nextDir;
+      }, dir);
+
+      await page.getByRole("button", { name: "通常通知を表示" }).click();
+      const region = page.getByRole("region", { name: "通知" });
+      await expect(region).toBeVisible();
+      await expect(page.getByText("下書きを保存しました")).toBeVisible();
+
+      const regionBox = await region.boundingBox();
+      expect(regionBox).not.toBeNull();
+      expect(regionBox?.x ?? -1).toBeGreaterThanOrEqual(0);
+      expect(
+        (regionBox?.x ?? Number.POSITIVE_INFINITY) + (regionBox?.width ?? 0),
+      ).toBeLessThanOrEqual(390);
+      expect(
+        await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth),
+      ).toBe(true);
+
+      await page.getByRole("button", { name: "成功通知を表示" }).click();
+      await expect(page.getByText("更新が完了しました")).toBeVisible();
+      const listLayout = await region.locator('ol[data-slot="toast-list"]').evaluate((el) => {
+        const style = getComputedStyle(el);
+        return {
+          display: style.display,
+          flexDirection: style.flexDirection,
+          rowGap: style.rowGap,
+          count: el.children.length,
+        };
+      });
+      expect(listLayout.display).toBe("flex");
+      expect(listLayout.flexDirection).toBe("column-reverse");
+      expect(Number.parseFloat(listLayout.rowGap)).toBeGreaterThan(0);
+      expect(listLayout.count).toBe(2);
+
+      await page.getByRole("button", { name: "通知を閉じる" }).first().click();
+      await page.getByRole("button", { name: "通知を閉じる" }).first().click();
+      await expect(page.getByText("下書きを保存しました")).toBeHidden();
+      await expect(page.getByText("更新が完了しました")).toBeHidden();
+
+      await page.getByRole("button", { name: "エラー通知を表示" }).click();
+      await expect(page.getByText("送信に失敗しました")).toBeVisible();
+      await page.getByRole("button", { name: "通知を閉じる" }).focus();
+      await page.keyboard.press("Escape");
+      await expect(page.getByText("送信に失敗しました")).toBeHidden();
+    });
+  }
+});
+
+test("Spinner と Skeleton は視認可能で、reduced-motion 設定時にアニメーションを停止する", async ({
+  page,
+}) => {
+  await page.emulateMedia({ colorScheme: "light", reducedMotion: "reduce" });
+
+  await page.goto("/iframe.html?id=shared-ui-spinner--medium&viewMode=story");
+  await expect(page.getByRole("status")).toBeVisible();
+  expect(
+    await page
+      .locator('[role="status"] > span[aria-hidden="true"]')
+      .first()
+      .evaluate((el) => getComputedStyle(el).animationDuration),
+  ).toBe("0s");
+
+  for (const colorScheme of ["light", "dark"] as const) {
+    await page.emulateMedia({ colorScheme, reducedMotion: "reduce" });
+    await page.goto("/iframe.html?id=shared-ui-spinner--large&viewMode=story");
+    const labelContrast = await page
+      .getByText("データを取得しています...")
+      .evaluate(measureContrast, "text" as const);
+    expect(labelContrast).toBeGreaterThanOrEqual(4.5);
+  }
+
+  await page.emulateMedia({ colorScheme: "light", reducedMotion: "reduce" });
+  await page.goto("/iframe.html?id=shared-ui-skeleton--text-lines&viewMode=story");
+  const firstLine = page.locator('#storybook-root [aria-hidden="true"] span').first();
+  await expect(firstLine).toBeVisible();
+  expect(await firstLine.evaluate((el) => getComputedStyle(el).animationDuration)).toBe("0s");
+});
+
+test("Textarea は明暗テーマで十分なコントラストを持ち、invalid 状態と200%文字拡大でも破綻しない", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 640 });
+
+  for (const colorScheme of ["light", "dark"] as const) {
+    await page.emulateMedia({ colorScheme, reducedMotion: "reduce" });
+
+    for (const storyId of ["shared-ui-textarea--outlined", "shared-ui-textarea--filled"]) {
+      await test.step(`${colorScheme} / ${storyId}`, async () => {
+        await page.goto(`/iframe.html?id=${storyId}&viewMode=story`);
+        const textarea = page.getByRole("textbox");
+        await expect(textarea).toBeVisible();
+        expect(await textarea.evaluate(measureContrast, "text" as const)).toBeGreaterThanOrEqual(
+          4.5,
+        );
+
+        await page.evaluate(() => {
+          document.documentElement.style.fontSize = "32px";
+        });
+        expect(
+          await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth),
+        ).toBe(true);
+      });
+    }
+
+    await page.goto("/iframe.html?id=shared-ui-textarea--invalid&viewMode=story");
+    const invalidTextarea = page.getByRole("textbox", { name: /詳細説明/ });
+    await expect(invalidTextarea).toHaveAttribute("aria-invalid", "true");
+    const errorLocator = page.getByText("20文字以上で入力してください。");
+    await expect(errorLocator).toBeVisible();
+    expect(await errorLocator.evaluate(measureContrast, "text" as const)).toBeGreaterThanOrEqual(
+      4.5,
+    );
+  }
+});
+
+test("Menu はキーボード・Escape・Disabled 抑止・LTR/RTL 収まり・明暗コントラストを満たす", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 640 });
+
+  for (const colorScheme of ["light", "dark"] as const) {
+    await page.emulateMedia({ colorScheme, reducedMotion: "reduce" });
+    await page.goto("/iframe.html?id=shared-ui-menu--default-open&viewMode=story");
+    await expect(page.getByRole("menu")).toBeVisible();
+
+    expect(
+      await page.getByRole("menuitem", { name: /編集/ }).evaluate(measureContrast, "text" as const),
+    ).toBeGreaterThanOrEqual(4.5);
+    expect(
+      await page.getByRole("menuitem", { name: "削除" }).evaluate(measureContrast, "text" as const),
+    ).toBeGreaterThanOrEqual(4.5);
+  }
+
+  await page.setViewportSize({ width: 320, height: 640 });
+  for (const dir of ["ltr", "rtl"] as const) {
+    await test.step(`${dir}`, async () => {
+      await page.emulateMedia({ colorScheme: "light", reducedMotion: "reduce" });
+      await page.goto("/iframe.html?id=shared-ui-menu--basic&viewMode=story");
+      await page.evaluate((nextDir) => {
+        document.documentElement.dir = nextDir;
+      }, dir);
+
+      const trigger = page.getByRole("button", { name: "操作メニュー" });
+      await trigger.click();
+      const menu = page.getByRole("menu");
+      await expect(menu).toBeVisible();
+
+      const menuBox = await menu.boundingBox();
+      expect(menuBox).not.toBeNull();
+      expect(menuBox?.x ?? -1).toBeGreaterThanOrEqual(0);
+      expect((menuBox?.x ?? Number.POSITIVE_INFINITY) + (menuBox?.width ?? 0)).toBeLessThanOrEqual(
+        320,
+      );
+      expect(
+        await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth),
+      ).toBe(true);
+
+      await page.keyboard.press("ArrowDown");
+      await expect(page.getByRole("menuitem", { name: /編集/ })).toBeFocused();
+      await page.keyboard.press("ArrowDown");
+      await expect(page.getByRole("menuitem", { name: "複製" })).toBeFocused();
+      await page.keyboard.press("ArrowDown");
+      const disabledItem = page.getByRole("menuitem", { name: "アーカイブ（無効）" });
+      await expect(disabledItem).toBeFocused();
+      await expect(disabledItem).toHaveAttribute("aria-disabled", "true");
+      await page.keyboard.press("Enter");
+      await expect(menu).toBeVisible();
+
+      await page.keyboard.press("Escape");
+      await expect(menu).toBeHidden();
+      await expect(trigger).toBeFocused();
+    });
+  }
+});
+
+test("Tooltip はキーボードフォーカス・Escape・トグル・LTR/RTL・明暗コントラストを満たす", async ({
+  page,
+}) => {
+  for (const colorScheme of ["light", "dark"] as const) {
+    await page.emulateMedia({ colorScheme, reducedMotion: "reduce" });
+    await page.goto("/iframe.html?id=shared-ui-tooltip--default-open&viewMode=story");
+    const tooltip = page.getByRole("tooltip");
+    await expect(tooltip).toBeVisible();
+    expect(await tooltip.evaluate(measureContrast, "text" as const)).toBeGreaterThanOrEqual(4.5);
+  }
+
+  await page.setViewportSize({ width: 390, height: 640 });
+  for (const dir of ["ltr", "rtl"] as const) {
+    await test.step(`${dir}`, async () => {
+      await page.emulateMedia({ colorScheme: "light", reducedMotion: "reduce" });
+      await page.goto("/iframe.html?id=shared-ui-tooltip--basic&viewMode=story");
+      await page.evaluate((nextDir) => {
+        document.documentElement.dir = nextDir;
+      }, dir);
+
+      const trigger = page.getByRole("button", { name: "保存" });
+      await expect(trigger).toBeVisible();
+      await page.keyboard.press("Tab");
+      await expect(trigger).toBeFocused();
+
+      const tooltip = page.getByRole("tooltip");
+      await expect(tooltip).toBeVisible();
+      await expect(tooltip).toContainText("変更内容を保存します");
+
+      const tooltipBox = await tooltip.boundingBox();
+      expect(tooltipBox).not.toBeNull();
+      expect(tooltipBox?.x ?? -1).toBeGreaterThanOrEqual(0);
+      expect(
+        (tooltipBox?.x ?? Number.POSITIVE_INFINITY) + (tooltipBox?.width ?? 0),
+      ).toBeLessThanOrEqual(390);
+
+      await page.keyboard.press("Escape");
+      await expect(tooltip).toBeHidden();
+      await expect(trigger).toBeFocused();
+    });
+  }
+
+  await page.emulateMedia({ colorScheme: "light", reducedMotion: "reduce" });
+  await page.goto("/iframe.html?id=shared-ui-tooltip--basic&viewMode=story");
+  const hoverTrigger = page.getByRole("button", { name: "保存" });
+  await expect(hoverTrigger).toBeVisible();
+  await hoverTrigger.hover();
+  const hoverTooltip = page.getByRole("tooltip");
+  await expect(hoverTooltip).toBeVisible();
+  await hoverTooltip.hover();
+  await expect(hoverTooltip).toBeVisible();
+
+  await page.goto("/iframe.html?id=shared-ui-tooltip--toggleable-info&viewMode=story");
+  const toggleTrigger = page.getByRole("button", { name: "補足情報を表示" });
+  await toggleTrigger.click();
+  await expect(page.getByRole("tooltip")).toBeVisible();
+  await toggleTrigger.click();
+  await expect(page.getByRole("tooltip")).toBeHidden();
+});

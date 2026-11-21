@@ -39,7 +39,7 @@ export const WithFormContent: Story = {
     children: (
       <TextField
         label="セッション名"
-        defaultValue="初診ヒアリング 2026-11-18"
+        defaultValue="プロジェクト計画 2026-11-18"
         description="後からいつでも変更できます。"
       />
     ),
