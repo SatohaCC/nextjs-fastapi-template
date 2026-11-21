@@ -73,7 +73,7 @@ Storybook ビルドを Chromium で描画し、背景色と透過 State Layer（
 
 - **CSS レイヤー順序（[globals.css](../frontend/src/app/globals.css)）**
   - 先頭に `@layer ui-sdk, reset;` を宣言し、`@layer ui-sdk` 内に `[data-slot][hidden]:not([hidden="until-found"])` の非表示規則を置いた上で `@stylex;` と `@layer reset` を配置する。
-  - Next.js 本番ビルドは Babel + `@stylexjs/postcss-plugin`（`useCSSLayers: true`）で静的に CSS を抽出し、Storybook と Vitest は [stylexVitePlugin.ts](../frontend/config/stylexVitePlugin.ts)（`runtimeInjection: true`）で変換する。
+  - Next.js 本番ビルドは Babel + `@stylexjs/postcss-plugin`（`useCSSLayers: true`）で静的に CSS を抽出し、Storybook と Vitest は [stylexVitePlugin.mts](../frontend/config/stylexVitePlugin.mts)（`runtimeInjection: true`）で変換する。
 - **`style?: StyleXStyles` の適用先**
   - `Button`・`Badge`・`Tabs`: 各ルート要素に `{...stylex.props(..., style)}` で適用。
   - `TextField`・`Select`: `<Field>` ルート要素に適用。
