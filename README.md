@@ -40,7 +40,7 @@ Backend の `CORS_ORIGINS` は、許可する Origin をカンマ区切りで指
 - `frontend/src/shared/ui/`: ヘッドレスUIを包む、Props ベースの最小部品
 - `frontend/src/shared/components/`: UI部品を組み合わせる Presentational コンポーネント
 - `frontend/src/shared/lib/`: データ取得等の外部ライブラリのアダプタ
-- `frontend/config/stylexVitePlugin.ts`: Storybook / Vitest 共通の StyleX 変換
+- `frontend/config/stylexVitePlugin.mts`: Storybook / Vitest 共通の StyleX 変換
 - `backend/app/`: FastAPI の `routers` / `schemas` / `services` / `clients` / `core`
 - `.agents/rules/`: 設計・コーディング規約
 - `.agents/skills/`: React の責務分離、Effect の要否判断の Skill
