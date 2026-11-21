@@ -89,4 +89,21 @@ describe("useAppQuery", () => {
     });
     expect(queryFn).toHaveBeenCalledTimes(2);
   });
+
+  it("再レンダリングをまたいでも refetch の関数参照が安定している", () => {
+    const queryFn = vi.fn(async () => "value");
+    const { result, rerender } = renderHook(
+      ({ enabled }: { enabled: boolean }) =>
+        useAppQuery({
+          queryKey: ["stable-refetch-query"],
+          queryFn,
+          enabled,
+        }),
+      { initialProps: { enabled: false }, wrapper },
+    );
+
+    const initialRefetch = result.current.refetch;
+    rerender({ enabled: false });
+    expect(result.current.refetch).toBe(initialRefetch);
+  });
 });
