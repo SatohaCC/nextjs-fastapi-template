@@ -762,10 +762,10 @@ export function handlePreToolUse(payload: HookPayload, root: string): PreToolUse
   const { count } = writeFailureSummary(root);
   const reason = [
     "コミット前チェックが未完了のため git commit を一時停止しました。",
-    "1. `.agents/skills/git-commit/SKILL.md` を読み込み、ステージ済み差分（`git diff --cached`）と `.cache/lint-review/failure-summary.md`（2回以上の失敗: " +
-      `${count}件）から、既存リンター設定や独自リンターで品質を縛れるか判断してください。`,
-    "2. ルール化・静的判定できない項目は無理にリンター化せず、そのままコミットへ進んで構いません。",
-    '3. 確認後（リンター設定や独自ルールを追加した場合はステージ後）に `node scripts/lint-review-hook.mts mark-reviewed --note "<判断結果>"` を実行してから再コミットしてください。',
+    "1. `.agents/skills/code-review/SKILL.md` に従い、ステージ済み差分（`git diff --cached`）をレビューしてください（同一のステージ済み差分で直前に完了済みなら再実行不要）。",
+    "2. `.agents/skills/git-commit/SKILL.md` を読み込み、ステージ済み差分と `.cache/lint-review/failure-summary.md`（2回以上の失敗: " +
+      `${count}件）から、既存リンター設定や独自リンターで品質を縛れるか判断してください（静的判定できない項目は無理にリンター化不要）。`,
+    '3. 確認後（修正やリンター追加を行った場合はステージ後）に `node scripts/lint-review-hook.mts mark-reviewed --note "<レビュー・判断結果>"` を実行してから再コミットしてください。',
   ].join("\n");
 
   return { decision: "deny", reason };

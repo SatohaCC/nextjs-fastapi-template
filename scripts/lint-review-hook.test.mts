@@ -101,6 +101,7 @@ test("handlePreToolUse は未確認の git commit を 1 回止め、markReviewed
       root,
     );
     assert.equal(denied.decision, "deny");
+    assert.match(denied.reason ?? "", /code-review/);
     assert.match(denied.reason ?? "", /git-commit/);
     assert.match(denied.reason ?? "", /mark-reviewed/);
     assert.equal(existsSync(path.join(root, ".cache", "lint-review", "failure-summary.md")), true);
