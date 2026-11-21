@@ -116,3 +116,15 @@ Vercel の Git 連携では、この設定を持つリポジトリのルート�
 `commit-msg` など引き継ぎの対象外となるフックがある場合は、既存設定を保つため自動設定をスキップします。ローカルパス検査は `pnpm check:paths --staged` で実行できます。
 
 Python のロック対象は Windows x64 と Linux x64（manylinux 2.28 以降）、Python 3.14 です。別のOS・CPUを使う場合は `pnpm-workspace.yaml` の `supportedArchitectures` に追加し、`pnpm install --no-frozen-lockfile` でロックファイルを更新してください。
+
+## テンプレートから新規プロジェクトを作成する
+
+このテンプレートを複製して新しいアプリケーションを立ち上げる際は、以下の箇所を確認・更新してください。
+
+- [ ] **パッケージ名・メタ情報**: ルートの `package.json`（`name`）、必要に応じて `frontend/package.json`、`backend/pyproject.toml`（`name` / `description`）を変更する
+- [ ] **Backend 基本設定**: `backend/app/core/config.py` の `app_name`（OpenAPI タイトル）と `service_name`（`/api/health` の返却値）を変更する
+- [ ] **メタデータ・サンプル画面**: `frontend/src/app/layout.tsx` の `metadata`（`title` / `description`）を更新し、`frontend/src/app/page.tsx` のサンプル内容をアプリの画面へ差し替える
+- [ ] **ヘルスチェックと E2E テスト**: `frontend/src/features/health/` と `frontend/e2e/health.spec.ts` を確認し、ヘルスチェックを残す場合は `service_name` の期待値（既定値 `template-backend`）や文言を新アプリに合わせて更新する
+- [ ] **テーマ・配色トークン**: `frontend/src/shared/styles/tokens.stylex.ts` の `palette` / `tokens` をプロダクトの配色に合わせてカスタマイズする
+- [ ] **環境変数とデプロイ設定**: `.env.example` を参照して `frontend/.env.local`（`BACKEND_URL`）や Backend のプロセス環境変数（`CORS_ORIGINS`）を設定し、必要に応じて `vercel.json` のルーティングやビルド設定を確認する
+
