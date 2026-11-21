@@ -31,7 +31,7 @@ pnpm dev
 
 開発時は Next.js が `/api/*` を Backend に転送します。転送先を変更する場合は、ルートの `.env.example` を `frontend/.env.local` にコピーし、`BACKEND_URL` を編集して Frontend を再起動してください。Next.js は `frontend/` をアプリのルートとして環境変数を読み込みます。
 
-Backend の `CORS_ORIGINS` は、許可する Origin をカンマ区切りで指定するプロセス環境変数です。既定値は `http://localhost:3000` と `http://127.0.0.1:3000` です。
+Backend のプロセス環境変数では、許可する Origin をカンマ区切りで指定する `CORS_ORIGINS`（既定値 `http://localhost:3000` と `http://127.0.0.1:3000`）、API ドキュメント公開を切り替える `DOCS_ENABLED`（既定値 `true`）、ログレベルを指定する `LOG_LEVEL`（既定値 `INFO`）を設定できます。
 
 ## 構成
 
@@ -39,7 +39,7 @@ Backend の `CORS_ORIGINS` は、許可する Origin をカンマ区切りで指
 - `frontend/src/features/`: データ取得と表示の接続（Container / custom Hook）
 - `frontend/src/shared/ui/`: ヘッドレスUIを包む、Props ベースの最小部品
 - `frontend/src/shared/components/`: UI部品を組み合わせる Presentational コンポーネント
-- `frontend/src/shared/lib/`: データ取得等の外部ライブラリのアダプタ
+- `frontend/src/shared/lib/`: OpenAPI 型付き API クライアント（Client 用 `apiRequest` / RSC 用 `serverApiRequest`）、レスポンス検証、React Query ラッパー等の外部ライブラリアダプタ
 - `frontend/config/stylexVitePlugin.mts`: Storybook / Vitest 共通の StyleX 変換
 - `backend/app/`: FastAPI の `routers` / `schemas` / `services` / `clients` / `core`
 - `.agents/rules/`: 設計・コーディング規約
@@ -125,8 +125,8 @@ Python のロック対象は Windows x64 と Linux x64（manylinux 2.28 以降�
 
 - [ ] **パッケージ名・メタ情報**: ルートの `package.json`（`name`）、必要に応じて `frontend/package.json`、`backend/pyproject.toml`（`name` / `description`）を変更する
 - [ ] **Backend 基本設定**: `backend/app/core/config.py` の `app_name`（OpenAPI タイトル）と `service_name`（`/api/health` の返却値）を変更する
-- [ ] **メタデータ・サンプル画面**: `frontend/src/app/layout.tsx` の `metadata`（`title` / `description`）を更新し、`frontend/src/app/page.tsx` のサンプル内容をアプリの画面へ差し替える
+- [ ] **メタデータ・アイコン・サンプル画面**: `frontend/src/app/layout.tsx` の `metadata`（`title` / `description`）と `frontend/src/app/icon.svg` を更新し、`frontend/src/app/page.tsx` のサンプル内容をアプリの画面へ差し替える
 - [ ] **ヘルスチェックと E2E テスト**: `frontend/src/features/health/` と `frontend/e2e/health.spec.ts` を確認し、ヘルスチェックを残す場合は `service_name` の期待値（既定値 `template-backend`）や文言を新アプリに合わせて更新する
 - [ ] **テーマ・配色トークン**: `frontend/src/shared/styles/tokens.stylex.ts` の `palette` / `tokens` をプロダクトの配色に合わせてカスタマイズする
-- [ ] **環境変数とデプロイ設定**: `.env.example` を参照して `frontend/.env.local`（`BACKEND_URL`）や Backend のプロセス環境変数（`CORS_ORIGINS`）を設定し、必要に応じて `vercel.json` のルーティングやビルド設定を確認する
+- [ ] **環境変数とデプロイ設定**: `.env.example` を参照して `frontend/.env.local`（`BACKEND_URL`）や Backend のプロセス環境変数（`CORS_ORIGINS`・本番環境では必要に応じて `DOCS_ENABLED=false` や `LOG_LEVEL`）を設定し、必要に応じて `vercel.json` のルーティングやビルド設定を確認する
 
