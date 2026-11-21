@@ -21,7 +21,7 @@ description: Material Design 3のWeb UI・デザインシステムを設計・�
 - 見た目、キーボード・フォーカス等の操作、アプリ固有のデータを分ける。既存のヘッドレスUIの契約を保ち、その上にM3の視覚表現を載せる。見た目がM3でもアクセシビリティが完成したとは判断しない。
 - 各variantと状態について、container / content / state layer / outline / focus indicator / elevationの役割を確認する。disabledやhoverの共通数値を全コンポーネントへ機械的に適用しない。
 - コントラストは最終的な前景色・背景色で検証する。Tone差だけでWCAG適合を保証しない。focus indicatorをState Layerやrippleだけで代用しない。
-- CSS変数・StyleX等へのマッピングを記録する。このプロジェクトでは共有UIの設計規約を読み、`*.styles.ts` とセマンティックトークンを使う。M3採用を理由に既存のUIライブラリを交換しない。
+- CSS変数・StyleX等へのマッピングを記録する。`shared/ui`・`shared/components` を変更するときは、[共有 UI の設計規約](../../rules/frontend-shared-ui.md) のファイル構成と StyleX 分離に従う。M3採用を理由に既存のUIライブラリを交換しない。
 - 参照資料の数値は版付きの基準値として扱う。厳密な再現や新API利用では、対象コンポーネントの公式Specsと導入済みパッケージの版・型定義を再確認する。取得できない仕様を確認済みと書かない。
 
 ## 完了の確認
