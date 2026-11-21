@@ -1,6 +1,7 @@
 import io
 import json
 import logging
+import os
 
 import pytest
 from fastapi.testclient import TestClient
@@ -69,14 +70,77 @@ def test_docs_endpoints_can_be_disabled_via_settings() -> None:
     assert "/api/health" in app.openapi()["paths"]
 
 
-def test_load_settings_parses_docs_and_log_level(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_load_settings_parses_existing_environment_formats(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("CORS_ORIGINS", "https://one.example, , https://two.example ")
+    monkeypatch.setenv("DOCS_ENABLED", " Off ")
+    monkeypatch.setenv("LOG_LEVEL", " debug ")
+    monkeypatch.setenv("DATABASE_PATH", " :memory: ")
+
+    loaded = load_settings()
+
+    assert loaded.cors_origins == ["https://one.example", "https://two.example"]
+    assert loaded.docs_enabled is False
+    assert loaded.log_level == "DEBUG"
+    assert loaded.database_path == ":memory:"
+
+
+@pytest.mark.parametrize("empty_value", [None, ""])
+def test_load_settings_uses_defaults(
+    monkeypatch: pytest.MonkeyPatch, empty_value: str | None
+) -> None:
+    for key in ("CORS_ORIGINS", "DOCS_ENABLED", "LOG_LEVEL", "DATABASE_PATH"):
+        if empty_value is None:
+            monkeypatch.delenv(key, raising=False)
+        else:
+            monkeypatch.setenv(key, empty_value)
+
+    loaded = load_settings()
+
+    assert loaded.cors_origins == ["http://localhost:3000", "http://127.0.0.1:3000"]
+    assert loaded.docs_enabled is True
+    assert loaded.log_level == "INFO"
+    assert loaded.database_path == "data/app.db"
+
+
+def test_create_app_uses_explicit_settings_over_environment(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     monkeypatch.setenv("DOCS_ENABLED", "false")
-    monkeypatch.setenv("LOG_LEVEL", "debug")
+    monkeypatch.setenv("DATABASE_PATH", "configured.db")
+    settings = Settings(docs_enabled=True)
+
+    application = create_app(settings)
+
+    assert application.state.settings is settings
+    assert application.openapi_url == "/openapi.json"
+    assert application.state.settings.database_path == "data/app.db"
+
+
+def test_load_settings_reads_only_supported_environment_fields(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("APP_NAME", "Ignored API name")
+    monkeypatch.setenv("SERVICE_NAME", "ignored-service")
+
+    loaded = load_settings()
+
+    assert loaded.app_name == "Template API"
+    assert loaded.service_name == "template-backend"
+
+
+def test_load_settings_preserves_case_sensitive_environment_lookup(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        os,
+        "environ",
+        {"DOCS_ENABLED": "false", "docs_enabled": "true", "database_path": "ignored.db"},
+    )
 
     loaded = load_settings()
 
     assert loaded.docs_enabled is False
-    assert loaded.log_level == "DEBUG"
+    assert loaded.database_path == "data/app.db"
 
 
 def test_load_settings_rejects_invalid_values(monkeypatch: pytest.MonkeyPatch) -> None:

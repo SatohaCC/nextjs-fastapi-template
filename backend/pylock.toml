@@ -347,6 +347,17 @@ url = "https://files.pythonhosted.org/packages/3a/9f/3554f0148b01ddaa5e678bf5fbc
 sha256 = "b0cdb655fbd1562c2dfc9986f9103a106f7058cd0915afc6e656d4b1d73f3387"
 
 [[packages]]
+name = "pydantic-settings"
+version = "2.16.3"
+
+[[packages.wheels]]
+name = "pydantic_settings-2.16.3-py3-none-any.whl"
+url = "https://files.pythonhosted.org/packages/4c/26/3e68379ca313b6aa58e11fbd8b28d5c6f1b9f4428d70222ba021a76797ec/pydantic_settings-2.16.3-py3-none-any.whl"
+
+[packages.wheels.hashes]
+sha256 = "d1db16a2d34006323a1b42c0640898da58adfbad7ec30baaa9e2b18aafc08999"
+
+[[packages]]
 name = "pygments"
 version = "2.21.0"
 
@@ -524,6 +535,8 @@ requirements = [
     "httpx>=0.28.0",
     "import-linter>=2.1",
     "mypy>=1.14.0",
+    "pydantic-settings>=2.8,<3",
+    "pydantic>=2.7,<3",
     "pytest>=8.3.0",
     "ruff>=0.8.0",
     "uvicorn[standard]>=0.32.0",
