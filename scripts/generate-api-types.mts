@@ -1,5 +1,5 @@
 import { execFileSync } from "node:child_process";
-import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -335,8 +335,34 @@ export function generateApiTypes({
   return content;
 }
 
+/** 生成済みの OpenAPI 型定義ファイルが最新かどうかを検証する。 */
+export function checkApiTypes({
+  root,
+  targetPath = path.join(root, DEFAULT_API_TYPES_RELATIVE_PATH),
+}: {
+  root: string;
+  targetPath?: string;
+}): { upToDate: boolean; expected: string; actual: string | null } {
+  const expected = renderApiTypes(root);
+  const actual = existsSync(targetPath)
+    ? readFileSync(targetPath, "utf8").replaceAll("\r\n", "\n")
+    : null;
+  return { upToDate: actual === expected, expected, actual };
+}
+
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const root = path.resolve(import.meta.dirname, "..");
-  generateApiTypes({ root });
-  console.log("frontend/src/shared/lib/api/schema.d.ts を生成しました。");
+  if (process.argv.includes("--check")) {
+    const result = checkApiTypes({ root });
+    if (!result.upToDate) {
+      console.error(
+        "OpenAPI 生成型に差分があります。pnpm gen:api-types を実行して更新してください。",
+      );
+      process.exit(1);
+    }
+    console.log("OpenAPI 生成型は最新です。");
+  } else {
+    generateApiTypes({ root });
+    console.log("frontend/src/shared/lib/api/schema.d.ts を生成しました。");
+  }
 }

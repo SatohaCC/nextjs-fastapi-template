@@ -32,7 +32,8 @@
     "storybook": "pnpm --filter frontend storybook",
     "build-storybook": "pnpm --filter frontend build-storybook",
     "test:storybook": "pnpm --filter frontend test:storybook",
-    "gen:api-types": "node scripts/generate-api-types.mts"
+    "gen:api-types": "node scripts/generate-api-types.mts",
+    "check:api-types": "node scripts/generate-api-types.mts --check"
   },
   "devDependencies": {
     "concurrently": "^9.0.0"

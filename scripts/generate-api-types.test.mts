@@ -1,6 +1,16 @@
 import assert from "node:assert/strict";
+import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import os from "node:os";
+import path from "node:path";
 import test from "node:test";
-import { type OpenApiDocument, openApiToTypeScript } from "./generate-api-types.mts";
+import {
+  checkApiTypes,
+  generateApiTypes,
+  type OpenApiDocument,
+  openApiToTypeScript,
+} from "./generate-api-types.mts";
+
+const ROOT = path.resolve(import.meta.dirname, "..");
 
 test("OpenAPI スキーマのプリミティブ・Union・参照・オブジェクトを決定論的に変換する", () => {
   const spec: OpenApiDocument = {
@@ -75,4 +85,38 @@ test("OpenAPI スキーマのプリミティブ・Union・参照・オブジェ�
   assert.match(first, /"application\/json": Array<components\["schemas"\]\["Item"\]>;/);
   assert.match(first, /requestBody: \{/);
   assert.match(first, /204: \{\s+content\?: never;\s+\};/);
+});
+
+test("現行の生成済み型ファイルに対して checkApiTypes が最新と判定する", () => {
+  const result = checkApiTypes({ root: ROOT });
+
+  assert.equal(result.upToDate, true);
+});
+
+test("ドリフトした型ファイルに対して checkApiTypes が差分ありと判定する", () => {
+  const tempDir = mkdtempSync(path.join(os.tmpdir(), "api-types-test-"));
+  try {
+    const targetPath = path.join(tempDir, "schema.d.ts");
+    writeFileSync(targetPath, "// drifted\n", "utf8");
+
+    const result = checkApiTypes({ root: ROOT, targetPath });
+
+    assert.equal(result.upToDate, false);
+  } finally {
+    rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test("generateApiTypes で一時ファイルへ生成した直後は checkApiTypes が最新と判定する", () => {
+  const tempDir = mkdtempSync(path.join(os.tmpdir(), "api-types-test-"));
+  try {
+    const outputPath = path.join(tempDir, "schema.d.ts");
+    generateApiTypes({ root: ROOT, outputPath });
+
+    const result = checkApiTypes({ root: ROOT, targetPath: outputPath });
+
+    assert.equal(result.upToDate, true);
+  } finally {
+    rmSync(tempDir, { recursive: true, force: true });
+  }
 });
