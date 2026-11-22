@@ -1,6 +1,8 @@
 import * as stylex from "@stylexjs/stylex";
 import { tokens } from "../../styles/tokens.stylex";
 
+const FORCED_COLORS = "@media (forced-colors: active)";
+
 export const selectStyles = stylex.create({
   root: {
     display: "flex",
@@ -11,7 +13,7 @@ export const selectStyles = stylex.create({
   },
   label: {
     fontSize: "0.875rem",
-    lineHeight: "1.25rem",
+    lineHeight: 1.43,
     fontWeight: 500,
     letterSpacing: "0.00625rem",
     color: tokens.onSurfaceVariant,
@@ -40,8 +42,8 @@ export const selectStyles = stylex.create({
     paddingInline: "1rem",
     borderWidth: 0,
     fontFamily: "inherit",
-    fontSize: "1rem",
-    lineHeight: "1.5rem",
+    fontSize: "max(1rem, 1em)",
+    lineHeight: 1.5,
     letterSpacing: "0.03125rem",
     color: tokens.onSurface,
     textAlign: "start",
@@ -97,6 +99,9 @@ export const selectStyles = stylex.create({
     borderStartEndRadius: tokens.cornerExtraSmall,
     borderEndStartRadius: tokens.cornerNone,
     borderEndEndRadius: tokens.cornerNone,
+    borderWidth: { default: 0, [FORCED_COLORS]: 1 },
+    borderStyle: { default: "none", [FORCED_COLORS]: "solid" },
+    borderColor: { default: "transparent", [FORCED_COLORS]: "CanvasText" },
     boxShadow: {
       default: `inset 0 -1px 0 0 ${tokens.onSurfaceVariant}`,
       "@media (hover: hover)": { ":hover": `inset 0 -1px 0 0 ${tokens.onSurface}` },
@@ -109,6 +114,7 @@ export const selectStyles = stylex.create({
     },
   },
   filledOpen: {
+    borderColor: { default: "transparent", [FORCED_COLORS]: "Highlight" },
     boxShadow: `inset 0 -2px 0 0 ${tokens.primary}`,
   },
   filledInvalid: {
@@ -122,6 +128,7 @@ export const selectStyles = stylex.create({
     backgroundColor: tokens.disabledContainer,
     color: tokens.disabledContent,
     cursor: "not-allowed",
+    borderColor: { default: "transparent", [FORCED_COLORS]: "GrayText" },
     boxShadow: {
       default: `inset 0 -1px 0 0 ${tokens.disabledContent}`,
       "@media (hover: hover)": { ":hover": `inset 0 -1px 0 0 ${tokens.disabledContent}` },
@@ -181,7 +188,7 @@ export const selectStyles = stylex.create({
     paddingInline: "1rem",
     paddingBlock: "0.5rem",
     fontSize: "0.9375rem",
-    lineHeight: "1.375rem",
+    lineHeight: 1.47,
     color: tokens.onSurface,
     cursor: "pointer",
     outline: "none",
@@ -211,7 +218,7 @@ export const selectStyles = stylex.create({
   },
   supporting: {
     fontSize: "0.75rem",
-    lineHeight: "1rem",
+    lineHeight: 1.35,
     color: tokens.onSurfaceVariant,
     paddingInline: "0.25rem",
   },
@@ -220,7 +227,7 @@ export const selectStyles = stylex.create({
   },
   error: {
     fontSize: "0.75rem",
-    lineHeight: "1rem",
+    lineHeight: 1.35,
     color: tokens.error,
     paddingInline: "0.25rem",
   },

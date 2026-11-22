@@ -1,6 +1,8 @@
 import * as stylex from "@stylexjs/stylex";
 import { tokens } from "../../styles/tokens.stylex";
 
+const FORCED_COLORS = "@media (forced-colors: active)";
+
 export const switchStyles = stylex.create({
   root: {
     display: "flex",
@@ -34,7 +36,7 @@ export const switchStyles = stylex.create({
   },
   label: {
     fontSize: "0.9375rem",
-    lineHeight: "1.375rem",
+    lineHeight: 1.47,
     fontWeight: 500,
     color: tokens.onSurface,
     cursor: "pointer",
@@ -45,7 +47,7 @@ export const switchStyles = stylex.create({
   },
   description: {
     fontSize: "0.8125rem",
-    lineHeight: "1.25rem",
+    lineHeight: 1.54,
     color: tokens.onSurfaceVariant,
   },
   descriptionDisabled: {
@@ -69,6 +71,12 @@ export const switchStyles = stylex.create({
     transitionProperty: "background-color, border-color",
     transitionDuration: tokens.motionDuration,
     transitionTimingFunction: tokens.motionEasing,
+    "::after": {
+      content: '""',
+      position: "absolute",
+      insetBlock: "-0.5rem",
+      insetInline: 0,
+    },
   },
   trackUnchecked: {
     backgroundColor: tokens.surfaceContainerHighest,
@@ -94,7 +102,7 @@ export const switchStyles = stylex.create({
   },
   trackDisabledUnchecked: {
     backgroundColor: tokens.disabledContainer,
-    borderColor: tokens.disabledContent,
+    borderColor: { default: tokens.disabledContent, [FORCED_COLORS]: "GrayText" },
     cursor: "not-allowed",
     backgroundImage: {
       default: "none",
@@ -105,7 +113,7 @@ export const switchStyles = stylex.create({
   },
   trackDisabledChecked: {
     backgroundColor: tokens.disabledContainer,
-    borderColor: "transparent",
+    borderColor: { default: "transparent", [FORCED_COLORS]: "GrayText" },
     cursor: "not-allowed",
     backgroundImage: {
       default: "none",
@@ -123,6 +131,9 @@ export const switchStyles = stylex.create({
     height: "1.5rem",
     display: "block",
     borderRadius: tokens.cornerFull,
+    borderWidth: { default: 0, [FORCED_COLORS]: 2 },
+    borderStyle: { default: "none", [FORCED_COLORS]: "solid" },
+    borderColor: { default: "transparent", [FORCED_COLORS]: "CanvasText" },
     transformOrigin: "center",
     transitionProperty: "transform, background-color",
     transitionDuration: tokens.motionDuration,
@@ -143,16 +154,19 @@ export const switchStyles = stylex.create({
       ":dir(rtl)": "translateX(-1.25rem) scale(1)",
     },
     backgroundColor: tokens.onPrimary,
+    borderColor: { default: "transparent", [FORCED_COLORS]: "Highlight" },
   },
   thumbDisabledUnchecked: {
     backgroundColor: tokens.disabledContent,
+    borderColor: { default: "transparent", [FORCED_COLORS]: "GrayText" },
   },
   thumbDisabledChecked: {
     backgroundColor: tokens.surface,
+    borderColor: { default: "transparent", [FORCED_COLORS]: "GrayText" },
   },
   error: {
     fontSize: "0.75rem",
-    lineHeight: "1rem",
+    lineHeight: 1.35,
     color: tokens.error,
   },
 });

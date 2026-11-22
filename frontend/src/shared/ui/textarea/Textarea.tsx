@@ -3,7 +3,7 @@
 import * as stylex from "@stylexjs/stylex";
 import { Field, FieldError, FieldLabel, useFieldControl } from "@ui-sdk/react/field";
 import { type TextareaOptions, Textarea as UiTextarea } from "@ui-sdk/react/textarea";
-import type { ReactNode } from "react";
+import type { KeyboardEvent, ReactNode } from "react";
 import { mergeControlDescribedBy, useStandaloneField } from "../internal/useStandaloneField";
 import { textareaStyles as s } from "./Textarea.styles";
 
@@ -124,6 +124,37 @@ export function Textarea({
     ariaDescribedBy,
   });
 
+  const handleKeyDown =
+    submitShortcut === "enter"
+      ? (event: KeyboardEvent<HTMLTextAreaElement>) => {
+          if (
+            event.defaultPrevented ||
+            event.currentTarget.disabled ||
+            event.key !== "Enter" ||
+            event.shiftKey ||
+            event.ctrlKey ||
+            event.metaKey ||
+            event.altKey
+          ) {
+            return;
+          }
+          // IME 変換中または Safari の変換確定直後（keyCode === 229）は確定操作を妨げず送信もしない。
+          if (event.nativeEvent.isComposing || event.nativeEvent.keyCode === 229) {
+            return;
+          }
+          const form = event.currentTarget.form;
+          if (!onSubmit && !form) {
+            return;
+          }
+          event.preventDefault();
+          if (onSubmit) {
+            onSubmit(event.currentTarget.value, { event: event.nativeEvent });
+          } else {
+            form?.requestSubmit();
+          }
+        }
+      : undefined;
+
   const controlBox = (
     <TextareaControlBox
       id={id}
@@ -145,8 +176,9 @@ export function Textarea({
         readOnly={readOnly}
         required={required}
         maxLength={maxLength}
-        submitShortcut={submitShortcut}
-        onSubmit={onSubmit}
+        submitShortcut={submitShortcut === "enter" ? undefined : submitShortcut}
+        onSubmit={submitShortcut === "enter" ? undefined : onSubmit}
+        onKeyDown={handleKeyDown}
         aria-label={ariaLabel}
         aria-labelledby={ariaLabelledBy}
         aria-invalid={hasOuterField ? (isInvalid ?? ariaInvalid) : ariaInvalid}

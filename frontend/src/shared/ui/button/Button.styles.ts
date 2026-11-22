@@ -17,7 +17,7 @@ export const buttonStyles = stylex.create({
     borderColor: "transparent",
     fontFamily: "inherit",
     fontSize: "0.875rem",
-    lineHeight: "1.25rem",
+    lineHeight: 1.43,
     fontWeight: 500,
     letterSpacing: "0.00625rem",
     textDecoration: "none",

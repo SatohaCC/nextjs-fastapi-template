@@ -1,6 +1,9 @@
 import * as stylex from "@stylexjs/stylex";
 import { tokens } from "../../styles/tokens.stylex";
 
+const COARSE_POINTER = "@media (pointer: coarse)";
+const FORCED_COLORS = "@media (forced-colors: active)";
+
 export const radioGroupStyles = stylex.create({
   root: {
     display: "flex",
@@ -16,7 +19,7 @@ export const radioGroupStyles = stylex.create({
   },
   groupLabel: {
     fontSize: "0.875rem",
-    lineHeight: "1.25rem",
+    lineHeight: 1.43,
     fontWeight: 500,
     letterSpacing: "0.00625rem",
     color: tokens.onSurfaceVariant,
@@ -55,9 +58,9 @@ export const radioGroupStyles = stylex.create({
     alignItems: "center",
     justifyContent: "center",
     flexShrink: 0,
-    width: "2.5rem",
-    height: "2.5rem",
-    margin: "-0.375rem",
+    width: { default: "2.5rem", [COARSE_POINTER]: "2.75rem" },
+    height: { default: "2.5rem", [COARSE_POINTER]: "2.75rem" },
+    margin: { default: "-0.375rem", [COARSE_POINTER]: "-0.5rem" },
     padding: 0,
     borderWidth: 0,
     borderRadius: tokens.cornerFull,
@@ -109,20 +112,25 @@ export const radioGroupStyles = stylex.create({
     borderColor: tokens.error,
   },
   ringDisabled: {
-    borderColor: tokens.disabledContent,
+    borderColor: { default: tokens.disabledContent, [FORCED_COLORS]: "GrayText" },
   },
   dot: {
     display: "block",
+    boxSizing: "border-box",
     width: "0.625rem",
     height: "0.625rem",
     borderRadius: tokens.cornerFull,
     backgroundColor: tokens.primary,
+    borderWidth: { default: 0, [FORCED_COLORS]: "0.3125rem" },
+    borderStyle: { default: "none", [FORCED_COLORS]: "solid" },
+    borderColor: { default: "transparent", [FORCED_COLORS]: "Highlight" },
   },
   dotInvalid: {
     backgroundColor: tokens.error,
   },
   dotDisabled: {
     backgroundColor: tokens.disabledContent,
+    borderColor: { default: "transparent", [FORCED_COLORS]: "GrayText" },
   },
   textGroup: {
     display: "flex",
@@ -133,7 +141,7 @@ export const radioGroupStyles = stylex.create({
   },
   itemLabel: {
     fontSize: "0.9375rem",
-    lineHeight: "1.375rem",
+    lineHeight: 1.47,
     fontWeight: 500,
     color: tokens.onSurface,
     cursor: "pointer",
@@ -145,7 +153,7 @@ export const radioGroupStyles = stylex.create({
   },
   itemDescription: {
     fontSize: "0.8125rem",
-    lineHeight: "1.25rem",
+    lineHeight: 1.54,
     color: tokens.onSurfaceVariant,
     paddingInlineStart: "0.5rem",
   },
@@ -154,7 +162,7 @@ export const radioGroupStyles = stylex.create({
   },
   supporting: {
     fontSize: "0.75rem",
-    lineHeight: "1rem",
+    lineHeight: 1.35,
     color: tokens.onSurfaceVariant,
   },
   supportingDisabled: {
@@ -162,7 +170,7 @@ export const radioGroupStyles = stylex.create({
   },
   error: {
     fontSize: "0.75rem",
-    lineHeight: "1rem",
+    lineHeight: 1.35,
     color: tokens.error,
   },
 });

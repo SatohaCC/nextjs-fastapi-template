@@ -1,6 +1,8 @@
 import * as stylex from "@stylexjs/stylex";
 import { tokens } from "../../styles/tokens.stylex";
 
+const FORCED_COLORS = "@media (forced-colors: active)";
+
 export const tabsStyles = stylex.create({
   root: { width: "100%", minWidth: 0, color: tokens.onSurface },
   list: {
@@ -29,7 +31,7 @@ export const tabsStyles = stylex.create({
     color: tokens.onSurfaceVariant,
     fontFamily: "inherit",
     fontSize: "0.875rem",
-    lineHeight: "1.25rem",
+    lineHeight: 1.43,
     fontWeight: 500,
     letterSpacing: "0.00625rem",
     cursor: "pointer",
@@ -51,10 +53,12 @@ export const tabsStyles = stylex.create({
       position: "absolute",
       insetInline: 0,
       bottom: 0,
-      height: 3,
+      height: 0,
+      borderTopWidth: 3,
+      borderTopStyle: "solid",
+      borderTopColor: { default: tokens.primary, [FORCED_COLORS]: "Highlight" },
       borderStartStartRadius: tokens.cornerExtraSmall,
       borderStartEndRadius: tokens.cornerExtraSmall,
-      backgroundColor: tokens.primary,
     },
   },
   secondaryIndicator: {
@@ -63,8 +67,10 @@ export const tabsStyles = stylex.create({
       position: "absolute",
       insetInline: 0,
       bottom: 0,
-      height: 2,
-      backgroundColor: tokens.primary,
+      height: 0,
+      borderBottomWidth: 2,
+      borderBottomStyle: "solid",
+      borderBottomColor: { default: tokens.primary, [FORCED_COLORS]: "Highlight" },
     },
   },
   disabled: {

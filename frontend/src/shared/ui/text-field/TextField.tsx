@@ -31,6 +31,10 @@ export interface TextFieldProps {
   maxLength?: number;
   autoComplete?: string;
   inputMode?: ComponentProps<"input">["inputMode"];
+  enterKeyHint?: ComponentProps<"input">["enterKeyHint"];
+  autoCapitalize?: ComponentProps<"input">["autoCapitalize"];
+  autoCorrect?: "on" | "off";
+  spellCheck?: ComponentProps<"input">["spellCheck"];
   style?: stylex.StyleXStyles;
 }
 
@@ -57,6 +61,10 @@ export function TextField({
   maxLength,
   autoComplete,
   inputMode,
+  enterKeyHint,
+  autoCapitalize,
+  autoCorrect,
+  spellCheck,
   style,
 }: TextFieldProps) {
   const isInvalid = invalid ?? (errorMessage ? true : undefined);
@@ -101,6 +109,10 @@ export function TextField({
           maxLength={maxLength}
           autoComplete={autoComplete}
           inputMode={inputMode}
+          enterKeyHint={enterKeyHint}
+          autoCapitalize={autoCapitalize}
+          autoCorrect={autoCorrect}
+          spellCheck={spellCheck}
           className={(state) => stylex.props(s.input, state.disabled && s.inputDisabled).className}
         />
         {hasRenderableNode(trailing) ? (

@@ -5,8 +5,8 @@ export const toastStyles = stylex.create({
   region: {
     position: "fixed",
     zIndex: 60,
-    width: "min(calc(100vw - 2rem), 24rem)",
-    maxWidth: "calc(100vw - 2rem)",
+    width: "min(calc(100dvw - 2rem), 24rem)",
+    maxWidth: "calc(100dvw - 2rem)",
     marginBlock: 0,
     marginInline: 0,
     padding: 0,
@@ -101,13 +101,13 @@ export const toastStyles = stylex.create({
   },
   title: {
     fontSize: "0.9375rem",
-    lineHeight: "1.375rem",
+    lineHeight: 1.47,
     fontWeight: 600,
     overflowWrap: "anywhere",
   },
   description: {
     fontSize: "0.875rem",
-    lineHeight: "1.375rem",
+    lineHeight: 1.55,
     overflowWrap: "anywhere",
   },
   actions: {
