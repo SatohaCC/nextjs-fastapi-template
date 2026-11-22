@@ -3,7 +3,7 @@ import { tokens } from "../shared/styles/tokens.stylex";
 
 export const statusPageStyles = stylex.create({
   page: {
-    minHeight: "70vh",
+    minHeight: "70dvh",
     display: "grid",
     placeItems: "center",
     padding: "2rem 1.25rem",
@@ -35,11 +35,13 @@ export const statusPageStyles = stylex.create({
     lineHeight: 1.35,
     fontWeight: 700,
     color: tokens.onSurface,
+    textWrap: "balance",
   },
   description: {
     fontSize: "0.9375rem",
     lineHeight: 1.75,
     color: tokens.onSurfaceVariant,
+    textWrap: "pretty",
   },
   digest: {
     fontFamily: "monospace",
@@ -62,7 +64,7 @@ export const statusPageStyles = stylex.create({
     display: "inline-flex",
     alignItems: "center",
     justifyContent: "center",
-    minHeight: "2.5rem",
+    minHeight: "2.75rem",
     paddingInline: "1.25rem",
     borderRadius: tokens.cornerFull,
     border: `1px solid ${tokens.outlineVariant}`,

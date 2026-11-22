@@ -31,7 +31,9 @@ export function GlobalErrorContent({ error, retry }: GlobalErrorProps) {
   return (
     <main id="main-content" tabIndex={-1} {...stylex.props(s.page)}>
       <section aria-labelledby="global-error-title" role="alert" {...stylex.props(s.card)}>
-        <p {...stylex.props(s.code, s.errorCode)}>FATAL ERROR</p>
+        <p lang="en" translate="no" {...stylex.props(s.code, s.errorCode)}>
+          FATAL ERROR
+        </p>
         <h1 id="global-error-title" {...stylex.props(s.title)}>
           アプリケーションの読み込みに失敗しました
         </h1>
@@ -58,6 +60,8 @@ export default function GlobalError({ error, retry }: GlobalErrorProps) {
   return (
     <html lang="ja">
       <head>
+        <meta name="color-scheme" content="light dark" />
+        <meta name="text-scale" content="scale" />
         <title>エラー | Next.js + FastAPI</title>
       </head>
       <body {...stylex.props(layoutStyles.body)}>

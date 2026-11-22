@@ -8,9 +8,13 @@ import { layoutStyles } from "./layout.styles";
 export const metadata: Metadata = {
   title: "サンプルページ | Next.js + FastAPI",
   description: "Next.js + FastAPI starter template",
+  other: {
+    "text-scale": "scale",
+  },
 };
 
 export const viewport: Viewport = {
+  colorScheme: "light dark",
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "#F5FAF9" },
     { media: "(prefers-color-scheme: dark)", color: "#101514" },

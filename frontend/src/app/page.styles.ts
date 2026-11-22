@@ -1,8 +1,8 @@
 import * as stylex from "@stylexjs/stylex";
 import { tokens } from "../shared/styles/tokens.stylex";
 
-const mobile = "@media (max-width: 599px)";
-const stacked = "@media (max-width: 850px)";
+const mobile = "@media (max-width: 37.5em)";
+const stacked = "@media (max-width: 53.125em)";
 
 export const pageStyles = stylex.create({
   page: {
@@ -44,7 +44,7 @@ export const pageStyles = stylex.create({
     fontFamily: "monospace",
     fontSize: "1rem",
   },
-  nav: { display: "flex", gap: "1.25rem" },
+  nav: { display: "flex", flexWrap: "wrap", gap: "1.25rem" },
   link: {
     display: "inline-flex",
     alignItems: "center",
@@ -78,14 +78,19 @@ export const pageStyles = stylex.create({
     letterSpacing: "0.12em",
   },
   title: {
-    fontSize: "clamp(1.75rem, 5vw, 4rem)",
+    fontSize: "clamp(1.75rem, 1rem + 3.5vw, 4rem)",
     lineHeight: 1.2,
     fontWeight: 780,
     letterSpacing: "-0.035em",
     marginBlock: "1rem 1.25rem",
     textWrap: "balance",
   },
-  description: { maxWidth: "26rem", fontSize: "1rem", lineHeight: 1.85 },
+  description: {
+    maxWidth: "26rem",
+    fontSize: "1rem",
+    lineHeight: 1.85,
+    textWrap: "pretty",
+  },
   action: {
     display: "inline-flex",
     alignItems: "center",
@@ -159,12 +164,13 @@ export const pageStyles = stylex.create({
     borderRadius: tokens.cornerExtraLarge,
     backgroundColor: tokens.surfaceContainerLow,
   },
-  sectionTitle: { fontSize: "1.375rem", fontWeight: 700 },
+  sectionTitle: { fontSize: "1.375rem", fontWeight: 700, textWrap: "balance" },
   support: {
     marginTop: "0.375rem",
     fontSize: "0.875rem",
     lineHeight: 1.75,
     color: tokens.onSurfaceVariant,
+    textWrap: "pretty",
   },
   structure: { marginTop: "2.5rem", scrollMarginTop: "1rem" },
   layers: {

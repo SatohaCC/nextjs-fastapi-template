@@ -30,7 +30,9 @@ export default function AppErrorPage({ error, retry }: AppErrorPageProps) {
   return (
     <main id="main-content" tabIndex={-1} {...stylex.props(s.page)}>
       <section aria-labelledby="error-title" role="alert" {...stylex.props(s.card)}>
-        <p {...stylex.props(s.code, s.errorCode)}>ERROR</p>
+        <p lang="en" translate="no" {...stylex.props(s.code, s.errorCode)}>
+          ERROR
+        </p>
         <h1 id="error-title" {...stylex.props(s.title)}>
           予期しないエラーが発生しました
         </h1>
