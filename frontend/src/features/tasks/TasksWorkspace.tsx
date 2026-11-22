@@ -2,6 +2,7 @@
 
 import * as stylex from "@stylexjs/stylex";
 import dynamic from "next/dynamic";
+import { useSearchParams } from "next/navigation";
 import { useCallback, useDeferredValue, useEffect, useMemo, useState } from "react";
 import { Badge } from "@/shared/ui/badge/Badge";
 import { Button } from "@/shared/ui/button/Button";
@@ -65,13 +66,39 @@ export function TasksWorkspace({
   initialTasks,
   initialFilters = DEFAULT_TASK_FILTERS,
 }: TasksWorkspaceProps) {
-  const [filters, setFilters] = useState<TaskFilterState>(() => initialFilters);
-  const [debouncedQuery, setDebouncedQuery] = useState(() => initialFilters.q.trim());
+  const routeSearchParams = useSearchParams();
+  const externalFilters = useMemo(
+    () =>
+      routeSearchParams ? parseTaskFiltersFromSearchParams(routeSearchParams) : initialFilters,
+    [routeSearchParams, initialFilters],
+  );
+  const externalFilterKey = useMemo(
+    () => serializeTaskFiltersToSearchParams(externalFilters).toString(),
+    [externalFilters],
+  );
+
+  const [prevExternalFilterKey, setPrevExternalFilterKey] = useState(externalFilterKey);
+  const [filters, setFilters] = useState<TaskFilterState>(() => externalFilters);
+  const [debouncedQuery, setDebouncedQuery] = useState(() => externalFilters.q.trim());
   const [editingTask, setEditingTask] = useState<TaskItem | null>(null);
   const [deletingTask, setDeletingTask] = useState<TaskItem | null>(null);
   const [hasLoadedEditDialog, setHasLoadedEditDialog] = useState(false);
   const [hasLoadedDeleteDialog, setHasLoadedDeleteDialog] = useState(false);
   const [toaster] = useState(() => createToaster());
+
+  // 同一ルートへの Link 遷移などで外部から URL/props の条件が変わった場合のみ状態を同期する。
+  const currentQueryKey = serializeTaskFiltersToSearchParams({
+    status: filters.status,
+    priority: filters.priority,
+    q: debouncedQuery,
+  }).toString();
+  if (externalFilterKey !== prevExternalFilterKey) {
+    setPrevExternalFilterKey(externalFilterKey);
+    if (externalFilterKey !== currentQueryKey) {
+      setFilters(externalFilters);
+      setDebouncedQuery(externalFilters.q.trim());
+    }
+  }
 
   useEffect(() => {
     const trimmed = filters.q.trim();
@@ -117,7 +144,8 @@ export function TasksWorkspace({
     });
     const nextSearch = mergedParams.toString();
     const nextUrl = `${window.location.pathname}${nextSearch ? `?${nextSearch}` : ""}${window.location.hash}`;
-    window.history.replaceState(window.history.state, "", nextUrl);
+    // Next.js がパッチした replaceState に __NA 状態を渡すと useSearchParams 同期がスキップされるため null を渡す。
+    window.history.replaceState(null, "", nextUrl);
   }, [queryFilters]);
 
   useEffect(() => {

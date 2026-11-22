@@ -8,13 +8,16 @@ export const DEFAULT_TASK_FILTERS: TaskFilterState = {
 
 const MAX_QUERY_LENGTH = 120;
 
-type SearchParamsInput = Record<string, string | string[] | undefined> | URLSearchParams;
+type SearchParamsInput =
+  | Record<string, string | string[] | undefined>
+  | Pick<URLSearchParams, "get">;
 
 function readFirstSearchParam(params: SearchParamsInput, key: string): string | undefined {
-  if (params instanceof URLSearchParams) {
+  if ("get" in params && typeof params.get === "function") {
     return params.get(key) ?? undefined;
   }
-  const raw = params[key];
+  const record = params as Record<string, string | string[] | undefined>;
+  const raw = record[key];
   return Array.isArray(raw) ? raw[0] : raw;
 }
 

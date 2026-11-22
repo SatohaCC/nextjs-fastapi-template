@@ -3,7 +3,14 @@ import userEvent from "@testing-library/user-event";
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import { QueryProvider } from "@/shared/lib/query/QueryProvider";
 import { TasksWorkspace } from "./TasksWorkspace";
+import { DEFAULT_TASK_FILTERS } from "./taskFilters";
 import type { TaskItem } from "./tasksApi";
+
+let mockRouteSearchParams: URLSearchParams | null = null;
+
+vi.mock("next/navigation", () => ({
+  useSearchParams: () => mockRouteSearchParams,
+}));
 
 class MockResizeObserver {
   observe() {}
@@ -56,6 +63,7 @@ describe("TasksWorkspace", () => {
 
   afterEach(() => {
     vi.restoreAllMocks();
+    mockRouteSearchParams = null;
     window.history.replaceState(null, "", "/");
   });
 
@@ -628,5 +636,93 @@ describe("TasksWorkspace", () => {
     await waitFor(() => {
       expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
     });
+  });
+
+  it("同一ルート遷移相当で initialFilters や useSearchParams が変わるとフィルタを同期し、自前 replaceState では入力中文字を保持する", async () => {
+    const user = userEvent.setup();
+    const requestedUrls: string[] = [];
+
+    vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => {
+      const url = typeof input === "string" ? input : input.toString();
+      requestedUrls.push(url);
+      return new Response(JSON.stringify({ items: [makeTask()], total: 1 }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    });
+
+    // 1. Router 外（useSearchParams が null）でも initialFilters の変化に追従する。
+    const { rerender } = render(
+      <QueryProvider>
+        <TasksWorkspace
+          initialTasks={{ items: [makeTask()], total: 1 }}
+          initialFilters={{ status: "done", priority: "all", q: "SQLite" }}
+        />
+      </QueryProvider>,
+    );
+
+    const searchInput = screen.getByRole("searchbox", { name: "キーワード検索" });
+    expect(searchInput).toHaveValue("SQLite");
+    expect(screen.getByRole("radio", { name: "完了" })).toHaveAttribute("aria-checked", "true");
+
+    rerender(
+      <QueryProvider>
+        <TasksWorkspace
+          initialTasks={{ items: [makeTask()], total: 1 }}
+          initialFilters={DEFAULT_TASK_FILTERS}
+        />
+      </QueryProvider>,
+    );
+
+    expect(searchInput).toHaveValue("");
+    expect(screen.getByRole("radio", { name: "すべて" })).toHaveAttribute("aria-checked", "true");
+    await waitFor(() => {
+      expect(requestedUrls).toContain("/api/tasks");
+    });
+
+    // 2. App Router 内（useSearchParams が非 null）での Link 遷移と自前 replaceState の区別を検証する。
+    requestedUrls.length = 0;
+    const replaceStateSpy = vi.spyOn(window.history, "replaceState");
+    mockRouteSearchParams = new URLSearchParams("q=SQLite");
+    window.history.replaceState(null, "", "/?q=SQLite");
+
+    rerender(
+      <QueryProvider key="router-mode">
+        <TasksWorkspace initialTasks={{ items: [makeTask()], total: 1 }} />
+      </QueryProvider>,
+    );
+
+    const routerSearchInput = screen.getByRole("searchbox", { name: "キーワード検索" });
+    expect(routerSearchInput).toHaveValue("SQLite");
+
+    // 同一ルート遷移（/tasks?q=SQLite -> /tasks）を模擬する。
+    mockRouteSearchParams = new URLSearchParams("");
+    window.history.replaceState({ __NA: true }, "", "/");
+    rerender(
+      <QueryProvider key="router-mode">
+        <TasksWorkspace initialTasks={{ items: [makeTask()], total: 1 }} />
+      </QueryProvider>,
+    );
+
+    expect(routerSearchInput).toHaveValue("");
+    await waitFor(() => {
+      expect(requestedUrls).toContain("/api/tasks");
+    });
+
+    // ユーザーが検索入力し、replaceState(null, ...) の結果が useSearchParams に遅れて反映されても入力中文字を維持する。
+    replaceStateSpy.mockClear();
+    await user.type(routerSearchInput, "abc");
+    await waitFor(() => {
+      expect(replaceStateSpy).toHaveBeenCalledWith(null, "", "/?q=abc");
+    });
+
+    await user.type(routerSearchInput, "def");
+    mockRouteSearchParams = new URLSearchParams("q=abc");
+    rerender(
+      <QueryProvider key="router-mode">
+        <TasksWorkspace initialTasks={{ items: [makeTask()], total: 1 }} />
+      </QueryProvider>,
+    );
+    expect(routerSearchInput).toHaveValue("abcdef");
   });
 });
