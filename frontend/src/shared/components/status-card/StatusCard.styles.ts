@@ -16,7 +16,7 @@ export const statusCardStyles = stylex.create({
   },
   label: {
     fontSize: "0.875rem",
-    lineHeight: "1.25rem",
+    lineHeight: 1.43,
     fontWeight: 500,
     color: tokens.onSurfaceVariant,
   },

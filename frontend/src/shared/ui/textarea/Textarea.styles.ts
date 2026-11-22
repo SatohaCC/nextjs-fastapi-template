@@ -1,6 +1,8 @@
 import * as stylex from "@stylexjs/stylex";
 import { tokens } from "../../styles/tokens.stylex";
 
+const FORCED_COLORS = "@media (forced-colors: active)";
+
 export const textareaStyles = stylex.create({
   root: {
     display: "flex",
@@ -11,7 +13,7 @@ export const textareaStyles = stylex.create({
   },
   label: {
     fontSize: "0.875rem",
-    lineHeight: "1.25rem",
+    lineHeight: 1.43,
     fontWeight: 500,
     letterSpacing: "0.00625rem",
     color: tokens.onSurfaceVariant,
@@ -89,6 +91,12 @@ export const textareaStyles = stylex.create({
     borderStartEndRadius: tokens.cornerExtraSmall,
     borderEndStartRadius: tokens.cornerNone,
     borderEndEndRadius: tokens.cornerNone,
+    borderWidth: { default: 0, [FORCED_COLORS]: 1 },
+    borderStyle: { default: "none", [FORCED_COLORS]: "solid" },
+    borderColor: {
+      default: "transparent",
+      [FORCED_COLORS]: { default: "CanvasText", ":focus-within": "Highlight" },
+    },
     boxShadow: {
       default: `inset 0 -1px 0 0 ${tokens.onSurfaceVariant}`,
       "@media (hover: hover)": { ":hover": `inset 0 -1px 0 0 ${tokens.onSurface}` },
@@ -110,6 +118,7 @@ export const textareaStyles = stylex.create({
   filledDisabled: {
     backgroundColor: tokens.disabledContainer,
     cursor: "not-allowed",
+    borderColor: { default: "transparent", [FORCED_COLORS]: "GrayText" },
     boxShadow: {
       default: `inset 0 -1px 0 0 ${tokens.disabledContent}`,
       "@media (hover: hover)": { ":hover": `inset 0 -1px 0 0 ${tokens.disabledContent}` },
@@ -131,8 +140,8 @@ export const textareaStyles = stylex.create({
     backgroundColor: "transparent",
     color: tokens.onSurface,
     fontFamily: "inherit",
-    fontSize: "1rem",
-    lineHeight: "1.5rem",
+    fontSize: "max(1rem, 1em)",
+    lineHeight: 1.5,
     letterSpacing: "0.03125rem",
     outline: "none",
     "::placeholder": {
@@ -153,7 +162,7 @@ export const textareaStyles = stylex.create({
   },
   supporting: {
     fontSize: "0.75rem",
-    lineHeight: "1rem",
+    lineHeight: 1.35,
     letterSpacing: "0.025rem",
     color: tokens.onSurfaceVariant,
     paddingInline: "0.25rem",
@@ -163,7 +172,7 @@ export const textareaStyles = stylex.create({
   },
   error: {
     fontSize: "0.75rem",
-    lineHeight: "1rem",
+    lineHeight: 1.35,
     letterSpacing: "0.025rem",
     color: tokens.error,
     paddingInline: "0.25rem",

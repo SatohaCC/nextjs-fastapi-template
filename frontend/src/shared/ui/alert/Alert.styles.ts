@@ -53,13 +53,13 @@ export const alertStyles = stylex.create({
   },
   title: {
     fontSize: "0.9375rem",
-    lineHeight: "1.375rem",
+    lineHeight: 1.47,
     fontWeight: 600,
     overflowWrap: "anywhere",
   },
   message: {
     fontSize: "0.875rem",
-    lineHeight: "1.375rem",
+    lineHeight: 1.55,
     overflowWrap: "anywhere",
   },
   controls: {

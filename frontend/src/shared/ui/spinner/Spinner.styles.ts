@@ -1,6 +1,8 @@
 import * as stylex from "@stylexjs/stylex";
 import { tokens } from "../../styles/tokens.stylex";
 
+const FORCED_COLORS = "@media (forced-colors: active)";
+
 const spin = stylex.keyframes({
   from: { transform: "rotate(0deg)" },
   to: { transform: "rotate(360deg)" },
@@ -18,17 +20,14 @@ export const spinnerStyles = stylex.create({
     flexShrink: 0,
     borderRadius: tokens.cornerFull,
     borderStyle: "solid",
-    borderTopColor: tokens.primary,
-    borderRightColor: tokens.outlineVariant,
-    borderBottomColor: tokens.outlineVariant,
-    borderLeftColor: tokens.outlineVariant,
-    animationName: {
-      default: spin,
-      "@media (prefers-reduced-motion: reduce)": "none",
-    },
+    borderTopColor: { default: tokens.primary, [FORCED_COLORS]: "Highlight" },
+    borderRightColor: { default: tokens.outlineVariant, [FORCED_COLORS]: "CanvasText" },
+    borderBottomColor: { default: tokens.outlineVariant, [FORCED_COLORS]: "CanvasText" },
+    borderLeftColor: { default: tokens.outlineVariant, [FORCED_COLORS]: "CanvasText" },
+    animationName: spin,
     animationDuration: {
       default: "900ms",
-      "@media (prefers-reduced-motion: reduce)": "0s",
+      "@media (prefers-reduced-motion: reduce)": "6s",
     },
     animationTimingFunction: "linear",
     animationIterationCount: "infinite",
@@ -50,7 +49,7 @@ export const spinnerStyles = stylex.create({
   },
   label: {
     fontSize: "0.9375rem",
-    lineHeight: "1.375rem",
+    lineHeight: 1.47,
     fontWeight: 500,
     color: tokens.onSurface,
   },

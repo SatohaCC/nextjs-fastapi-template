@@ -1,5 +1,5 @@
 import * as stylex from "@stylexjs/stylex";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Field, FieldDescription, FieldError, FieldLabel } from "@ui-sdk/react/field";
 import { describe, expect, it, vi } from "vitest";
@@ -258,5 +258,56 @@ describe("Textarea", () => {
 
     await user.click(screen.getByRole("button", { name: "送信" }));
     expect(submitted).toBe("入力途中のテキスト");
+  });
+
+  it("submitShortcut='enter' は IME 変換中・keyCode 229・修飾付き Enter を送信せず既定動作も抑止しない", async () => {
+    const user = userEvent.setup();
+    const onSubmit = vi.fn();
+    const onFormSubmit = vi.fn((event: React.FormEvent<HTMLFormElement>) => {
+      event.preventDefault();
+    });
+
+    const { rerender } = render(
+      <Textarea label="チャット入力" submitShortcut="enter" onSubmit={onSubmit} />,
+    );
+
+    const textarea = screen.getByRole("textbox", { name: "チャット入力" });
+    await user.type(textarea, "変換中");
+
+    expect(fireEvent.keyDown(textarea, { key: "Enter", isComposing: true })).toBe(true);
+    expect(onSubmit).not.toHaveBeenCalled();
+
+    expect(fireEvent.keyDown(textarea, { key: "Enter", keyCode: 229 })).toBe(true);
+    expect(onSubmit).not.toHaveBeenCalled();
+
+    expect(fireEvent.keyDown(textarea, { key: "Enter", shiftKey: true })).toBe(true);
+    expect(fireEvent.keyDown(textarea, { key: "Enter", ctrlKey: true })).toBe(true);
+    expect(fireEvent.keyDown(textarea, { key: "Enter", metaKey: true })).toBe(true);
+    expect(fireEvent.keyDown(textarea, { key: "Enter", altKey: true })).toBe(true);
+    expect(onSubmit).not.toHaveBeenCalled();
+
+    expect(fireEvent.keyDown(textarea, { key: "Enter" })).toBe(false);
+    expect(onSubmit).toHaveBeenCalledTimes(1);
+    expect(onSubmit).toHaveBeenCalledWith("変換中", expect.anything());
+
+    rerender(
+      <form onSubmit={onFormSubmit}>
+        <Textarea label="フォーム入力" name="message" submitShortcut="enter" />
+      </form>,
+    );
+
+    const formTextarea = screen.getByRole("textbox", { name: "フォーム入力" });
+    expect(fireEvent.keyDown(formTextarea, { key: "Enter", isComposing: true })).toBe(true);
+    expect(fireEvent.keyDown(formTextarea, { key: "Enter", keyCode: 229 })).toBe(true);
+    expect(onFormSubmit).not.toHaveBeenCalled();
+
+    expect(fireEvent.keyDown(formTextarea, { key: "Enter" })).toBe(false);
+    expect(onFormSubmit).toHaveBeenCalledTimes(1);
+
+    rerender(<Textarea label="チャット入力" submitShortcut="enter" disabled onSubmit={onSubmit} />);
+    expect(
+      fireEvent.keyDown(screen.getByRole("textbox", { name: "チャット入力" }), { key: "Enter" }),
+    ).toBe(true);
+    expect(onSubmit).toHaveBeenCalledTimes(1);
   });
 });

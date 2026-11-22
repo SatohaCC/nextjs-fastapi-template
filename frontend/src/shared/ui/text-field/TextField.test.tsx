@@ -113,4 +113,23 @@ describe("TextField", () => {
     expect(formInput).not.toHaveAttribute("aria-invalid", "true");
     expect(submitted).toBe("佐藤");
   });
+
+  it("enterKeyHint・autoCapitalize・autoCorrect・spellCheck をネイティブ input へ転送する", () => {
+    render(
+      <TextField
+        label="検索キーワード"
+        type="search"
+        enterKeyHint="search"
+        autoCapitalize="none"
+        autoCorrect="off"
+        spellCheck={false}
+      />,
+    );
+
+    const input = screen.getByRole("searchbox", { name: "検索キーワード" });
+    expect(input).toHaveAttribute("enterkeyhint", "search");
+    expect(input).toHaveAttribute("autocapitalize", "none");
+    expect(input).toHaveAttribute("autocorrect", "off");
+    expect(input).toHaveAttribute("spellcheck", "false");
+  });
 });
