@@ -2,31 +2,34 @@
 
 import { useAppMutation } from "@/shared/lib/query/useAppMutation";
 import { useAppQuery } from "@/shared/lib/query/useAppQuery";
+import { DEFAULT_TASK_FILTERS, isSameTaskFilters } from "./taskFilters";
 import {
   createTask,
   deleteTask,
   fetchTasks,
   type TaskFilterState,
+  type TaskItem,
   type TaskList,
   updateTask,
 } from "./tasksApi";
 
-export const DEFAULT_TASK_FILTERS: TaskFilterState = {
-  status: "all",
-  priority: "all",
-  q: "",
-};
+export { DEFAULT_TASK_FILTERS };
+
+const EMPTY_TASKS: readonly TaskItem[] = [];
 
 /** タスク一覧取得と作成・更新・削除ミューテーションを統合するカスタムフック。 */
-export function useTasks(filters: TaskFilterState, initialTasks?: TaskList) {
+export function useTasks(
+  filters: TaskFilterState,
+  initialTasks?: TaskList,
+  initialFilters: TaskFilterState = DEFAULT_TASK_FILTERS,
+) {
   const normalizedQuery = filters.q.trim();
-  const isDefaultFilters =
-    filters.status === "all" && filters.priority === "all" && normalizedQuery === "";
+  const matchesInitialFilters = isSameTaskFilters(filters, initialFilters);
 
   const tasksQuery = useAppQuery({
     queryKey: ["tasks", filters.status, filters.priority, normalizedQuery],
     queryFn: ({ signal }) => fetchTasks(filters, signal),
-    initialData: isDefaultFilters ? initialTasks : undefined,
+    initialData: matchesInitialFilters ? initialTasks : undefined,
   });
 
   const createMutation = useAppMutation({
@@ -45,7 +48,7 @@ export function useTasks(filters: TaskFilterState, initialTasks?: TaskList) {
   });
 
   return {
-    tasks: tasksQuery.data?.items ?? [],
+    tasks: tasksQuery.data?.items ?? EMPTY_TASKS,
     total: tasksQuery.data?.total ?? 0,
     isLoading: tasksQuery.isLoading,
     isFetching: tasksQuery.isFetching,

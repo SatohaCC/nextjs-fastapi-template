@@ -1,11 +1,21 @@
 "use client";
 
 import * as stylex from "@stylexjs/stylex";
-import { useId, useState } from "react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { Alert } from "@/shared/ui/alert/Alert";
 import { Button } from "@/shared/ui/button/Button";
-import { Dialog, DialogCloseButton } from "@/shared/ui/dialog/Dialog";
+import {
+  DialogBody,
+  DialogCloseIconButton,
+  DialogHeader,
+  DialogHeaderText,
+  DialogHeading,
+  DialogPanel,
+  DialogRoot,
+  DialogSummary,
+} from "@/shared/ui/dialog/Dialog";
 import { RadioGroup } from "@/shared/ui/radio-group/RadioGroup";
+import { Spinner } from "@/shared/ui/spinner/Spinner";
 import { Switch } from "@/shared/ui/switch/Switch";
 import { TextField } from "@/shared/ui/text-field/TextField";
 import { Textarea } from "@/shared/ui/textarea/Textarea";
@@ -34,18 +44,33 @@ function TaskEditFormBody({
   task,
   isSaving,
   onSave,
+  onDirtyChange,
+  onImmediateCancel,
 }: {
   task: TaskItem;
   isSaving: boolean;
   onSave: (taskId: string, patch: TaskUpdateInput) => Promise<void>;
+  onDirtyChange: (dirty: boolean) => void;
+  onImmediateCancel: () => void;
 }) {
   const titleId = useId();
+  const titleInputRef = useRef<HTMLInputElement>(null);
   const [title, setTitle] = useState(task.title);
   const [description, setDescription] = useState(task.description);
   const [priority, setPriority] = useState<TaskPriority>(task.priority);
   const [isDone, setIsDone] = useState(task.status === "done");
   const [titleError, setTitleError] = useState<string | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
+
+  const isDirty =
+    title !== task.title ||
+    description !== task.description ||
+    priority !== task.priority ||
+    isDone !== (task.status === "done");
+
+  useEffect(() => {
+    onDirtyChange(isDirty);
+  }, [isDirty, onDirtyChange]);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -54,7 +79,7 @@ function TaskEditFormBody({
     const trimmedTitle = title.trim();
     if (!trimmedTitle) {
       setTitleError("タイトルを入力してください");
-      document.getElementById(titleId)?.focus();
+      titleInputRef.current?.focus();
       return;
     }
 
@@ -70,7 +95,7 @@ function TaskEditFormBody({
       const fieldError = extractFieldErrorMessage(error, "title");
       if (fieldError) {
         setTitleError(fieldError);
-        document.getElementById(titleId)?.focus();
+        titleInputRef.current?.focus();
         return;
       }
       setSubmitError(error instanceof Error ? error.message : "タスクの更新に失敗しました。");
@@ -79,17 +104,19 @@ function TaskEditFormBody({
 
   return (
     <form onSubmit={handleSubmit} noValidate {...stylex.props(s.form)}>
-      {submitError && (
+      {submitError ? (
         <Alert tone="error" title="更新できませんでした">
           {submitError}
         </Alert>
-      )}
+      ) : null}
 
       <TextField
         id={titleId}
+        inputRef={titleInputRef}
         label="タイトル"
         name="title"
         required
+        autoComplete="off"
         maxLength={120}
         value={title}
         onValueChange={(nextValue) => {
@@ -126,11 +153,18 @@ function TaskEditFormBody({
       <Switch label="完了済みとしてマーク" checked={isDone} onCheckedChange={setIsDone} />
 
       <div {...stylex.props(s.actions)}>
-        <DialogCloseButton variant="text" disabled={isSaving}>
+        <Button type="button" variant="text" disabled={isSaving} onClick={onImmediateCancel}>
           キャンセル
-        </DialogCloseButton>
+        </Button>
         <Button type="submit" variant="filled" disabled={isSaving}>
-          {isSaving ? "保存中..." : "変更を保存"}
+          {isSaving ? (
+            <>
+              <Spinner size="sm" decorative />
+              保存中…
+            </>
+          ) : (
+            "変更を保存"
+          )}
         </Button>
       </div>
     </form>
@@ -139,8 +173,47 @@ function TaskEditFormBody({
 
 /** タスクの内容を編集するモーダルダイアログ。 */
 export function TaskEditDialog({ task, isSaving, onClose, onSave }: TaskEditDialogProps) {
+  const [isDirty, setIsDirty] = useState(false);
+  const [showDiscardConfirm, setShowDiscardConfirm] = useState(false);
+  const [trackedTaskId, setTrackedTaskId] = useState<string | null>(task?.id ?? null);
+
+  const currentTaskId = task?.id ?? null;
+  if (currentTaskId !== trackedTaskId) {
+    setTrackedTaskId(currentTaskId);
+    setIsDirty(false);
+    setShowDiscardConfirm(false);
+  }
+
+  const handleDirtyChange = useCallback((dirty: boolean) => {
+    setIsDirty(dirty);
+    if (!dirty) {
+      setShowDiscardConfirm(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!task || !isDirty || isSaving) {
+      return;
+    }
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+      event.returnValue = "";
+    };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [task, isDirty, isSaving]);
+
+  const handleImmediateClose = useCallback(() => {
+    if (isSaving) {
+      return;
+    }
+    setShowDiscardConfirm(false);
+    setIsDirty(false);
+    onClose();
+  }, [isSaving, onClose]);
+
   return (
-    <Dialog
+    <DialogRoot
       open={task !== null}
       dismissible={!isSaving}
       onOpenChange={(open, details) => {
@@ -149,14 +222,68 @@ export function TaskEditDialog({ task, isSaving, onClose, onSave }: TaskEditDial
             details.cancel();
             return;
           }
+          if (isDirty) {
+            details.cancel();
+            setShowDiscardConfirm(true);
+            return;
+          }
+          setShowDiscardConfirm(false);
+          setIsDirty(false);
           onClose();
         }
       }}
-      title="タスクを編集"
-      description="タイトル・詳細メモ・優先度・完了状態を変更できます。"
-      closeLabel={isSaving ? undefined : "閉じる"}
     >
-      {task && <TaskEditFormBody key={task.id} task={task} isSaving={isSaving} onSave={onSave} />}
-    </Dialog>
+      <DialogPanel>
+        <DialogHeader>
+          <DialogHeaderText>
+            <DialogHeading>タスクを編集</DialogHeading>
+            <DialogSummary>タイトル・詳細メモ・優先度・完了状態を変更できます。</DialogSummary>
+          </DialogHeaderText>
+          {!isSaving ? <DialogCloseIconButton label="閉じる" /> : null}
+        </DialogHeader>
+        {task ? (
+          <DialogBody style={s.bodyStack}>
+            {showDiscardConfirm ? (
+              <Alert
+                tone="warning"
+                title="未保存の変更があります"
+                action={
+                  <div {...stylex.props(s.confirmActions)}>
+                    <Button
+                      type="button"
+                      variant="text"
+                      size="sm"
+                      disabled={isSaving}
+                      onClick={() => setShowDiscardConfirm(false)}
+                    >
+                      編集を続ける
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="filled"
+                      size="sm"
+                      disabled={isSaving}
+                      onClick={handleImmediateClose}
+                    >
+                      変更を破棄して閉じる
+                    </Button>
+                  </div>
+                }
+              >
+                変更を破棄して閉じますか？
+              </Alert>
+            ) : null}
+            <TaskEditFormBody
+              key={task.id}
+              task={task}
+              isSaving={isSaving}
+              onSave={onSave}
+              onDirtyChange={handleDirtyChange}
+              onImmediateCancel={handleImmediateClose}
+            />
+          </DialogBody>
+        ) : null}
+      </DialogPanel>
+    </DialogRoot>
   );
 }

@@ -61,6 +61,9 @@ export const tasksWorkspaceStyles = stylex.create({
     fontWeight: 700,
     color: tokens.onSurface,
   },
+  countBadge: {
+    fontVariantNumeric: "tabular-nums",
+  },
   summaryActions: {
     display: "flex",
     flexWrap: "wrap",

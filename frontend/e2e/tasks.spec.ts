@@ -88,7 +88,7 @@ test.describe("タスク管理フルスタック CRUD（SQLite 永続化）", ()
     await expect(updatedRow.getByText("優先度: 低")).toBeVisible();
 
     const filterArea = page.getByRole("search", { name: "タスク絞り込み" });
-    await filterArea.getByRole("textbox", { name: "キーワード検索" }).fill(prefix);
+    await filterArea.getByRole("searchbox", { name: "キーワード検索" }).fill(prefix);
     await filterArea.getByRole("radio", { name: "完了", exact: true }).click();
     await expect(updatedRow).toBeVisible();
 
