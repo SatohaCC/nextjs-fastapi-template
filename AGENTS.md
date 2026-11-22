@@ -14,6 +14,8 @@
 - このリポジトリへの変更を伴う開発作業は、着手時に [dev-workflow Skill](.agents/skills/dev-workflow/SKILL.md) を読み、入口として使う。
 - 開発作業は Issue で追跡する。作業が1単位ならその Issue で実装・検証・PR を行う。個別に完了・レビューできる作業が複数ある場合は、作業単位でサブ Issue に分け、それぞれの PR を提出する。すでに対象のサブ Issue がある場合は再利用する。
 - 開発依頼には、このリポジトリでの Issue の起票、分割時の親子の紐付け、作業単位ごとの PR 作成を含む。
+- GitHub Issue を新規起票する直前に、[github-issue-workflow Skill](.agents/skills/github-issue-workflow/SKILL.md) と該当する `.github/ISSUE_TEMPLATE/*.yml` を開く。起票コマンドを実行する前に、本文の必須項目と適用する既定ラベルを確認する。起票後は GitHub 上の本文とラベルを確認する。直接の起票依頼と開発作業に伴う起票の両方に適用する。
+- 複数の作業単位がある場合は、各単位が完了するたびに明示的な承認を得て push し、対応する PR を提出する。PR 作成後と PR ブランチへの追加 push 後に CI の結果を確認する。
 
 ## Git・コミット
 
