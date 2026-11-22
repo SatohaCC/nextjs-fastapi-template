@@ -1,8 +1,8 @@
 import * as stylex from "@stylexjs/stylex";
 import { tokens } from "../../shared/styles/tokens.stylex";
 
-const mobile = "@media (max-width: 599px)";
-const stacked = "@media (max-width: 900px)";
+const mobile = "@media (max-width: 37.5em)";
+const stacked = "@media (max-width: 56.25em)";
 
 export const tasksPageStyles = stylex.create({
   page: {
@@ -81,7 +81,7 @@ export const tasksPageStyles = stylex.create({
     letterSpacing: "0.12em",
   },
   title: {
-    fontSize: "clamp(1.75rem, 3.5vw, 2.5rem)",
+    fontSize: "clamp(1.75rem, 1.25rem + 1.5vw, 2.5rem)",
     lineHeight: 1.25,
     fontWeight: 780,
     letterSpacing: "-0.025em",
@@ -91,6 +91,7 @@ export const tasksPageStyles = stylex.create({
     maxWidth: "46rem",
     fontSize: "0.9375rem",
     lineHeight: 1.7,
+    textWrap: "pretty",
   },
   fallbackLayout: {
     display: "grid",

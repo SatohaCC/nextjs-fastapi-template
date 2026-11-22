@@ -1,7 +1,7 @@
 "use client";
 
 import * as stylex from "@stylexjs/stylex";
-import { useState } from "react";
+import { type RefObject, useRef, useState } from "react";
 import { Alert } from "@/shared/ui/alert/Alert";
 import { Button } from "@/shared/ui/button/Button";
 import {
@@ -29,10 +29,12 @@ export interface TaskDeleteDialogProps {
 function TaskDeleteDialogBody({
   task,
   isDeleting,
+  cancelButtonRef,
   onConfirm,
 }: {
   task: TaskItem;
   isDeleting: boolean;
+  cancelButtonRef: RefObject<HTMLButtonElement | null>;
   onConfirm: (task: TaskItem) => Promise<void>;
 }) {
   const [deleteError, setDeleteError] = useState<string | null>(null);
@@ -54,7 +56,7 @@ function TaskDeleteDialogBody({
         </Alert>
       ) : null}
       <div {...stylex.props(s.actions)}>
-        <DialogCloseButton variant="text" disabled={isDeleting}>
+        <DialogCloseButton ref={cancelButtonRef} variant="text" disabled={isDeleting}>
           キャンセル
         </DialogCloseButton>
         <Button type="button" variant="filled" disabled={isDeleting} onClick={handleConfirm}>
@@ -74,6 +76,8 @@ function TaskDeleteDialogBody({
 
 /** タスク削除前に確認を求めるモーダルダイアログ。 */
 export function TaskDeleteDialog({ task, isDeleting, onClose, onConfirm }: TaskDeleteDialogProps) {
+  const cancelButtonRef = useRef<HTMLButtonElement>(null);
+
   return (
     <DialogRoot
       open={task !== null}
@@ -88,7 +92,7 @@ export function TaskDeleteDialog({ task, isDeleting, onClose, onConfirm }: TaskD
         }
       }}
     >
-      <DialogPanel>
+      <DialogPanel initialFocus={() => cancelButtonRef.current}>
         <DialogHeader>
           <DialogHeaderText>
             <DialogHeading>タスクを削除</DialogHeading>
@@ -106,6 +110,7 @@ export function TaskDeleteDialog({ task, isDeleting, onClose, onConfirm }: TaskD
               key={task.id}
               task={task}
               isDeleting={isDeleting}
+              cancelButtonRef={cancelButtonRef}
               onConfirm={onConfirm}
             />
           </DialogBody>
