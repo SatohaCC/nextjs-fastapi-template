@@ -62,6 +62,7 @@ description: Git コミット前の変更確認・コードレビュー・リン
      ```powershell
      node scripts/lint-review-hook.mts mark-reviewed --note "<判断結果の要約>"
      ```
+   - `PreToolUse` フックはコマンド実行前に評価されるため、`mark-reviewed` と `git commit` を同一コマンドで連結せず、別々のコマンドとして順に実行する。
 
 ### 4. コミットメッセージ作成（Conventional Commits 1.0.0・日本語）
 
