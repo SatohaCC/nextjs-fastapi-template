@@ -37,7 +37,7 @@ export default async function TasksPage() {
         </nav>
       </header>
 
-      <main>
+      <main id="main-content" tabIndex={-1}>
         <div {...stylex.props(s.hero)}>
           <p {...stylex.props(s.eyebrow)}>FULL-STACK CRUD / SQLITE</p>
           <h1 id="tasks-page-title" {...stylex.props(s.title)}>
