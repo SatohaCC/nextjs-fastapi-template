@@ -1,6 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+import { useCallback } from "react";
 
 export interface AppQueryOptions<TData> {
   queryKey: readonly unknown[];
@@ -24,6 +25,9 @@ export function useAppQuery<TData>({
   });
 
   const normalizedError = error instanceof Error ? error : null;
+  const stableRefetch = useCallback(() => {
+    void refetch();
+  }, [refetch]);
 
   return {
     data: data ?? null,
@@ -31,8 +35,6 @@ export function useAppQuery<TData>({
     errorMessage: normalizedError ? normalizedError.message : null,
     isLoading,
     isFetching,
-    refetch: () => {
-      void refetch();
-    },
+    refetch: stableRefetch,
   };
 }

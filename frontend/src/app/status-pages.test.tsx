@@ -57,6 +57,6 @@ describe("App Router 標準ステータス画面", () => {
 
     const status = screen.getByRole("status");
     expect(status).toHaveAttribute("aria-busy", "true");
-    expect(status).toHaveTextContent("読み込み中...");
+    expect(status).toHaveTextContent("読み込み中…");
   });
 });

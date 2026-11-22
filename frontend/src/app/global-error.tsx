@@ -29,7 +29,7 @@ export function GlobalErrorContent({ error, retry }: GlobalErrorProps) {
   const digest = getErrorDigest(error);
 
   return (
-    <main {...stylex.props(s.page)}>
+    <main id="main-content" tabIndex={-1} {...stylex.props(s.page)}>
       <section aria-labelledby="global-error-title" role="alert" {...stylex.props(s.card)}>
         <p {...stylex.props(s.code, s.errorCode)}>FATAL ERROR</p>
         <h1 id="global-error-title" {...stylex.props(s.title)}>
@@ -38,7 +38,7 @@ export function GlobalErrorContent({ error, retry }: GlobalErrorProps) {
         <p {...stylex.props(s.description)}>
           ルートレイアウトで予期しないエラーが発生しました。再試行するか、トップページを再読み込みしてください。
         </p>
-        {digest && <p {...stylex.props(s.digest)}>識別子: {digest}</p>}
+        {digest ? <p {...stylex.props(s.digest)}>識別子: {digest}</p> : null}
         <div {...stylex.props(s.actions)}>
           <Button variant="filled" onClick={retry}>
             再試行
