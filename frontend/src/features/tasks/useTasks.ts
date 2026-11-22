@@ -30,6 +30,7 @@ export function useTasks(
     queryKey: ["tasks", filters.status, filters.priority, normalizedQuery],
     queryFn: ({ signal }) => fetchTasks(filters, signal),
     initialData: matchesInitialFilters ? initialTasks : undefined,
+    retainPreviousData: true,
   });
 
   const createMutation = useAppMutation({
