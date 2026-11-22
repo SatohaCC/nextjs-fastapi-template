@@ -57,6 +57,13 @@ test("トップページでセキュリティヘッダーとアイコンが正�
   page,
   request,
 }) => {
+  const consoleWarnings: string[] = [];
+  page.on("console", (msg) => {
+    if (msg.type() === "warning" || msg.type() === "error") {
+      consoleWarnings.push(msg.text());
+    }
+  });
+
   const response = await page.goto("/");
   expect(response).not.toBeNull();
   expect(response?.status()).toBe(200);
@@ -65,6 +72,19 @@ test("トップページでセキュリティヘッダーとアイコンが正�
   expect(headers["x-content-type-options"]).toBe("nosniff");
   expect(headers["x-frame-options"]).toBe("DENY");
   expect(headers["referrer-policy"]).toBe("strict-origin-when-cross-origin");
+  expect(headers["content-security-policy"]).toBe(
+    "frame-ancestors 'none'; object-src 'none'; base-uri 'self'",
+  );
+  expect(headers["cross-origin-opener-policy"]).toBe("same-origin");
+  expect(headers["cross-origin-resource-policy"]).toBe("same-origin");
+
+  await expect(page.locator('meta[name="color-scheme"]')).toHaveAttribute("content", "light dark");
+  await expect(page.locator('meta[name="text-scale"]')).toHaveAttribute("content", "scale");
+  expect(
+    consoleWarnings.some(
+      (text) => text.includes("Permissions-Policy") || text.includes("Unrecognized feature"),
+    ),
+  ).toBe(false);
 
   const iconHref = await page.locator('link[rel="icon"]').first().getAttribute("href");
   expect(iconHref).toBeTruthy();

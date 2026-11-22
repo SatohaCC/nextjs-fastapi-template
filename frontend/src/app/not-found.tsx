@@ -6,11 +6,9 @@ import { statusPageStyles as s } from "./status-page.styles";
 export default function NotFound() {
   return (
     <main id="main-content" tabIndex={-1} {...stylex.props(s.page)}>
-      <section aria-labelledby="not-found-title" {...stylex.props(s.card)}>
+      <section {...stylex.props(s.card)}>
         <p {...stylex.props(s.code)}>404</p>
-        <h1 id="not-found-title" {...stylex.props(s.title)}>
-          ページが見つかりません
-        </h1>
+        <h1 {...stylex.props(s.title)}>ページが見つかりません</h1>
         <p {...stylex.props(s.description)}>
           指定されたページは移動または削除された可能性があります。URL を確認してください。
         </p>
