@@ -552,6 +552,53 @@ describe("TasksWorkspace", () => {
     expect(within(secondDeleteDialog).queryByText("削除できませんでした")).not.toBeInTheDocument();
   });
 
+  it.each([
+    { filter: "状態", query: "status=done" },
+    { filter: "優先度", query: "priority=high" },
+  ])("$filter の絞り込み中は直前の一覧を保持し、取得後に差し替える", async ({ filter, query }) => {
+    const user = userEvent.setup();
+    const response = createDeferred<Response>();
+    const previousTask = makeTask();
+    const requestUrl = `/api/tasks?${query}`;
+    const fetchTasks = vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => {
+      if (input === requestUrl) return response.promise;
+      return Response.json({ items: [previousTask], total: 1 });
+    });
+    const nextTask = makeTask({
+      id: "task-2",
+      title: "絞り込み後のタスク",
+      status: "done",
+      priority: "high",
+    });
+
+    render(
+      <QueryProvider>
+        <TasksWorkspace initialTasks={{ items: [previousTask], total: 1 }} />
+      </QueryProvider>,
+    );
+    expect(screen.getByText(previousTask.title)).toBeVisible();
+
+    if (filter === "状態") {
+      await user.click(screen.getByRole("radio", { name: "完了" }));
+    } else {
+      await user.click(screen.getByRole("combobox", { name: "優先度" }));
+      await user.click(screen.getByRole("option", { name: "高" }));
+    }
+
+    await waitFor(() => {
+      expect(fetchTasks).toHaveBeenCalledWith(requestUrl, expect.anything());
+    });
+    expect(screen.getByText(previousTask.title)).toBeVisible();
+    expect(screen.getByText("最新の状態を取得中…")).toBeInTheDocument();
+    expect(screen.queryByText("タスクを読み込んでいます…")).not.toBeInTheDocument();
+
+    response.resolve(Response.json({ items: [nextTask], total: 1 }));
+
+    expect(await screen.findByText(nextTask.title)).toBeVisible();
+    expect(screen.queryByText(previousTask.title)).not.toBeInTheDocument();
+    expect(screen.queryByText("最新の状態を取得中…")).not.toBeInTheDocument();
+  });
+
   it("検索入力をデバウンスして URL クエリを同期し、popstate で条件を復元できる", async () => {
     const user = userEvent.setup();
     const requestedUrls: string[] = [];
