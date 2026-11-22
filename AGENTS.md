@@ -5,6 +5,7 @@
 - コメント・docstring: [.agents/rules/coding-style.md](.agents/rules/coding-style.md)
 - Backend: [.agents/rules/backend-architecture.md](.agents/rules/backend-architecture.md)
 - Frontend の依存方向（`frontend/src/app/`・`frontend/src/features/` を含む）と共有 UI: [.agents/rules/frontend-shared-ui.md](.agents/rules/frontend-shared-ui.md)
+- Frontend の App Router・レイアウト契約・URL 状態同期（`frontend/src/app/`・`frontend/src/features/`）: [.agents/rules/frontend-app-router.md](.agents/rules/frontend-app-router.md)
 
 `frontend/` を変更する場合は、その配下の `AGENTS.md` も読む。プロジェクト固有のSkillは `.agents/skills/` にある。
 
