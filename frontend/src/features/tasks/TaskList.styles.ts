@@ -28,8 +28,10 @@ export const taskListStyles = stylex.create({
     borderColor: tokens.outlineVariant,
     backgroundColor: tokens.surfaceContainerLow,
     minWidth: 0,
+  },
+  itemDeferred: {
     contentVisibility: "auto",
-    containIntrinsicSize: "auto 84px",
+    containIntrinsicSize: "auto none auto 5.25rem",
   },
   checkboxWrap: {
     flexShrink: 0,
@@ -51,7 +53,7 @@ export const taskListStyles = stylex.create({
   },
   title: {
     fontSize: "1rem",
-    lineHeight: "1.5rem",
+    lineHeight: 1.5,
     fontWeight: 600,
     color: tokens.onSurface,
     overflowWrap: "anywhere",
@@ -68,10 +70,11 @@ export const taskListStyles = stylex.create({
   },
   description: {
     fontSize: "0.875rem",
-    lineHeight: "1.45rem",
+    lineHeight: 1.65,
     color: tokens.onSurfaceVariant,
     whiteSpace: "pre-wrap",
     overflowWrap: "anywhere",
+    textWrap: "pretty",
   },
   actions: {
     flexShrink: 0,

@@ -1,7 +1,7 @@
 "use client";
 
 import * as stylex from "@stylexjs/stylex";
-import { useCallback, useEffect, useId, useRef, useState } from "react";
+import { type RefObject, useCallback, useEffect, useId, useRef, useState } from "react";
 import { Alert } from "@/shared/ui/alert/Alert";
 import { Button } from "@/shared/ui/button/Button";
 import {
@@ -43,18 +43,19 @@ export interface TaskEditDialogProps {
 function TaskEditFormBody({
   task,
   isSaving,
+  titleInputRef,
   onSave,
   onDirtyChange,
   onImmediateCancel,
 }: {
   task: TaskItem;
   isSaving: boolean;
+  titleInputRef: RefObject<HTMLInputElement | null>;
   onSave: (taskId: string, patch: TaskUpdateInput) => Promise<void>;
   onDirtyChange: (dirty: boolean) => void;
   onImmediateCancel: () => void;
 }) {
   const titleId = useId();
-  const titleInputRef = useRef<HTMLInputElement>(null);
   const [title, setTitle] = useState(task.title);
   const [description, setDescription] = useState(task.description);
   const [priority, setPriority] = useState<TaskPriority>(task.priority);
@@ -117,6 +118,7 @@ function TaskEditFormBody({
         name="title"
         required
         autoComplete="off"
+        enterKeyHint="next"
         maxLength={120}
         value={title}
         onValueChange={(nextValue) => {
@@ -173,6 +175,9 @@ function TaskEditFormBody({
 
 /** タスクの内容を編集するモーダルダイアログ。 */
 export function TaskEditDialog({ task, isSaving, onClose, onSave }: TaskEditDialogProps) {
+  const discardMessageId = useId();
+  const titleInputRef = useRef<HTMLInputElement>(null);
+  const continueEditingButtonRef = useRef<HTMLButtonElement>(null);
   const [isDirty, setIsDirty] = useState(false);
   const [showDiscardConfirm, setShowDiscardConfirm] = useState(false);
   const [trackedTaskId, setTrackedTaskId] = useState<string | null>(task?.id ?? null);
@@ -190,6 +195,13 @@ export function TaskEditDialog({ task, isSaving, onClose, onSave }: TaskEditDial
       setShowDiscardConfirm(false);
     }
   }, []);
+
+  useEffect(() => {
+    if (!showDiscardConfirm) {
+      return;
+    }
+    continueEditingButtonRef.current?.focus();
+  }, [showDiscardConfirm]);
 
   useEffect(() => {
     if (!task || !isDirty || isSaving) {
@@ -224,7 +236,11 @@ export function TaskEditDialog({ task, isSaving, onClose, onSave }: TaskEditDial
           }
           if (isDirty) {
             details.cancel();
-            setShowDiscardConfirm(true);
+            if (showDiscardConfirm) {
+              continueEditingButtonRef.current?.focus();
+            } else {
+              setShowDiscardConfirm(true);
+            }
             return;
           }
           setShowDiscardConfirm(false);
@@ -233,7 +249,7 @@ export function TaskEditDialog({ task, isSaving, onClose, onSave }: TaskEditDial
         }
       }}
     >
-      <DialogPanel>
+      <DialogPanel initialFocus={() => titleInputRef.current}>
         <DialogHeader>
           <DialogHeaderText>
             <DialogHeading>タスクを編集</DialogHeading>
@@ -243,6 +259,15 @@ export function TaskEditDialog({ task, isSaving, onClose, onSave }: TaskEditDial
         </DialogHeader>
         {task ? (
           <DialogBody style={s.bodyStack}>
+            <TaskEditFormBody
+              key={task.id}
+              task={task}
+              isSaving={isSaving}
+              titleInputRef={titleInputRef}
+              onSave={onSave}
+              onDirtyChange={handleDirtyChange}
+              onImmediateCancel={handleImmediateClose}
+            />
             {showDiscardConfirm ? (
               <Alert
                 tone="warning"
@@ -250,11 +275,16 @@ export function TaskEditDialog({ task, isSaving, onClose, onSave }: TaskEditDial
                 action={
                   <div {...stylex.props(s.confirmActions)}>
                     <Button
+                      ref={continueEditingButtonRef}
                       type="button"
                       variant="text"
                       size="sm"
                       disabled={isSaving}
-                      onClick={() => setShowDiscardConfirm(false)}
+                      aria-describedby={discardMessageId}
+                      onClick={() => {
+                        setShowDiscardConfirm(false);
+                        titleInputRef.current?.focus();
+                      }}
                     >
                       編集を続ける
                     </Button>
@@ -270,17 +300,9 @@ export function TaskEditDialog({ task, isSaving, onClose, onSave }: TaskEditDial
                   </div>
                 }
               >
-                変更を破棄して閉じますか？
+                <span id={discardMessageId}>変更を破棄して閉じますか？</span>
               </Alert>
             ) : null}
-            <TaskEditFormBody
-              key={task.id}
-              task={task}
-              isSaving={isSaving}
-              onSave={onSave}
-              onDirtyChange={handleDirtyChange}
-              onImmediateCancel={handleImmediateClose}
-            />
           </DialogBody>
         ) : null}
       </DialogPanel>

@@ -12,6 +12,9 @@ import { Spinner } from "@/shared/ui/spinner/Spinner";
 import { taskListStyles as s } from "./TaskList.styles";
 import type { TaskItem, TaskPriority, TaskStatus } from "./tasksApi";
 
+/** 初期ビューポート内に収まる先頭件数には content-visibility: auto を適用しない。 */
+const DEFERRED_RENDER_START_INDEX = 6;
+
 const PRIORITY_LABELS: Record<TaskPriority, string> = {
   low: "優先度: 低",
   medium: "優先度: 中",
@@ -89,10 +92,13 @@ export const TaskList = memo(function TaskList({
   return (
     // biome-ignore lint/a11y/noRedundantRoles: list-style: none 適用時も Safari でリスト役割を保持するため。
     <ul role="list" {...stylex.props(s.list)}>
-      {tasks.map((task) => {
+      {tasks.map((task, index) => {
         const isDone = task.status === "done";
         return (
-          <li key={task.id} {...stylex.props(s.item)}>
+          <li
+            key={task.id}
+            {...stylex.props(s.item, index >= DEFERRED_RENDER_START_INDEX && s.itemDeferred)}
+          >
             <div {...stylex.props(s.checkboxWrap)}>
               <Checkbox
                 aria-label={

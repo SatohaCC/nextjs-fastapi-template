@@ -60,7 +60,9 @@ export default function TasksPage({ searchParams }: { searchParams: Promise<RawS
           <span aria-hidden="true" {...stylex.props(s.mark)}>
             &gt;_
           </span>
-          <span translate="no">Next.js + FastAPI Template</span>
+          <span lang="en" translate="no">
+            Next.js + FastAPI Template
+          </span>
         </Link>
         <nav aria-label="ページ遷移" {...stylex.props(s.nav)}>
           <Link href="/" {...stylex.props(s.link)}>
@@ -74,7 +76,7 @@ export default function TasksPage({ searchParams }: { searchParams: Promise<RawS
 
       <main id="main-content" tabIndex={-1}>
         <div {...stylex.props(s.hero)}>
-          <p translate="no" {...stylex.props(s.eyebrow)}>
+          <p lang="en" translate="no" {...stylex.props(s.eyebrow)}>
             FULL-STACK CRUD / SQLITE
           </p>
           <h1 id="tasks-page-title" {...stylex.props(s.title)}>
@@ -92,7 +94,9 @@ export default function TasksPage({ searchParams }: { searchParams: Promise<RawS
       </main>
 
       <footer {...stylex.props(s.footer)}>
-        <span translate="no">Next.js + FastAPI Template</span>
+        <span lang="en" translate="no">
+          Next.js + FastAPI Template
+        </span>
         <Link href="/" {...stylex.props(s.link)}>
           トップページへ戻る
         </Link>

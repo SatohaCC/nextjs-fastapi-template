@@ -100,6 +100,7 @@ export const TaskCreateForm = memo(function TaskCreateForm({
           name="title"
           required
           autoComplete="off"
+          enterKeyHint="next"
           maxLength={120}
           placeholder="例: SQLite 永続化の動作確認…"
           value={title}

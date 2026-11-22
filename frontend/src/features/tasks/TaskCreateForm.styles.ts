@@ -21,13 +21,13 @@ export const taskCreateFormStyles = stylex.create({
   },
   heading: {
     fontSize: "1.125rem",
-    lineHeight: "1.625rem",
+    lineHeight: 1.45,
     fontWeight: 700,
     color: tokens.onSurface,
   },
   requiredNote: {
     fontSize: "0.8125rem",
-    lineHeight: "1.25rem",
+    lineHeight: 1.54,
     color: tokens.onSurfaceVariant,
   },
   form: {

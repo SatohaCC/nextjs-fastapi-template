@@ -187,6 +187,7 @@ describe("TasksWorkspace", () => {
     const dialog = await screen.findByRole("dialog");
     expect(dialog).toBeVisible();
     const editTitleInput = within(dialog).getByRole("textbox", { name: /タイトル/ });
+    expect(editTitleInput).toHaveFocus();
     await user.clear(editTitleInput);
     await user.type(editTitleInput, "編集後タスク");
     await user.click(within(dialog).getByRole("button", { name: "変更を保存" }));
@@ -199,6 +200,7 @@ describe("TasksWorkspace", () => {
     await user.click(screen.getByRole("menuitem", { name: "削除" }));
 
     const deleteDialog = await screen.findByRole("dialog");
+    expect(within(deleteDialog).getByRole("button", { name: "キャンセル" })).toHaveFocus();
     await user.click(within(deleteDialog).getByRole("button", { name: "削除する" }));
 
     await waitFor(() => {
@@ -615,6 +617,7 @@ describe("TasksWorkspace", () => {
 
     const editDialog = await screen.findByRole("dialog");
     const editTitle = within(editDialog).getByRole("textbox", { name: /タイトル/ });
+    expect(editTitle).toHaveFocus();
     await user.type(editTitle, "（変更中）");
 
     const beforeUnloadEvent = new Event("beforeunload", { cancelable: true });
@@ -625,12 +628,32 @@ describe("TasksWorkspace", () => {
     expect(screen.getByRole("dialog")).toBeInTheDocument();
     expect(within(editDialog).getByText("未保存の変更があります")).toBeVisible();
 
-    await user.click(within(editDialog).getByRole("button", { name: "編集を続ける" }));
+    const editForm = editDialog.querySelector("form");
+    const discardConfirmAlert = within(editDialog).getByRole("alert");
+    expect(editForm).not.toBeNull();
+    expect(
+      Boolean(
+        editForm &&
+          editForm.compareDocumentPosition(discardConfirmAlert) & Node.DOCUMENT_POSITION_FOLLOWING,
+      ),
+    ).toBe(true);
+
+    const continueButton = within(editDialog).getByRole("button", { name: "編集を続ける" });
+    expect(continueButton).toHaveFocus();
+    const describedById = continueButton.getAttribute("aria-describedby");
+    expect(describedById).toBeTruthy();
+    expect(document.getElementById(describedById as string)).toHaveTextContent(
+      "変更を破棄して閉じますか？",
+    );
+
+    await user.click(continueButton);
     expect(within(editDialog).queryByText("未保存の変更があります")).not.toBeInTheDocument();
     expect(editTitle).toHaveValue("既存タスク（変更中）");
+    expect(editTitle).toHaveFocus();
 
     await user.keyboard("{Escape}");
     expect(within(editDialog).getByText("未保存の変更があります")).toBeVisible();
+    expect(within(editDialog).getByRole("button", { name: "編集を続ける" })).toHaveFocus();
 
     await user.click(within(editDialog).getByRole("button", { name: "変更を破棄して閉じる" }));
     await waitFor(() => {
@@ -724,5 +747,49 @@ describe("TasksWorkspace", () => {
       </QueryProvider>,
     );
     expect(routerSearchInput).toHaveValue("abcdef");
+  });
+
+  it("入力ヒント属性を設定し、初期ビューポート外のタスク項目だけに遅延描画スタイルを適用する", () => {
+    const tasks = Array.from({ length: 8 }, (_, index) =>
+      makeTask({
+        id: `task-${index + 1}`,
+        title: `タスク ${index + 1}`,
+      }),
+    );
+
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response(JSON.stringify({ items: tasks, total: tasks.length }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      }),
+    );
+
+    render(
+      <QueryProvider>
+        <TasksWorkspace initialTasks={{ items: tasks, total: tasks.length }} />
+      </QueryProvider>,
+    );
+
+    const searchInput = screen.getByRole("searchbox", { name: "キーワード検索" });
+    expect(searchInput).toHaveAttribute("enterkeyhint", "search");
+    expect(searchInput).toHaveAttribute("autocapitalize", "none");
+    expect(searchInput).toHaveAttribute("autocorrect", "off");
+    expect(searchInput).toHaveAttribute("spellcheck", "false");
+
+    const createTitleInput = screen.getByRole("textbox", { name: /タイトル/ });
+    expect(createTitleInput).toHaveAttribute("enterkeyhint", "next");
+
+    const listItems = screen.getAllByRole("listitem");
+    expect(listItems).toHaveLength(8);
+    const eagerClassName = listItems[0]?.className ?? "";
+    const deferredClassName = listItems[6]?.className ?? "";
+    expect(eagerClassName).not.toBe("");
+    expect(deferredClassName).not.toBe(eagerClassName);
+    for (const item of listItems.slice(0, 6)) {
+      expect(item.className).toBe(eagerClassName);
+    }
+    for (const item of listItems.slice(6)) {
+      expect(item.className).toBe(deferredClassName);
+    }
   });
 });

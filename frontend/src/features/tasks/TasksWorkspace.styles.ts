@@ -1,8 +1,8 @@
 import * as stylex from "@stylexjs/stylex";
 import { tokens } from "../../shared/styles/tokens.stylex";
 
-const stacked = "@media (max-width: 900px)";
-const mobile = "@media (max-width: 599px)";
+const stacked = "@media (max-width: 56.25em)";
+const mobile = "@media (max-width: 37.5em)";
 
 export const tasksWorkspaceStyles = stylex.create({
   layout: {
@@ -57,7 +57,7 @@ export const tasksWorkspaceStyles = stylex.create({
   },
   summaryTitle: {
     fontSize: "1.125rem",
-    lineHeight: "1.625rem",
+    lineHeight: 1.45,
     fontWeight: 700,
     color: tokens.onSurface,
   },

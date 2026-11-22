@@ -296,6 +296,10 @@ export function TasksWorkspace({
               name="q"
               type="search"
               autoComplete="off"
+              enterKeyHint="search"
+              autoCapitalize="none"
+              autoCorrect="off"
+              spellCheck={false}
               maxLength={120}
               placeholder="例: SQLite…"
               value={filters.q}
