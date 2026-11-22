@@ -634,18 +634,20 @@ test("Spinner と Skeleton は視認可能で、reduced-motion 設定時にア�
 
   await page.goto("/iframe.html?id=shared-ui-spinner--medium&viewMode=story");
   await expect(page.getByRole("status")).toBeVisible();
-  expect(
-    await page
-      .locator('[role="status"] > span[aria-hidden="true"]')
-      .first()
-      .evaluate((el) => getComputedStyle(el).animationDuration),
-  ).toBe("0s");
+  const spinnerMotion = await page
+    .locator('[role="status"] > span[aria-hidden="true"]')
+    .first()
+    .evaluate((el) => {
+      const style = getComputedStyle(el);
+      return { animationDuration: style.animationDuration, animationName: style.animationName };
+    });
+  expect(spinnerMotion).toEqual({ animationDuration: "0s", animationName: "none" });
 
   for (const colorScheme of ["light", "dark"] as const) {
     await page.emulateMedia({ colorScheme, reducedMotion: "reduce" });
     await page.goto("/iframe.html?id=shared-ui-spinner--large&viewMode=story");
     const labelContrast = await page
-      .getByText("データを取得しています...")
+      .getByText("データを取得しています…")
       .evaluate(measureContrast, "text" as const);
     expect(labelContrast).toBeGreaterThanOrEqual(4.5);
   }
@@ -654,7 +656,11 @@ test("Spinner と Skeleton は視認可能で、reduced-motion 設定時にア�
   await page.goto("/iframe.html?id=shared-ui-skeleton--text-lines&viewMode=story");
   const firstLine = page.locator('#storybook-root [aria-hidden="true"] span').first();
   await expect(firstLine).toBeVisible();
-  expect(await firstLine.evaluate((el) => getComputedStyle(el).animationDuration)).toBe("0s");
+  const skeletonMotion = await firstLine.evaluate((el) => {
+    const style = getComputedStyle(el);
+    return { animationDuration: style.animationDuration, animationName: style.animationName };
+  });
+  expect(skeletonMotion).toEqual({ animationDuration: "0s", animationName: "none" });
 });
 
 test("Textarea は明暗テーマで十分なコントラストを持ち、invalid 状態と200%文字拡大でも破綻しない", async ({

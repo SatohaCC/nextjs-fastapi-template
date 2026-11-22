@@ -3,8 +3,8 @@
 import * as stylex from "@stylexjs/stylex";
 import { Field, FieldDescription, FieldError, FieldLabel } from "@ui-sdk/react/field";
 import { Input, type InputOptions } from "@ui-sdk/react/input";
-import { Textarea, type TextareaOptions } from "@ui-sdk/react/textarea";
-import type { ComponentProps, ReactNode } from "react";
+import type { ComponentProps, ReactNode, Ref } from "react";
+import { hasRenderableNode } from "../internal/hasRenderableNode";
 import { textFieldStyles as s } from "./TextField.styles";
 
 export type TextFieldVariant = "outlined" | "filled";
@@ -15,13 +15,11 @@ export interface TextFieldProps {
   description?: string;
   errorMessage?: string;
   invalid?: boolean;
-  multiline?: boolean;
-  rows?: number;
-  autoResize?: boolean;
   leading?: ReactNode;
   trailing?: ReactNode;
   name?: string;
   id?: string;
+  inputRef?: Ref<HTMLInputElement>;
   type?: ComponentProps<"input">["type"];
   placeholder?: string;
   value?: string;
@@ -33,25 +31,21 @@ export interface TextFieldProps {
   maxLength?: number;
   autoComplete?: string;
   inputMode?: ComponentProps<"input">["inputMode"];
-  submitShortcut?: TextareaOptions["submitShortcut"];
-  onTextareaSubmit?: TextareaOptions["onSubmit"];
   style?: stylex.StyleXStyles;
 }
 
-/** Material Design 3 準拠のテキスト入力フィールド（単一行・複数行）。 */
+/** Material Design 3 準拠の単一行テキスト入力フィールド。 */
 export function TextField({
   label,
   variant = "outlined",
   description,
   errorMessage,
   invalid,
-  multiline = false,
-  rows = 3,
-  autoResize = false,
   leading,
   trailing,
   name,
   id,
+  inputRef,
   type = "text",
   placeholder,
   value,
@@ -63,8 +57,6 @@ export function TextField({
   maxLength,
   autoComplete,
   inputMode,
-  submitShortcut,
-  onTextareaSubmit,
   style,
 }: TextFieldProps) {
   const isInvalid = invalid ?? (errorMessage ? true : undefined);
@@ -78,71 +70,44 @@ export function TextField({
         }
       >
         {label}
-        {required && (
+        {required ? (
           <span aria-hidden="true" {...stylex.props(s.requiredMark)}>
             *
           </span>
-        )}
+        ) : null}
       </FieldLabel>
       <div
         {...stylex.props(
           s.controlBox,
-          multiline && s.controlBoxMultiline,
           variant === "outlined" ? s.outlined : s.filled,
           isInvalid && (variant === "outlined" ? s.outlinedInvalid : s.filledInvalid),
           disabled && (variant === "outlined" ? s.outlinedDisabled : s.filledDisabled),
         )}
       >
-        {leading && (
-          <span aria-hidden="true" {...stylex.props(s.affix, disabled && s.affixDisabled)}>
-            {leading}
-          </span>
-        )}
-        {multiline ? (
-          <Textarea
-            id={id}
-            rows={rows}
-            autoResize={autoResize}
-            placeholder={placeholder}
-            value={value}
-            defaultValue={defaultValue}
-            onValueChange={onValueChange}
-            disabled={disabled}
-            readOnly={readOnly}
-            required={required}
-            maxLength={maxLength}
-            submitShortcut={submitShortcut}
-            onSubmit={onTextareaSubmit}
-            className={(state) =>
-              stylex.props(s.input, s.textarea, state.disabled && s.inputDisabled).className
-            }
-          />
-        ) : (
-          <Input
-            id={id}
-            type={type}
-            placeholder={placeholder}
-            value={value}
-            defaultValue={defaultValue}
-            onValueChange={onValueChange}
-            disabled={disabled}
-            readOnly={readOnly}
-            required={required}
-            maxLength={maxLength}
-            autoComplete={autoComplete}
-            inputMode={inputMode}
-            className={(state) =>
-              stylex.props(s.input, state.disabled && s.inputDisabled).className
-            }
-          />
-        )}
-        {trailing && (
-          <span aria-hidden="true" {...stylex.props(s.affix, disabled && s.affixDisabled)}>
-            {trailing}
-          </span>
-        )}
+        {hasRenderableNode(leading) ? (
+          <span {...stylex.props(s.affix, disabled && s.affixDisabled)}>{leading}</span>
+        ) : null}
+        <Input
+          ref={inputRef}
+          id={id}
+          type={type}
+          placeholder={placeholder}
+          value={value}
+          defaultValue={defaultValue}
+          onValueChange={onValueChange}
+          disabled={disabled}
+          readOnly={readOnly}
+          required={required}
+          maxLength={maxLength}
+          autoComplete={autoComplete}
+          inputMode={inputMode}
+          className={(state) => stylex.props(s.input, state.disabled && s.inputDisabled).className}
+        />
+        {hasRenderableNode(trailing) ? (
+          <span {...stylex.props(s.affix, disabled && s.affixDisabled)}>{trailing}</span>
+        ) : null}
       </div>
-      {description && (
+      {hasRenderableNode(description) ? (
         <FieldDescription
           className={(state) =>
             stylex.props(s.supporting, state.disabled && s.supportingDisabled).className
@@ -150,7 +115,7 @@ export function TextField({
         >
           {description}
         </FieldDescription>
-      )}
+      ) : null}
       <FieldError className={stylex.props(s.error).className}>{errorMessage}</FieldError>
     </Field>
   );

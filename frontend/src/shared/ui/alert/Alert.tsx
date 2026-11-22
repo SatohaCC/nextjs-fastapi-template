@@ -3,6 +3,7 @@
 import * as stylex from "@stylexjs/stylex";
 import { Button as UiButton } from "@ui-sdk/react/button";
 import type { ReactNode } from "react";
+import { hasRenderableNode } from "../internal/hasRenderableNode";
 import { alertStyles as s } from "./Alert.styles";
 
 export type AlertTone = "info" | "success" | "warning" | "error";
@@ -18,59 +19,53 @@ export interface AlertProps {
   style?: stylex.StyleXStyles;
 }
 
-function ToneIcon({ tone }: { tone: AlertTone }) {
-  if (tone === "success") {
-    return (
-      <svg
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        aria-hidden="true"
-        {...stylex.props(s.icon)}
-      >
-        <circle cx="12" cy="12" r="9" />
-        <path d="m8.5 12.5 2.5 2.5 4.5-5" />
-      </svg>
-    );
-  }
-  if (tone === "warning") {
-    return (
-      <svg
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        aria-hidden="true"
-        {...stylex.props(s.icon)}
-      >
-        <path d="M12 3 2.5 20h19L12 3Z" />
-        <path d="M12 9v5M12 17h.01" />
-      </svg>
-    );
-  }
-  if (tone === "error") {
-    return (
-      <svg
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        aria-hidden="true"
-        {...stylex.props(s.icon)}
-      >
-        <circle cx="12" cy="12" r="9" />
-        <path d="m15 9-6 6M9 9l6 6" />
-      </svg>
-    );
-  }
-  return (
+const TONE_ICONS: Record<AlertTone, ReactNode> = {
+  success: (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      {...stylex.props(s.icon)}
+    >
+      <circle cx="12" cy="12" r="9" />
+      <path d="m8.5 12.5 2.5 2.5 4.5-5" />
+    </svg>
+  ),
+  warning: (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      {...stylex.props(s.icon)}
+    >
+      <path d="M12 3 2.5 20h19L12 3Z" />
+      <path d="M12 9v5M12 17h.01" />
+    </svg>
+  ),
+  error: (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      {...stylex.props(s.icon)}
+    >
+      <circle cx="12" cy="12" r="9" />
+      <path d="m15 9-6 6M9 9l6 6" />
+    </svg>
+  ),
+  info: (
     <svg
       viewBox="0 0 24 24"
       fill="none"
@@ -84,8 +79,22 @@ function ToneIcon({ tone }: { tone: AlertTone }) {
       <circle cx="12" cy="12" r="9" />
       <path d="M12 11v5M12 8h.01" />
     </svg>
-  );
-}
+  ),
+};
+
+const DISMISS_ICON = (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    aria-hidden="true"
+    {...stylex.props(s.dismissIcon)}
+  >
+    <path d="M18 6 6 18M6 6l12 12" />
+  </svg>
+);
 
 /** Material Design 3 準拠のインライン通知バナー。 */
 export function Alert({
@@ -99,6 +108,8 @@ export function Alert({
   style,
 }: AlertProps) {
   const resolvedRole = role ?? (tone === "error" || tone === "warning" ? "alert" : "status");
+  const hasAction = hasRenderableNode(action);
+  const hasControls = hasAction || onDismiss !== undefined;
 
   return (
     <div
@@ -107,37 +118,27 @@ export function Alert({
       {...stylex.props(s.root, s[tone], style)}
     >
       <span aria-hidden="true" {...stylex.props(s.iconWrap)}>
-        <ToneIcon tone={tone} />
+        {TONE_ICONS[tone]}
       </span>
       <div {...stylex.props(s.body)}>
-        {title && <div {...stylex.props(s.title)}>{title}</div>}
+        {hasRenderableNode(title) ? <div {...stylex.props(s.title)}>{title}</div> : null}
         <div {...stylex.props(s.message)}>{children}</div>
       </div>
-      {(action || onDismiss) && (
+      {hasControls ? (
         <div {...stylex.props(s.controls)}>
           {action}
-          {onDismiss && (
+          {onDismiss ? (
             <UiButton
               type="button"
               aria-label={dismissLabel}
               onClick={onDismiss}
               {...stylex.props(s.dismissButton)}
             >
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                aria-hidden="true"
-                {...stylex.props(s.dismissIcon)}
-              >
-                <path d="M18 6 6 18M6 6l12 12" />
-              </svg>
+              {DISMISS_ICON}
             </UiButton>
-          )}
+          ) : null}
         </div>
-      )}
+      ) : null}
     </div>
   );
 }

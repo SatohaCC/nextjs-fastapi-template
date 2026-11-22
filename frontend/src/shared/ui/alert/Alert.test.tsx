@@ -50,13 +50,24 @@ describe("Alert", () => {
     expect(onDismiss).toHaveBeenCalledTimes(1);
   });
 
-  it("StyleX オーバーライドの動的 CSS 変数をルート要素に転送する", () => {
-    render(
+  it("StyleX オーバーライドの動的 CSS 変数をルート要素に転送し、数値 0 の action と空文字 title を正しく扱う", () => {
+    const { rerender } = render(
       <Alert tone="success" style={overrides.width(320)}>
         完了しました
       </Alert>,
     );
 
     expect(screen.getByRole("status").getAttribute("style")).toMatch(/--[\w-]+:\s*320px/);
+
+    rerender(
+      <Alert tone="info" title="" action={0}>
+        本文メッセージ
+      </Alert>,
+    );
+    const status = screen.getByRole("status");
+    expect(status).toHaveTextContent("本文メッセージ");
+    expect(status).toHaveTextContent("0");
+    // body 直下には message のみが存在し、空タイトル要素は出力されない。
+    expect(status.children[1]?.children).toHaveLength(1);
   });
 });

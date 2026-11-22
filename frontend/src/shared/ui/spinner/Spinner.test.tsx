@@ -7,11 +7,16 @@ const overrides = stylex.create({ width: (width: number) => ({ width }) });
 
 describe("Spinner", () => {
   it("既定で status ロールと aria-busy を持ち、ラベルを支援技術へ提供する", () => {
-    render(<Spinner label="読み込み中..." />);
+    const { rerender } = render(<Spinner />);
 
-    const status = screen.getByRole("status");
-    expect(status).toHaveAttribute("aria-busy", "true");
-    expect(status).toHaveTextContent("読み込み中...");
+    const defaultStatus = screen.getByRole("status");
+    expect(defaultStatus).toHaveAttribute("aria-busy", "true");
+    expect(defaultStatus).toHaveTextContent("読み込み中…");
+
+    rerender(<Spinner label="処理中…" />);
+    const customStatus = screen.getByRole("status");
+    expect(customStatus).toHaveAttribute("aria-busy", "true");
+    expect(customStatus).toHaveTextContent("処理中…");
   });
 
   it("decorative 指定時は aria-hidden な装飾要素のみを描画する", () => {

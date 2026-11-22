@@ -4,7 +4,20 @@ import userEvent from "@testing-library/user-event";
 import { useRef } from "react";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { TextField } from "../text-field/TextField";
-import { Dialog, DialogCloseButton } from "./Dialog";
+import {
+  Dialog,
+  DialogActions,
+  DialogBody,
+  DialogCloseButton,
+  DialogCloseIconButton,
+  DialogHeader,
+  DialogHeaderText,
+  DialogHeading,
+  DialogPanel,
+  DialogRoot,
+  DialogSummary,
+  DialogTriggerButton,
+} from "./Dialog";
 
 function FocusTargetDialog() {
   const finalRef = useRef<HTMLButtonElement | null>(null);
@@ -103,6 +116,45 @@ describe("Dialog", () => {
     await user.click(screen.getByRole("button", { name: "閉じる" }));
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "復帰先ボタン" })).toHaveFocus();
+  });
+
+  it("Compound Component で組み立てたダイアログが開閉・アクセシブル名・数値 0 の子要素を描画する", async () => {
+    const user = userEvent.setup();
+
+    const { rerender } = render(
+      <DialogRoot>
+        <DialogTriggerButton variant="tonal">詳細を開く</DialogTriggerButton>
+        <DialogPanel>
+          <DialogHeader>
+            <DialogHeaderText>
+              <DialogHeading>構成済みダイアログ</DialogHeading>
+              <DialogSummary>パーツを直接組み合わせています。</DialogSummary>
+            </DialogHeaderText>
+            <DialogCloseIconButton label="右上で閉じる" />
+          </DialogHeader>
+          <DialogBody>本文コンテンツ</DialogBody>
+          <DialogActions>
+            <DialogCloseButton variant="text">閉じる</DialogCloseButton>
+          </DialogActions>
+        </DialogPanel>
+      </DialogRoot>,
+    );
+
+    await user.click(screen.getByRole("button", { name: "詳細を開く" }));
+    const compoundDialog = screen.getByRole("dialog", { name: "構成済みダイアログ" });
+    expect(compoundDialog).toBeVisible();
+    expect(compoundDialog).toHaveAccessibleDescription("パーツを直接組み合わせています。");
+
+    await user.click(screen.getByRole("button", { name: "右上で閉じる" }));
+    expect(screen.queryByRole("dialog", { name: "構成済みダイアログ" })).not.toBeInTheDocument();
+
+    rerender(
+      <Dialog title="数値テスト" defaultOpen actions={0}>
+        {0}
+      </Dialog>,
+    );
+    const openDialog = screen.getByRole("dialog", { name: "数値テスト" });
+    expect(openDialog).toHaveTextContent("0");
   });
 });
 

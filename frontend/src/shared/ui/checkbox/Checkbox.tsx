@@ -7,6 +7,35 @@ import type { ComponentProps } from "react";
 import { mergeControlDescribedBy, useStandaloneField } from "../internal/useStandaloneField";
 import { checkboxStyles as s } from "./Checkbox.styles";
 
+const INDETERMINATE_ICON = (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="3"
+    strokeLinecap="round"
+    aria-hidden="true"
+    {...stylex.props(s.icon)}
+  >
+    <path d="M5 12h14" />
+  </svg>
+);
+
+const CHECK_ICON = (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="3"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+    {...stylex.props(s.icon)}
+  >
+    <path d="M5 12l5 5L20 7" />
+  </svg>
+);
+
 export interface CheckboxProps
   extends Omit<ComponentProps<typeof UiCheckbox>, "className" | "style" | "children" | "render"> {
   label?: string;
@@ -87,34 +116,7 @@ export function Checkbox({
             )}
           >
             <CheckboxIndicator className={stylex.props(s.indicator).className}>
-              {(indicatorState) =>
-                indicatorState.indeterminate ? (
-                  <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="3"
-                    strokeLinecap="round"
-                    aria-hidden="true"
-                    {...stylex.props(s.icon)}
-                  >
-                    <path d="M5 12h14" />
-                  </svg>
-                ) : (
-                  <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="3"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    aria-hidden="true"
-                    {...stylex.props(s.icon)}
-                  >
-                    <path d="M5 12l5 5L20 7" />
-                  </svg>
-                )
-              }
+              {(indicatorState) => (indicatorState.indeterminate ? INDETERMINATE_ICON : CHECK_ICON)}
             </CheckboxIndicator>
           </span>
         );
